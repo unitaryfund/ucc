@@ -1,0 +1,3 @@
+[submodule "benchpress"]
+	path = compiler_tests/benchpress
+	url = https://github.com/Qiskit/benchpress
