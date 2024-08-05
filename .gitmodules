@@ -3,4 +3,4 @@
 	url = https://github.com/jordandsullivan/benchpress.git
 [submodule "libs/qiskit"]
 	path = libs/qiskit
-	url = https://github.com/Qiskit/qiskit.git
+	url = https://github.com/jordandsullivan/qiskit
