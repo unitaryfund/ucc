@@ -2,17 +2,23 @@
 
 from qiskit import QuantumCircuit
 from quantum_translator.qiskit_interface import QiskitInterface
-from utils.qasm_validation import is_valid_openqasm
+from quantum_translator.qasm_validation import is_valid_openqasm
+
+# Create a simple quantum circuit
+circuit = QuantumCircuit(2)
+circuit.h(0)
+circuit.cx(0, 1)
 
 def test_qiskit_to_openqasm3():
-    # Create a simple quantum circuit
-    circuit = QuantumCircuit(2)
-    circuit.h(0)
-    circuit.cx(0, 1)
-
     # Translate the circuit to OpenQASM3
-    qasm_output = QiskitInterface.translate_to_qasm(circuit)
+    qasm_output = QiskitInterface.to_qasm3(circuit)
 
     # Validate the output as OpenQASM3
     assert is_valid_openqasm(qasm_output, version='3'), "The generated code is not valid OpenQASM3."
 
+def test_qiskit_to_openqasm2():
+    # Translate the circuit to OpenQASM2
+    qasm_output = QiskitInterface.to_qasm2(circuit)
+
+    # Validate the output as OpenQASM3
+    assert is_valid_openqasm(qasm_output, version='2'), "The generated code is not valid OpenQASM2."

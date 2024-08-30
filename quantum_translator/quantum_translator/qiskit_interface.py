@@ -1,7 +1,10 @@
-from qiskit import QuantumCircuit, qasm3
+from qiskit import QuantumCircuit, qasm3, qasm2
 
 class QiskitInterface:
     @staticmethod
-    def translate_to_qasm(circuit: QuantumCircuit) -> str:
-        """Translates a Qiskit circuit to OpenQASM3 string."""
-        return qasm3.dumps(circuit)
+    def to_qasm(circuit: QuantumCircuit, version='2') -> str:
+        """Translates a Qiskit circuit to OpenQASM string of the version specified."""
+        if version == '2':
+            return qasm2.dumps(circuit)
+        elif version =='3':
+            qasm3.dumps(circuit)    
