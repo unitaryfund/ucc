@@ -1,8 +1,8 @@
-# tests/test_cirq_interface.py
+# tests/test_.interfaces..interfaces.cirq_interface.py
 
 from cirq import Circuit, H, CNOT, LineQubit
-from quantum_translator.cirq_interface import CirqInterface
-from quantum_translator.qasm_validation import is_valid_openqasm
+from ucc.quantum_translator.interfaces import CirqInterface
+from ucc.quantum_translator.qasm_validation import is_valid_openqasm
 import pytest
 
 @pytest.mark.skip(reason="Skipping as cirq lacks OpenQASM3 conversion as of Aug 21, 2024.")

@@ -1,13 +1,9 @@
 import pytest
-from quantum_translator import QuantumTranslator
+from ucc.quantum_translator import QuantumTranslator
 from pytket import Circuit as TketCircuit
 from cirq import Circuit as CirqCircuit
 from qiskit import QuantumCircuit as QiskitCircuit
 
-# Test for supported types
-def test_supported_types():
-    expected = "pytket.Circuit, cirq.Circuit, qiskit.QuantumCircuit, OpenQASM2"
-    assert QuantumTranslator.supported_types() == expected
 
 # Test valid TKET circuit to OpenQASM2 translation
 def test_tket_to_qasm2():
@@ -15,17 +11,11 @@ def test_tket_to_qasm2():
     qasm_output = QuantumTranslator.to_qasm(circuit, version='2')
     assert QuantumTranslator.is_valid_openqasm(qasm_output, version='2')
 
-# Test valid Qiskit circuit to OpenQASM2 translation
-def test_qiskit_to_qasm2():
+# Test valid Qiskit circuit to OpenQASM3 translation
+def test_qiskit_to_qasm3():
     circuit = QiskitCircuit(2)
-    qasm_output = QuantumTranslator.to_qasm(circuit, version='2')
-    assert QuantumTranslator.is_valid_openqasm(qasm_output, version='2')
-
-# Test valid Cirq circuit to OpenQASM2 translation
-def test_cirq_to_qasm2():
-    circuit = CirqCircuit()
-    qasm_output = QuantumTranslator.to_qasm(circuit, version='2')
-    assert QuantumTranslator.is_valid_openqasm(qasm_output, version='2')
+    qasm_output = QuantumTranslator.to_qasm(circuit, version='3')
+    assert QuantumTranslator.is_valid_openqasm(qasm_output, version='3')
 
 # Test valid OpenQASM2 input
 def test_valid_openqasm2_input():

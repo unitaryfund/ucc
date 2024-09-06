@@ -7,4 +7,4 @@ class QiskitInterface:
         if version == '2':
             return qasm2.dumps(circuit)
         elif version =='3':
-            qasm3.dumps(circuit)    
+            return qasm3.dumps(circuit)    

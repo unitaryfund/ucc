@@ -1,9 +1,10 @@
 from pytket import Circuit
-from quantum_translator.tket_interface import TKETInterface
-from quantum_translator.qasm_validation import is_valid_openqasm
+from ucc.quantum_translator.interfaces import TKETInterface
+from ucc.quantum_translator.qasm_validation import is_valid_openqasm
 import pytest
 
-@pytest.mark.skip(reason="Skipping as PyTKET lacks OpenQASM3 conversion as of Aug 21, 2024.")
+@pytest.mark.skip(
+    reason="Skipping as PyTKET lacks OpenQASM3 conversion as of Aug 21, 2024.")
 def test_tket_to_openqasm3():
     # Create a simple TKET circuit
     circuit = Circuit(2)
