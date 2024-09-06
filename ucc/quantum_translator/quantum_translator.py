@@ -80,8 +80,8 @@ class QuantumTranslator:
         raise TypeError(f'Provided circuit is not in {cls.supported_circuit_formats}')
     
     def to_return_format(self, qasm_circuit):
-        """Translates given OpenQASM `qasm_circuit` to format of `self.return_type`."""
-        match self.return_type:
+        """Translates given OpenQASM `qasm_circuit` to format of `self.return_format`."""
+        match self.return_format:
             case 'tket':
                 return self.to_tket(qasm_circuit)
             case 'qiskit':

@@ -1,5 +1,5 @@
 from ucc.quantum_translator import QuantumTranslator
-from ucc.transpilers import UCCTranspiler
+from ucc.compilers import UCCCompiler
 
 def compile(circuit, qasm_version='2', return_format='original'):
     """
@@ -20,10 +20,10 @@ def compile(circuit, qasm_version='2', return_format='original'):
         variable type : Compiled circuit result 
     """
     translator = QuantumTranslator(circuit, return_format)
-    qasm_code = translator.to_qasm(version=qasm_version)
+    qasm_code = translator.to_qasm(circuit, version=qasm_version)
 
-    compiled_result = UCCTranspiler.transpile(qasm_code)
+    compiled_qasm = UCCCompiler.transpile(qasm_code)
+    print(compiled_qasm)
+    final_result = translator.to_return_format(compiled_qasm)
 
-
-
-    return compiled_result
+    return final_result
