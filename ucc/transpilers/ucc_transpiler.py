@@ -1,6 +1,6 @@
 from qiskit import transpile, QuantumCircuit
 from ..quantum_translator import QuantumTranslator
-class UCCCompiler:
+class UCCTranspiler:
     @staticmethod
     def transpile(qasm_code: str):
         """
