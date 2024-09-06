@@ -1,6 +1,6 @@
 from pytket import Circuit
 from ucc.quantum_translator.interfaces import TKETInterface
-from ucc.quantum_translator.qasm_validation import is_valid_openqasm
+from ucc.quantum_translator import QuantumTranslator
 import pytest
 
 @pytest.mark.skip(
@@ -15,7 +15,7 @@ def test_tket_to_openqasm3():
     qasm_output = TKETInterface.to_qasm(circuit)
 
     # Validate the output as OpenQASM3
-    assert is_valid_openqasm(qasm_output, version='3'), "The generated code is not valid OpenQASM3."
+    assert QuantumTranslator.is_valid_openqasm(qasm_output, version='3'), "The generated code is not valid OpenQASM3."
 
 def test_tket_to_openqasm2():
     # Create a simple TKET circuit
@@ -27,4 +27,4 @@ def test_tket_to_openqasm2():
     qasm_output = TKETInterface.to_qasm(circuit)
 
     # Validate the output as OpenQASM3
-    assert is_valid_openqasm(qasm_output, version='2'), "The generated code is not valid OpenQASM3."
+    assert QuantumTranslator.is_valid_openqasm(qasm_output, version='2'), "The generated code is not valid OpenQASM3."
