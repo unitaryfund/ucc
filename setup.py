@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),  # Automatically find and include all packages in the project
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",  # If using MIT License, adjust if needed
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",  # Minimum Python version required
