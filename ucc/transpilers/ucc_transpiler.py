@@ -5,7 +5,9 @@ class UCCTranspiler:
     def transpile(qasm_code: str):
         """
         transpiles the given QASM code using Qiskit's transpile function.
-        Currently this is just translating QASM to Qiskit, running qiskit.transpile, then translating back to QASM for testing purposes. TODO: create a DAG object from the qasm_code directly and only call subset of Qiskit compiler passes.
+        Currently this is just translating QASM to Qiskit, running qiskit.transpile, 
+        then translating back to QASM for testing purposes. 
+        TODO: create a DAG object from the qasm_code directly and only call subset of Qiskit compiler passes.
         
         Parameters:
             qasm_code (str): The OpenQASM code to transpile.
