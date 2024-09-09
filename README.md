@@ -1,2 +1,47 @@
-# ucc
-Unitary Compiler Collection
+# <a href="https://github.com/unitaryfund/ucc">
+[![Repository](https://img.shields.io/badge/GitHub-5C5C5C.svg?logo=github)](https://github.com/unitaryfund/ucc)
+[![Unitary Fund](https://img.shields.io/badge/Supported%20By-Unitary%20Fund-FFFF00.svg)](https://unitary.fund)
+[![Discord Chat](https://img.shields.io/badge/dynamic/json?color=blue&label=Discord&query=approximate_presence_count&suffix=%20online.&url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2FJqVGmpkP96%3Fwith_counts%3Dtrue)](http://discord.unitary.fund)
+
+The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnostic, high performance compilation of quantum circuits. It interfaces with multiple quantum computing frameworks, including [Qiskit](https://github.com/Qiskit/qiskit), [Cirq](https://github.com/quantumlib/Cirq), and [PyTKET](https://github.com/CQCL/tket) via OpenQASM2. 
+
+
+## Quickstart
+
+### Installation
+
+```bash
+git clone <repository_url>
+cd ucc
+pip install -e . # Editable mode
+```
+
+### Example with Qiskit, Cirq, and PyTKET
+
+Define a circuit in Qiskit and compile it!
+
+```python
+from ucc import compile
+
+from pytket import Circuit as TketCircuit
+from cirq import Circuit as CirqCircuit
+from qiskit import QuantumCircuit as QiskitCircuit
+from cirq import H, CNOT, LineQubit
+
+def test_tket_compile():
+    circuit = TketCircuit(2)
+    circuit.H(0)
+    circuit.CX(0, 1)
+    compile(circuit, qasm_version='2', return_format='original')
+
+def test_qiskit_compile():
+    circuit = QiskitCircuit(2)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    compile(circuit, qasm_version='2', return_format='original')
+
+def test_cirq_compile():
+    qubits = LineQubit.range(2)
+    circuit = CirqCircuit(H(qubits[0]), CNOT(qubits[0], qubits[1]))
+    compile(circuit, qasm_version='2', return_format='original')
+```

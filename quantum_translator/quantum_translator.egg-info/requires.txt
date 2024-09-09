@@ -1,4 +1,0 @@
-qiskit
-cirq
-pytket
-openqasm3
