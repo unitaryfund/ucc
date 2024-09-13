@@ -4,9 +4,7 @@ from ucc.transpilers import UCCTranspiler
 def compile(circuit, qasm_version='2', return_format='original'):
     """
     Processes the provided quantum circuit using the QuantumTranslator 
-    and compiles it using the Compiler. Why is it called a compiler and not
-     a transpiler? To keep things general, even though it's currently just 
-     transpiling.
+    and compiles it using the UCCTranspiler.
 
     Parameters:
         circuit (object): The quantum circuit to be compiled.
