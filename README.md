@@ -11,7 +11,7 @@ The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnos
 ### Installation
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/unitaryfund/ucc.git
 cd ucc
 pip install -e . # Editable mode
 ```
