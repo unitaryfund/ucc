@@ -18,7 +18,7 @@ pip install -e . # Editable mode
 
 ### Example with Qiskit, Cirq, and PyTKET
 
-Define a circuit in Qiskit and compile it!
+Define a circuit with your preferred quantum SDK and compile it!
 
 ```python
 from ucc import compile
