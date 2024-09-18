@@ -303,8 +303,8 @@ def is_commutation_supported(op, qargs, max_num_qubits):
     if getattr(op, "_directive", False) or op.name in _skipped_op_names:
         return False
 
-    if getattr(op, "is_parameterized", False) and op.is_parameterized():
-        return False
+    # if getattr(op, "is_parameterized", False) and op.is_parameterized():
+    #     return False
 
     return True
 
