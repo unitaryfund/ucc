@@ -1,7 +1,7 @@
 from ucc.quantum_translator import QuantumTranslator
 from ucc.transpilers import UCCTranspiler
 
-def compile(circuit, qasm_version='2', return_format='original'):
+def compile(circuit, qasm_version='2', return_format='original', mode='qiskit', draw=False, get_gate_counts=False):
     """
     Processes the provided quantum circuit using the QuantumTranslator 
     and compiles it using the UCCTranspiler.
@@ -20,8 +20,11 @@ def compile(circuit, qasm_version='2', return_format='original'):
     translator = QuantumTranslator(circuit, return_format)
     qasm_code = translator.to_qasm(circuit, version=qasm_version)
 
-    compiled_qasm = UCCTranspiler.transpile(qasm_code)
-    print(compiled_qasm)
+    compiled_qasm, gate_counts = UCCTranspiler.transpile(qasm_code, mode=mode, draw=draw, get_gate_counts=get_gate_counts)
+    # print(compiled_qasm)
     final_result = translator.to_return_format(compiled_qasm)
 
-    return final_result
+    if get_gate_counts:
+        return final_result, gate_counts
+    else:
+        return final_result
