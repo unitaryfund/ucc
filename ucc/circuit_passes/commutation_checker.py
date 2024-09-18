@@ -1,3 +1,5 @@
+# This file has been modified from the original version in Qiskit. 
+# 
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2021.
@@ -71,6 +73,10 @@ class CommutationChecker:
         gates: Optional[Set[str]] = None,
         check_matrix: bool = True,
     ):
+        """
+        check_matrix (bool): If False, the commutation checker will not check the commutation of gates via matrix multiplication.
+        """
+
         super().__init__()
         if standard_gate_commutations is None:
             self._standard_commutations = {}

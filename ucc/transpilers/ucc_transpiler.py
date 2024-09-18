@@ -9,13 +9,18 @@ class UCCTranspiler:
     def transpile(qasm_code: str, mode: str = 'qiskit', draw = False, get_gate_counts = False) -> str:
         """
         transpiles the given QASM code using Qiskit's transpile function.
-        Currently this is just translating QASM to Qiskit, running qiskit.transpile, 
-        then translating back to QASM for testing purposes. 
+        mode = 'qiskit' just translates QASM to Qiskit, running qiskit.transpile with the maximum optimization level,
+        then translates back to QASM for testing purposes. 
         TODO: create a DAG object from the qasm_code directly and only call subset of
         Qiskit compiler passes.
+
+        mode = 'ucc' uses the UCCDefault1 transpiler from UCC to transpile the QASM code.
         
         Parameters:
             qasm_code (str): The OpenQASM code to transpile.
+            mode (str): The transpiler to use. 'qiskit' or 'ucc'.
+            draw (bool): Whether to draw the transpiled circuit.
+            get_gate_counts (bool): Whether to return the gate counts of the transpiled circuit.
 
         Returns:
             QuantumCircuit: The transpiled quantum circuit.

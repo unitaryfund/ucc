@@ -1,3 +1,5 @@
+# # This file has been modified from the original version in Qiskit. 
+
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2019.
@@ -52,6 +54,8 @@ class CommutativeCancellation(TransformationPass):
             target (Target): The :class:`~.Target` representing the target backend, if both
                 ``basis_gates`` and ``target`` are specified then this argument will take
                 precedence and ``basis_gates`` will be ignored.
+            standard_gates (list[str]): If provided, only the commutation relations between the gates in this list will be considered.
+            special_commutations (dict): Dictionary of special commutation relations.
         """
         super().__init__()
         if basis_gates:
