@@ -28,12 +28,12 @@ class UCCDefault1:
     def add_local_passes(self, local_iterations):
         for _ in range(local_iterations):            
             self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))            
-            # self.pass_manager.append(Optimize1qGatesDecomposition())
+            self.pass_manager.append(Optimize1qGatesDecomposition())
             self.pass_manager.append(CommutativeCancellation(standard_gates=self.target_basis, special_commutations=self.special_commutations))
             self.pass_manager.append(Collect2qBlocks())
-            self.pass_manager.append(ConsolidateBlocks(force_consolidate=True))
+            self.pass_manager.append(ConsolidateBlocks())
             self.pass_manager.append(UnitarySynthesis(basis_gates=self.target_basis))
-            # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
+            self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
     
     def add_map_passes(self, coupling_map = None):
         pass

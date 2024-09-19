@@ -1,3 +1,6 @@
+# This file has been modified from the original version in Qiskit. 
+
+# 
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2023.

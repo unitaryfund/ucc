@@ -1,3 +1,6 @@
+# This file has been modified from the original version in Qiskit. 
+
+# 
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2019.
@@ -132,12 +135,12 @@ class ConsolidateBlocks(TransformationPass):
                         continue
                     unitary = UnitaryGate(matrix, check_input=False)
 
-                max_2q_depth = 20  # If depth > 20, there will be 1q gates to consolidate.
+                #max_2q_depth = 20  # If depth > 20, there will be 1q gates to consolidate. (Removing this for UCC)
                 if (  # pylint: disable=too-many-boolean-expressions
                     self.force_consolidate
                     or unitary.num_qubits > 2
                     or self.decomposer.num_basis_gates(matrix) < basis_count
-                    or len(block) > max_2q_depth
+                    #or len(block) > max_2q_depth
                     or ((self.basis_gates is not None) and outside_basis)
                     or ((self.target is not None) and outside_basis)
                 ):
