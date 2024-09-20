@@ -1,3 +1,5 @@
+# This file has been modified from the original version in Qiskit. 
+
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2023.
@@ -29,9 +31,15 @@ class CommutationAnalysis(AnalysisPass):
     ``property_set['commutation_set']`` is a dictionary that describes
     the commutation relations on a given wire, all the gates on a wire
     are grouped into a set of gates that commute.
+    
     """
 
     def __init__(self, standard_gates=None, special_commutations=None):
+        """
+        standard_gates (list[str]): If provided, only the commutation relations between the gates in this list will be considered.
+        special_commutations (dict): If provided, the commutation relations in this dictionary will be added to the commutation checker.
+        """
+
         super().__init__()
         if standard_gates is None:
             new_standard_gates_commutations = standard_gates_commutations

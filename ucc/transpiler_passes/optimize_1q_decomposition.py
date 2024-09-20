@@ -1,3 +1,6 @@
+# This file has been modified from the original version in Qiskit. 
+
+# 
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2023.
@@ -33,6 +36,7 @@ from qiskit.circuit.library.standard_gates import (
     XGate,
 )
 from qiskit.circuit import Qubit
+from qiskit.circuit.quantumcircuitdata import CircuitInstruction
 from qiskit.dagcircuit.dagcircuit import DAGCircuit
 from qiskit.dagcircuit.dagnode import DAGOpNode
 
@@ -62,53 +66,26 @@ class Optimize1qGatesDecomposition(TransformationPass):
 
     The decision to replace the original chain with a new re-synthesis depends on:
      - whether the original chain was out of basis: replace
-     - whether the original chain was in basis but re-synthesis is lower error: replace
-     - whether the original chain contains a pulse gate: do not replace
      - whether the original chain amounts to identity: replace with null
 
-     Error is computed as a multiplication of the errors of individual gates on that qubit.
     """
 
-    def __init__(self, basis=None, target=None):
+    def __init__(self, basis=None):
         """Optimize1qGatesDecomposition initializer.
 
         Args:
             basis (list[str]): Basis gates to consider, e.g. `['u3', 'cx']`. For the effects
                 of this pass, the basis is the set intersection between the `basis` parameter
-                and the Euler basis. Ignored if ``target`` is also specified.
-            target (Optional[Target]): The :class:`~.Target` object corresponding to the compilation
-                target. When specified, any argument specified for ``basis_gates`` is ignored.
+                and the Euler basis.
         """
         super().__init__()
 
         self._basis_gates = basis
-        self._target = target
         self._global_decomposers = []
         self._local_decomposers_cache = {}
 
         if basis:
             self._global_decomposers = _possible_decomposers(set(basis))
-        elif target is None:
-            self._global_decomposers = _possible_decomposers(None)
-            self._basis_gates = None
-
-        self.error_map = self._build_error_map()
-
-    def _build_error_map(self):
-        # include path for when target exists but target.num_qubits is None (BasicSimulator)
-        if self._target is not None and self._target.num_qubits is not None:
-            error_map = euler_one_qubit_decomposer.OneQubitGateErrorMap(self._target.num_qubits)
-            for qubit in range(self._target.num_qubits):
-                gate_error = {}
-                for gate, gate_props in self._target.items():
-                    if gate_props is not None:
-                        props = gate_props.get((qubit,), None)
-                        if props is not None and props.error is not None:
-                            gate_error[gate] = props.error
-                error_map.add_qubit(gate_error)
-            return error_map
-        else:
-            return None
 
     def _resynthesize_run(self, matrix, qubit=None):
         """
@@ -117,76 +94,14 @@ class Optimize1qGatesDecomposition(TransformationPass):
         Returns the newly synthesized circuit in the indicated basis, or None
         if no synthesis routine applied.
 
-        When multiple synthesis options are available, it prefers the one with the lowest
-        error when the circuit is applied to `qubit`.
         """
-        # include path for when target exists but target.num_qubits is None (BasicSimulator)
-        if self._target is not None and self._target.num_qubits is not None:
-            if qubit is not None:
-                qubits_tuple = (qubit,)
-            else:
-                qubits_tuple = None
-            if qubits_tuple in self._local_decomposers_cache:
-                decomposers = self._local_decomposers_cache[qubits_tuple]
-            else:
-                available_1q_basis = set(self._target.operation_names_for_qargs(qubits_tuple))
-                decomposers = _possible_decomposers(available_1q_basis)
-        else:
-            decomposers = self._global_decomposers
 
         best_synth_circuit = euler_one_qubit_decomposer.unitary_to_gate_sequence(
             matrix,
-            decomposers,
+            self._global_decomposers,
             qubit,
-            self.error_map,
         )
         return best_synth_circuit
-
-    def _gate_sequence_to_dag(self, best_synth_circuit):
-        qubits = (Qubit(),)
-        out_dag = DAGCircuit()
-        out_dag.add_qubits(qubits)
-        out_dag.global_phase = best_synth_circuit.global_phase
-
-        for gate_name, angles in best_synth_circuit:
-            out_dag.apply_operation_back(NAME_MAP[gate_name](*angles), qubits, check=False)
-        return out_dag
-
-    def _substitution_checks(self, dag, old_run, new_circ, basis, qubit):
-        """
-        Returns `True` when it is recommended to replace `old_run` with `new_circ` over `basis`.
-        """
-        if new_circ is None:
-            return False
-
-        # do we even have calibrations?
-        has_cals_p = dag.calibrations is not None and len(dag.calibrations) > 0
-        # does this run have uncalibrated gates?
-        uncalibrated_p = not has_cals_p or any(not dag.has_calibration_for(g) for g in old_run)
-        # does this run have gates not in the image of ._decomposers _and_ uncalibrated?
-        if basis is not None:
-            uncalibrated_and_not_basis_p = any(
-                g.name not in basis and (not has_cals_p or not dag.has_calibration_for(g))
-                for g in old_run
-            )
-        else:
-            # If no basis is specified then we're always in the basis
-            uncalibrated_and_not_basis_p = False
-
-        # if we're outside of the basis set, we're obligated to logically decompose.
-        # if we're outside of the set of gates for which we have physical definitions,
-        #    then we _try_ to decompose, using the results if we see improvement.
-        new_error = 0.0
-        old_error = 0.0
-        if not uncalibrated_and_not_basis_p:
-            new_error = self._error(new_circ, qubit)
-            old_error = self._error(old_run, qubit)
-
-        return (
-            uncalibrated_and_not_basis_p
-            or (uncalibrated_p and new_error < old_error)
-            or (math.isclose(new_error[0], 0) and not math.isclose(old_error[0], 0))
-        )
 
     @control_flow.trivial_recurse
     def run(self, dag):
@@ -198,54 +113,37 @@ class Optimize1qGatesDecomposition(TransformationPass):
         Returns:
             DAGCircuit: the optimized DAG.
         """
-        runs = dag.collect_1q_runs()
-        for run in runs:
+        runs = []
+        qubits = []
+        bases = []
+        for run in dag.collect_1q_runs():
             qubit = dag.find_bit(run[0].qargs[0]).index
-            operator = run[0].op.to_matrix()
-            for node in run[1:]:
-                operator = node.op.to_matrix().dot(operator)
-            best_circuit_sequence = self._resynthesize_run(operator, qubit)
+            runs.append(run)
+            qubits.append(qubit)
+            bases.append(self._global_decomposers)
+        best_sequences = euler_one_qubit_decomposer.optimize_1q_gates_decomposition(
+            runs, qubits, bases, simplify=True
+        )
+        for index, best_circuit_sequence in enumerate(best_sequences):
+            run = runs[index]
+            qubit = qubits[index]
+            if best_circuit_sequence is not None:
+                (_, _, best_circuit_sequence) = best_circuit_sequence
 
-            if self._target is None:
-                basis = self._basis_gates
-            else:
-                basis = self._target.operation_names_for_qargs((qubit,))
-
-            if best_circuit_sequence is not None and self._substitution_checks(
-                dag, run, best_circuit_sequence, basis, qubit
-            ):
-                for gate_name, angles in best_circuit_sequence:
-                    op = NAME_MAP[gate_name](*angles)
-                    node = DAGOpNode(NAME_MAP[gate_name](*angles), run[0].qargs, dag=dag)
+                first_node_id = run[0]._node_id
+                qubit = run[0].qargs
+                for gate, angles in best_circuit_sequence:
+                    op = CircuitInstruction.from_standard(gate, qubit, angles)
+                    node = DAGOpNode.from_instruction(op, dag=dag)
                     node._node_id = dag._multi_graph.add_node(node)
-                    dag._increment_op(op)
-                    dag._multi_graph.insert_node_on_in_edges(node._node_id, run[0]._node_id)
+                    dag._increment_op(gate.name)
+                    dag._multi_graph.insert_node_on_in_edges(node._node_id, first_node_id)
                 dag.global_phase += best_circuit_sequence.global_phase
                 # Delete the other nodes in the run
                 for current_node in run:
                     dag.remove_op_node(current_node)
 
         return dag
-
-    def _error(self, circuit, qubit):
-        """
-        Calculate a rough error for a `circuit` that runs on a specific
-        `qubit` of `target` (`circuit` can either be an OneQubitGateSequence
-        from Rust or a list of DAGOPNodes).
-
-        Use basis errors from target if available, otherwise use length
-        of circuit as a weak proxy for error.
-        """
-        if isinstance(circuit, euler_one_qubit_decomposer.OneQubitGateSequence):
-            return euler_one_qubit_decomposer.compute_error_one_qubit_sequence(
-                circuit, qubit, self.error_map
-            )
-        else:
-            circuit_list = [(x.op.name, []) for x in circuit]
-            return euler_one_qubit_decomposer.compute_error_list(
-                circuit_list, qubit, self.error_map
-            )
-
 
 def _possible_decomposers(basis_set):
     decomposers = []
