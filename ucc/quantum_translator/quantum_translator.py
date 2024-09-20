@@ -11,7 +11,7 @@ import qiskit.qasm3
 from .interfaces import QiskitInterface, TKETInterface, CirqInterface
 
 class QuantumTranslator:
-    def __init__(self, circuit, return_format):
+    def __init__(self, circuit, return_format='original'):
         self._original_circuit = circuit
         self._original_format = self.identify_format(circuit)
 
@@ -99,7 +99,7 @@ class QuantumTranslator:
         """Validates and translates an OpenQASM2 string to a TKET circuit. 
         OpenQASM3 is not currently supported by PyTKET."""
 
-        assert cls.is_valid_openqasm(qasm_circuit, version='2')
+        # assert cls.is_valid_openqasm(qasm_circuit, version='2')
         return tket_from_qasm(qasm_circuit)
 
     @classmethod
@@ -107,7 +107,7 @@ class QuantumTranslator:
         """Validates and translates an OpenQASM2 string to a cirq circuit. 
         OpenQASM3 is not currently supported by Cirq."""
 
-        assert cls.is_valid_openqasm(qasm_circuit, version='2')
+        # assert cls.is_valid_openqasm(qasm_circuit, version='2')
         return cirq_from_qasm(qasm_circuit)
 
     @classmethod

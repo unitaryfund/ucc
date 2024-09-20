@@ -1,29 +1,31 @@
 from ucc.quantum_translator import QuantumTranslator
 from ucc.transpilers import UCCTranspiler
+from qbraid.transpiler import transpile
+from qbraid.programs.alias_manager import get_program_type_alias
 
-def compile(circuit, qasm_version='2', return_format='original', mode='qiskit', draw=False, get_gate_counts=False):
+
+def compile(circuit, return_format='original', mode='ucc', get_gate_counts=False):
     """
-    Processes the provided quantum circuit using the QuantumTranslator 
-    and compiles it using the UCCTranspiler.
+    Compiles provided quantum `circuit` by translating it to a Qiskit circuit, transpiling using the specified transpiler `mode`, and returning the optimized circuit in specified `return_format`.
 
     Parameters:
         circuit (object): The quantum circuit to be compiled.
-        qasm_version (str): OpenQASM version ('2' or '3').
         return_format (str): The format in which your circuit will be 
             returned. e.g. "TKET", "OpenQASM2" 
             Check `ucc.QuantumTranslator.supported_circuit_formats()`
             Defaults to format of input circuit. 
+            mode (str): 'ucc' or 'qiskit, specifies transpiler mode to use
     
     Returns:
-        variable type : Compiled circuit result 
+        variable type: Compiled circuit 
     """
-    translator = QuantumTranslator(circuit, return_format)
-    qasm_code = translator.to_qasm(circuit, version=qasm_version)
+    if return_format == "original":
+        return_format = get_program_type_alias(circuit)
+    
+    qiskit_circuit = transpile(circuit, "qiskit") 
+    compiled_circuit, gate_counts = UCCTranspiler.transpile(qiskit_circuit, mode=mode,  get_gate_counts=get_gate_counts)
 
-    compiled_qasm, gate_counts = UCCTranspiler.transpile(qasm_code, mode=mode, draw=draw, get_gate_counts=get_gate_counts)
-    # print(compiled_qasm)
-    final_result = translator.to_return_format(compiled_qasm)
-
+    final_result = transpile(compiled_circuit, return_format)
     if get_gate_counts:
         return final_result, gate_counts
     else:
