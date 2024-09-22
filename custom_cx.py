@@ -1,4 +1,4 @@
-# This file is a derivative work from related transpiler passes in Qiskit. 
+# This file is a derivative work from simlar transpiler passes in Qiskit. 
 # 
 # This code is part of Qiskit.
 #
@@ -82,7 +82,10 @@ class CXCancellation(TransformationPass):
 
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
-        """"""
+        """
+        Execute checks for commutation and inverse cancellation on the DAG.
+        Remvoe pairs of nodes which cancel one another.
+        """
         topo_sorted_nodes = list(dag.topological_op_nodes())
         circ_size = len(topo_sorted_nodes)
         for idx1 in range(0, circ_size):
