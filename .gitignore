@@ -8,9 +8,9 @@
 *.ipynb_checkpoints
 *.jupyter_cache
 _build
-__pycache__/
+*__pycache__/
 docs/build/
-mitiq.egg-info/
+*.egg-info/
 dist/
 build/
 jupyter_execute/
