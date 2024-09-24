@@ -103,9 +103,7 @@ class CXCancellation(TransformationPass):
                     node2.op,
                     node2.qargs
                     ):
-                    n1 = node1
-                    node1 = node2
-                    node2 = n1
+                    node1, node2 = node2, node1
                     is_inverse, phase_update = self._check_inverse(node1, node2)
                     if is_inverse:
                         dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
