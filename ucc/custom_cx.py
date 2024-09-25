@@ -1,4 +1,4 @@
-# This file is a derivative work from simlar transpiler passes in Qiskit. 
+# This file is a derivative work from similar transpiler passes in Qiskit. 
 # 
 # This code is part of Qiskit.
 #
@@ -17,6 +17,7 @@ from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.quantum_info import Operator
 from qiskit.circuit.operation import Operation
+from qiskit.circuit import Qubit
 from qiskit.quantum_info import Operator
 from qiskit.quantum_info.operators.predicates import matrix_equal
  
@@ -36,9 +37,9 @@ class CXCancellation(TransformationPass):
     def commute(
         self,
         op1: Operation,
-        qargs1: List,
+        qargs1: List[Qubit],
         op2: Operation,
-        qargs2: List,
+        qargs2: List[Qubit],
         ) -> bool:
         """Checks whether two operators ``op1`` and ``op2`` commute with one another."""
         commuting = False 
@@ -73,7 +74,7 @@ class CXCancellation(TransformationPass):
     def _decrement_cx_op(self, dag, op_name):
         """
         Remove the name associated with the removed CX gate from the
-        dictionaary containing the names of nodes in the DAG.S
+        dictionary containing the names of nodes in the DAG.
         """
         if dag._op_names[op_name] == 'cx':
             del dag._op_names[op_name]
@@ -84,34 +85,21 @@ class CXCancellation(TransformationPass):
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """
         Execute checks for commutation and inverse cancellation on the DAG.
-        Remvoe pairs of nodes which cancel one another.
+        Remove pairs of nodes which cancel one another.
         """
         topo_sorted_nodes = list(dag.topological_op_nodes())
-        circ_size = len(topo_sorted_nodes)
-        for idx1 in range(0, circ_size):
-            for idx2 in range(idx1 - 1, -1, -1):
-                is_inverse, phase_update = self._check_inverse(topo_sorted_nodes[idx1], topo_sorted_nodes[idx2])
-                if is_inverse:
-                    dag._multi_graph.remove_node_retain_edges_by_id(topo_sorted_nodes[idx1]._node_id)
-                    self._decrement_cx_op(dag, topo_sorted_nodes[idx1].name)
-                    dag._multi_graph.remove_node_retain_edges_by_id(topo_sorted_nodes[idx2]._node_id)
-                    self._decrement_cx_op(dag, topo_sorted_nodes[idx2].name)
-                if phase_update != 0:
-                        dag.global_phase += phase_update          
+        for i, node1 in enumerate(topo_sorted_nodes):
+            for node2 in topo_sorted_nodes[i+1:]:
                 if self.commute(
-                    topo_sorted_nodes[idx1].op,
-                    topo_sorted_nodes[idx1].qargs,
-                    topo_sorted_nodes[idx2].op,
-                    topo_sorted_nodes[idx2].qargs
+                    node1.op,
+                    node1.qargs,
+                    node2.op,
+                    node2.qargs
                     ):
-                    node1 = topo_sorted_nodes[idx2]
-                    topo_sorted_nodes[idx1] = node1
-                    node2 = topo_sorted_nodes[idx1]
-                    topo_sorted_nodes[idx2] = node2
-                    is_inverse, phase_update = self._check_inverse(topo_sorted_nodes[idx1], topo_sorted_nodes[idx2])      
+                    node1, node2 = node2, node1
+                    is_inverse, phase_update = self._check_inverse(node1, node2)
                     if is_inverse:
-                        dag._multi_graph.remove_node_retain_edges_by_id(topo_sorted_nodes[idx1]._node_id)
-                        dag._multi_graph.remove_node_retain_edges_by_id(topo_sorted_nodes[idx2]._node_id)
-                    if phase_update != 0:
+                        dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
+                        dag._multi_graph.remove_node_retain_edges_by_id(node2._node_id)
                         dag.global_phase += phase_update
         return dag
