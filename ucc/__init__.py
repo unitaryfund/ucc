@@ -1,4 +1,3 @@
 from .transpilers import UCCTranspiler
-from .compile import compile
+from .compile import compile, supported_circuit_formats
 from .custom_cx import CXCancellation
-from .quantum_translator import QuantumTranslator

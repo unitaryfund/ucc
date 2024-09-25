@@ -1,5 +1,5 @@
 from qiskit import transpile, QuantumCircuit
-from ..quantum_translator import QuantumTranslator
+
 
 from ucc.transpilers.ucc_defaults import UCCDefault1
 
