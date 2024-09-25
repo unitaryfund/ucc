@@ -90,13 +90,6 @@ class CXCancellation(TransformationPass):
         topo_sorted_nodes = list(dag.topological_op_nodes())
         for i, node1 in enumerate(topo_sorted_nodes):
             for node2 in topo_sorted_nodes[i+1:]:
-                is_inverse, phase_update = self._check_inverse(node1, node2)
-                if is_inverse:
-                    dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
-                    self._decrement_cx_op(dag, node1.name)
-                    dag._multi_graph.remove_node_retain_edges_by_id(node2._node_id)
-                    self._decrement_cx_op(dag, node2.name)
-                    dag.global_phase += phase_update          
                 if self.commute(
                     node1.op,
                     node1.qargs,
