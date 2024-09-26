@@ -42,3 +42,21 @@ def test_cx_cancellation_qft():
     result_circuit = pass_manager.run(qft)
     # check against result from default Qiskit transpiler
     assert 0 < result_circuit.count_ops().get("cx", 0) < 78
+
+
+num_qubits = 2
+rz_angle = 0.9823754  # random angle
+CX_RZ_CX_circuit = QuantumCircuit(num_qubits)
+CX_RZ_CX_circuit.cx(0, 1)
+CX_RZ_CX_circuit.rz(rz_angle, 0)
+CX_RZ_CX_circuit.cx(0, 1)
+
+CX_RZ_CX_circuit_ideal_compiled = QuantumCircuit(num_qubits)
+CX_RZ_CX_circuit_ideal_compiled.rz(rz_angle, 0)
+
+
+def test_commutation_rule_used():
+    pass_manager = PassManager()
+    pass_manager.append(CXCancellation())
+    compiled_circuit = pass_manager.run(CX_RZ_CX_circuit)
+    assert compiled_circuit == CX_RZ_CX_circuit_ideal_compiled
