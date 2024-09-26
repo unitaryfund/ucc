@@ -1,11 +1,9 @@
 import pytest
-
 import numpy as np
-
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 
-from ucc.custom_cx import CXCancellation
+from ..custom_cx import CXCancellation
 
 # Trivial circuit of only CNOTs
 num_qubits = 5

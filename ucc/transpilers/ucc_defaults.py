@@ -1,8 +1,7 @@
 #Construct a custom compiler
 from qiskit.transpiler import PassManager
-from qiskit.compiler import transpile
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
-from ..transpiler_passes import BasisTranslator, CommutativeCancellation, Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis, Optimize1qGatesDecomposition
+from ..transpiler_passes import BasisTranslator, CommutativeCancellation, Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, CXCancellation
 
 # from ucc_passes.entanglement_net_to_layout import Decompose2qNetworkWithMap
 
@@ -25,6 +24,10 @@ class UCCDefault1:
         self.add_local_passes(local_iterations)
         #self.add_cx_network_optimization()
 
+    @property
+    def default_passes(self):
+        return 
+        
     def add_local_passes(self, local_iterations):
         for _ in range(local_iterations):            
             self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))            
@@ -34,6 +37,7 @@ class UCCDefault1:
             self.pass_manager.append(ConsolidateBlocks())
             self.pass_manager.append(UnitarySynthesis(basis_gates=self.target_basis))
             self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
+            
     
     def add_map_passes(self, coupling_map = None):
         pass
