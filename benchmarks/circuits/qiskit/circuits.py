@@ -17,7 +17,7 @@
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library.standard_gates import XGate
-
+from qiskit.circuit import ParameterVector
 
 def dtc_unitary(num_qubits, g=0.95, seed=12345):
     """Generate a Floquet unitary for DTC evolution
@@ -168,4 +168,21 @@ def random_clifford_optimized(num_qubits, seed=12345):
     cliff = random_clifford(num_qubits, seed=seed)
     qc = cliff.to_circuit()
 
+    return qc
+
+
+# Step 1: Create a Parameterized Quantum Circuit (Ansatz)
+def VQE_ansatz(num_qubits, num_layers):
+    params = ParameterVector('θ', length=num_qubits * num_layers)
+    qc = QuantumCircuit(num_qubits)
+
+    param_index = 0
+    for layer in range(num_layers):
+        # Add RX rotation for each qubit
+        for qubit in range(num_qubits):
+            qc.rx(params[param_index], qubit)
+            param_index += 1
+        # Add entangling gates (CX) in a linear chain
+        for qubit in range(num_qubits - 1):
+            qc.cx(qubit, qubit + 1)
     return qc
