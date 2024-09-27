@@ -38,4 +38,4 @@ def test_cx_cancellation_qft():
     pass_manager.append(CXCancellation())
     result_circuit = pass_manager.run(qft)
     # check against result from default Qiskit transpiler
-    assert result_circuit.count_ops().get("cx", 0) < 78
+    assert 0 < result_circuit.count_ops().get("cx", 0) < 78
