@@ -1,14 +1,17 @@
 
-from qbraid.transpiler import transpile
+from qbraid.transpiler import transpile as translate
 from qbraid.programs.alias_manager import get_program_type_alias
+from qiskit import transpile as qiskit_transpile
 
 def write_qasm(circuit, filename, version='2'):
-    original_format = get_program_type_alias(circuit)
+    qiskit_circuit = translate(circuit, 'qiskit')
+    decomp_circuit = qiskit_transpile(
+        qiskit_circuit, 
+        basis_gates=['rz', 'rx', 'ry', 'h', 'cx'], 
+        optimization_level=0)
 
     # Generate QASM string
-    qasm_string = transpile(circuit, 'qasm' + version)
-    # Sanity check
-    # assert circuit == transpile(qasm_string, original_format)
+    qasm_string = translate(decomp_circuit, 'qasm' + version)
 
     # Write the string to a .qasm file
     with open(f"./circuits/qasm{version}/ucc/{filename}.qasm", "w") as file:
