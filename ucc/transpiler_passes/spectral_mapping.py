@@ -1,8 +1,12 @@
 import numpy as np
+
 from scipy.linalg import eigh, orthogonal_procrustes
 from scipy.optimize import linear_sum_assignment
+import networkx as nx
+import random
 
 from qiskit.transpiler.basepasses import AnalysisPass
+from qiskit.transpiler import Layout
 
 
 class SpectralMapping(AnalysisPass):
@@ -23,62 +27,85 @@ class SpectralMapping(AnalysisPass):
             dag (DAGCircuit): input dag
         """
 
-        # Step 1: Extract the adjacency matrix of the coupling list
-        target_adj = adjacency_matrix_from_list(self.coupling_list)
+        self.dag = dag
+        num_qubits = self.dag.num_qubits()       
+        
+        # Extract a connected subgraph of the target adjacency matrix
+        best_subgraph = greedy_connected_subgraph(self.coupling_list, num_qubits)
+        best_subgraph_qubits = list(best_subgraph.nodes)
+        best_subgraph_adj = nx.to_numpy_array(best_subgraph)
 
-        # Step 2: Extract the adjacency matrix of the input circuit
-        interaction_adj = adjacency_matrix_from_dag(dag)
+        # Extract the adjacency matrix of the input circuit
+        circuit_adj = self._adjacency_matrix_from_dag()
 
-        # Step 3: Perform spectral graph matching between the two adjacency matrices
-        P = spectral_graph_matching(interaction_adj, target_adj)
+        qubit_order = spectral_graph_matching(circuit_adj, best_subgraph_adj)
 
-        # Step 4: Convert the soft permutation matrix into a strict binary permutation matrix
-        P = get_permutation_matrix(P)
+        # Reorder the qubits in the input circuit based on the matching using best_subgraph_qubits
+        virtual_to_physical_match = {qubit:best_subgraph_qubits[qubit_order[i]] for i, qubit in enumerate(self.dag.qubits)}
 
-        # Step 5: Convert the permutation matrix into a list
-        virtual_to_physical_match = np.argmax(P, axis=1).tolist()
+        # Create a layout object
+        layout = Layout(virtual_to_physical_match)
+        for qreg in self.dag.qregs.values():
+            layout.add_register(qreg)
 
-        return virtual_to_physical_match
+        self.property_set["sabre_starting_layouts"] = [layout]
 
-def spectral_graph_matching(adj1, adj2, top_k=None):
+        return dag
+    
+    def _adjacency_matrix_from_dag(self):
+
+        # Step 1: Initialize an empty adjacency matrix
+        num_qubits = self.dag.num_qubits()
+        qubit_indices = {qubit: index for index, qubit in enumerate(self.dag.qubits)}
+        adj_matrix = np.zeros((num_qubits, num_qubits), dtype=int)
+
+        # Step through dag
+        for node in self.dag.op_nodes(include_directives=False):
+            len_args = len(node.qargs)
+            if len_args == 2:
+                qargs = [qubit_indices[qubit] for qubit in node.qargs]
+                adj_matrix[qargs[0], qargs[1]] += 1
+                adj_matrix[qargs[1], qargs[0]] += 1
+
+        return adj_matrix
+
+
+def spectral_graph_matching(A, B):
+
     """
     Perform spectral graph matching between two graphs of unequal sizes.
-
     Parameters:
-    adj1 (np.array): Adjacency matrix of graph 1
-    adj2 (np.array): Adjacency matrix of graph 2
-    top_k (int): Number of top eigenvectors to use (optional)
-
+    adj1 (np.array): Adjacency matrix or Laplacian of graph 1
+    adj2 (np.array): Adjacency matrix or Laplacian of graph 2
     Returns:
-    P (np.array): Permutation matrix that aligns adj1 and adj2
+    np.array: Index mapping from graph 1 to graph 2
     """
-    # Step 1: Pad the smaller adjacency matrix to match the size of the larger one
-    n1, n2 = adj1.shape[0], adj2.shape[0]
-    if n1 < n2:
-        adj1 = pad_adjacency_matrix(adj1, n2)
-    elif n2 < n1:
-        adj2 = pad_adjacency_matrix(adj2, n1)
+    #Ensure that the adjacency matrices are of the same size
+    n1, n2 = A.shape[0], B.shape[0]
+    if n1 != n2:
+        raise ValueError("The adjacency matrices must be of the same size.")
 
-    # Step 2: Compute eigenvalues and eigenvectors of adjacency matrices
-    eigvals1, eigvecs1 = eigh(adj1)
-    eigvals2, eigvecs2 = eigh(adj2)
+    # Compute eigenvalues and eigenvectors of adjacency matrices
+    A_eigenvals, A_eigenvecs = eigh(A)  
+    B_eigenvals, B_eigenvecs = eigh(B)
 
-    # Step 3: Optionally, select the top_k eigenvectors (ignoring smallest eigenvalues)
-    if top_k:
-        idx1 = np.argsort(eigvals1)[-top_k:]  # Top-k eigenvalues for graph 1
-        idx2 = np.argsort(eigvals2)[-top_k:]  # Top-k eigenvalues for graph 2
-        eigvecs1 = eigvecs1[:, idx1]
-        eigvecs2 = eigvecs2[:, idx2]
 
-    # Step 4: Use Procrustes analysis to align the eigenvectors
-    R, _ = orthogonal_procrustes(eigvecs1, eigvecs2)
+    # Compute the similarity matrix
+    P = np.zeros((n1, n1))
+    eta = 0.1/np.log(n1)
+    for i in range(n1):
+        for j in range(n1):
+            weight = eta / (eta**2 + (A_eigenvals[i] - B_eigenvals[j])**2)
+            P += weight * np.outer(A_eigenvecs[:, i], B_eigenvecs[:, j])
 
-    # Step 5: Compute the permutation matrix
-    P = eigvecs1 @ R @ eigvecs2.T
+    # Solve the linear assignment problem
+    row_ind, col_ind = linear_sum_assignment(-P)
 
-    return P
+    return col_ind   
 
-    
+
+
+
 def adjacency_matrix_from_list(adj_list, num_nodes=None):
     """
     Construct an adjacency matrix from an adjacency list.
@@ -104,51 +131,40 @@ def adjacency_matrix_from_list(adj_list, num_nodes=None):
         adj_matrix[node1, node2] = 1
         adj_matrix[node2, node1] = 1  # Assuming an undirected graph
 
-    return adj_matrix
+    return adj_matrix   
+
+
+def greedy_connected_subgraph(coupling_list, subgraph_size):
+    """
+    Construct a connected subgraph of a graph based on a greedy algorithm.
+    """
     
-def get_permutation_matrix(P):
-    """
-    Convert the soft permutation matrix into a strict binary permutation matrix
-    using the Hungarian algorithm.
+    G = nx.from_edgelist(coupling_list)
 
-    Parameters:
-    P (np.array): The soft permutation matrix from spectral matching.
+    if subgraph_size > len(G):
+        raise ValueError("The subgraph size cannot exceed the number of nodes in the graph.")
+    
+    # Start with the highest connected node
+    best_subgraph = set([max(dict(G.degree).items(), key=lambda x: x[1])[0]])   
+    while len(best_subgraph) < subgraph_size:
+        best_node = None
+        best_edges = 0
 
-    Returns:
-    np.array: A binary permutation matrix.
-    """
-    row_ind, col_ind = linear_sum_assignment(-P)  # Minimize negative P (maximize P)
-
-    # Initialize a binary permutation matrix
-    perm_matrix = np.zeros_like(P)
-    perm_matrix[row_ind, col_ind] = 1
-
-    return perm_matrix
-
-def adjacency_matrix_from_dag(dag):
-
-    # Step 1: Initialize an empty adjacency matrix
-    num_qubits = dag.num_qubits
-    adj_matrix = np.zeros((num_qubits, num_qubits), dtype=int)
-
-    # Step 
-
+        # Convert nodes to a list and shuffle
+        nodes = list(G.nodes - best_subgraph)
+        random.shuffle(nodes)
+        
+        for node in nodes:
+            temp_subgraph = best_subgraph | {node}
+            subgraph_edges = G.subgraph(temp_subgraph).number_of_edges()
             
-def pad_adjacency_matrix(adj, target_size):
-    """
-    Pad an adjacency matrix with zeros to match the target size.
-
-    Parameters:
-    adj (np.array): Adjacency matrix to pad
-    target_size (int): Target size (should be larger than adj.shape[0])
-
-    Returns:
-    np.array: Padded adjacency matrix
-    """
-    current_size = adj.shape[0]
-    if current_size >= target_size:
-        return adj  # No padding needed
-
-    padded_adj = np.zeros((target_size, target_size))
-    padded_adj[:current_size, :current_size] = adj
-    return padded_adj
+            if subgraph_edges > best_edges:
+                best_edges = subgraph_edges
+                best_node = node
+        
+        if best_node is None:  # No node improved connectivity
+            break
+        
+        best_subgraph.add(best_node)
+    
+    return G.subgraph(best_subgraph)
