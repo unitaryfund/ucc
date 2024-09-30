@@ -88,18 +88,32 @@ class CXCancellation(TransformationPass):
         Remove pairs of nodes which cancel one another.
         """
         topo_sorted_nodes = list(dag.topological_op_nodes())
-        for i, node1 in enumerate(topo_sorted_nodes):
-            for node2 in topo_sorted_nodes[i+1:]:
-                if self.commute(
+        for i, node1 in enumerate(topo_sorted_nodes[:-1]):
+            node2 = topo_sorted_nodes[i+1]
+            is_inverse, phase_update = self._check_inverse(node1, node2)
+            if is_inverse:
+                dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
+                self._decrement_cx_op(dag, node1.name)
+                dag._multi_graph.remove_node_retain_edges_by_id(node2._node_id)
+                self._decrement_cx_op(dag, node2.name)
+                dag.global_phase += phase_update
+            elif self.commute(
                     node1.op,
                     node1.qargs,
                     node2.op,
                     node2.qargs
                     ):
-                    node1, node2 = node2, node1
-                    is_inverse, phase_update = self._check_inverse(node1, node2)
-                    if is_inverse:
-                        dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
-                        dag._multi_graph.remove_node_retain_edges_by_id(node2._node_id)
-                        dag.global_phase += phase_update
+                    if i < len(topo_sorted_nodes) - 3:
+                        node_pairs = [(topo_sorted_nodes[i-1], node2), (node1, topo_sorted_nodes[i+2])]
+                    else:
+                        node_pairs = [(topo_sorted_nodes[i-1], node2)] # avoid checking a node out of range 
+                    for n1, n2 in node_pairs:
+                        is_inverse, phase_update = self._check_inverse(n1, n2)
+                        if is_inverse:
+                            dag._multi_graph.remove_node_retain_edges_by_id(n1._node_id)
+                            self._decrement_cx_op(dag, n1.name)
+                            dag._multi_graph.remove_node_retain_edges_by_id(n2._node_id)
+                            self._decrement_cx_op(dag, n2.name)
+                            dag.global_phase += phase_update  
         return dag
+

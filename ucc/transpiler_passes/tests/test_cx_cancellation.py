@@ -1,8 +1,9 @@
-import pytest
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
+from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
 
+from ..basis_translator import BasisTranslator
 from ..custom_cx import CXCancellation
 
 # Trivial circuit of only CNOTs
@@ -35,7 +36,9 @@ for i in range(num_qubits):
 
 def test_cx_cancellation_qft():
     pass_manager = PassManager()
+    target_basis = ['rz', 'rx', 'ry', 'h'] +  ['cx']
+    pass_manager.append(BasisTranslator(sel, target_basis))
     pass_manager.append(CXCancellation())
     result_circuit = pass_manager.run(qft)
     # check against result from default Qiskit transpiler
-    assert result_circuit.count_ops().get("cx", 0) < 78
+    assert 0 < result_circuit.count_ops().get("cx", 0) < 78

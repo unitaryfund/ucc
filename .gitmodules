@@ -1,6 +1,0 @@
-[submodule "libs/benchpress"]
-	path = libs/benchpress
-	url = https://github.com/unitaryfund/benchpress
-[submodule "libs/qiskit"]
-	path = libs/qiskit
-	url =https://github.com/unitaryfund/qiskit
