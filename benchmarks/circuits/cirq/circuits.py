@@ -17,8 +17,6 @@ import numpy as np
 import sympy
 import cirq
 
-import cirq
-import numpy as np
 
 def prepare_superposition(qubits):
     circuit = cirq.Circuit()

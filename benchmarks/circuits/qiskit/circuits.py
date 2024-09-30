@@ -16,9 +16,7 @@
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit import ParameterVector
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.circuit.library import QAOAAnsatz
+from qiskit.circuit import Parameter, ParameterVector
 from qiskit.circuit.library.standard_gates import XGate
 
 def dtc_unitary(num_qubits, g=0.95, seed=12345):
@@ -192,44 +190,37 @@ def VQE_ansatz(num_qubits, num_layers):
 
 def qaoa_ising_ansatz(num_qubits, num_layers):
     """
-    Generates a QAOA ansatz for a nearest-neighbor Ising Hamiltonian.
+    Generates a custom QAOA ansatz for a nearest-neighbor Ising Hamiltonian.
 
     Args:
         num_qubits (int): Number of qubits for the Ising Hamiltonian.
-        num_layers (int): Number of QAOA layers (reps).
+        num_layers (int): Number of QAOA layers.
 
     Returns:
-        QuantumCircuit: QAOA ansatz circuit.
+        QuantumCircuit: Custom QAOA ansatz circuit.
     """
-    # Define the parameters for the nearest-neighbor Ising Hamiltonian
-    J = 1.0  # Interaction strength
-    h = [0.5] * num_qubits  # Local field terms for each qubit (adjustable if needed)
+    # Initialize a quantum circuit with the required number of qubits
+    qc = QuantumCircuit(num_qubits)
 
-    # Construct the Ising Hamiltonian using SparsePauliOp
-    pauli_strings = []
-    coefficients = []
+    # Define the parameters for each layer (gamma for cost and beta for mixer)
+    gamma = [Parameter(f"γ_{i}") for i in range(num_layers)]
+    beta = [Parameter(f"β_{i}") for i in range(num_layers)]
 
-    # Build the Pauli strings and coefficients for the Hamiltonian
-    for i in range(num_qubits):
-        if i < num_qubits - 1:
-            # Nearest-neighbor interaction Z_i Z_{i+1}
-            pauli = ['I'] * num_qubits
-            pauli[i] = 'Z'
-            pauli[i + 1] = 'Z'
-            pauli_strings.append("".join(pauli))
-            coefficients.append(J)
+    # Create the QAOA circuit layer by layer
+    for layer in range(num_layers):
+        # Cost Hamiltonian Evolution: Apply ZZ interactions and single-qubit Z rotations
+        for i in range(num_qubits):
+            # Apply nearest-neighbor ZZ interaction if not at the last qubit
+            if i < num_qubits - 1:
+                qc.cx(i, i + 1)
+                qc.rz(2 * gamma[layer], i + 1)
+                qc.cx(i, i + 1)
 
-        # Local field term Z_i
-        pauli = ['I'] * num_qubits
-        pauli[i] = 'Z'
-        pauli_strings.append("".join(pauli))
-        coefficients.append(h[i])
+            # Apply local Z rotation (Z_i) for each qubit
+            qc.rz(2 * gamma[layer], i)
 
-    # Define the Ising Hamiltonian as a SparsePauliOp
-    ising_hamiltonian = SparsePauliOp(pauli_strings, coeffs=np.array(coefficients))
+        # Mixer Hamiltonian Evolution: Apply RX rotations
+        for i in range(num_qubits):
+            qc.rx(2 * beta[layer], i)
 
-    # Create the QAOA ansatz circuit
-    qaoa_circuit = QAOAAnsatz(cost_operator=ising_hamiltonian, reps=num_layers, initial_state=None)
-
-    return qaoa_circuit
-
+    return qc
