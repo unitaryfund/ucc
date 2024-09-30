@@ -1,0 +1,1 @@
+from .circuits import qcnn_circuit
