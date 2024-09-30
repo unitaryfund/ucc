@@ -3,8 +3,6 @@ from qiskit.providers import BackendV2
 from qiskit.transpiler import CouplingMap
 
 
-from ..quantum_translator import QuantumTranslator
-
 from ucc.transpilers.ucc_defaults import UCCDefault1
 
 
