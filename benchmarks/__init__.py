@@ -1,1 +1,1 @@
-from write_qasm import write_qasm
+from .write_qasm import write_qasm
