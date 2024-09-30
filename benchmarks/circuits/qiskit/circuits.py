@@ -16,8 +16,10 @@
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit.library.standard_gates import XGate
 from qiskit.circuit import ParameterVector
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.circuit.library import QAOAAnsatz
+from qiskit.circuit.library.standard_gates import XGate
 
 def dtc_unitary(num_qubits, g=0.95, seed=12345):
     """Generate a Floquet unitary for DTC evolution
@@ -186,3 +188,48 @@ def VQE_ansatz(num_qubits, num_layers):
         for qubit in range(num_qubits - 1):
             qc.cx(qubit, qubit + 1)
     return qc
+
+
+def qaoa_ising_ansatz(num_qubits, num_layers):
+    """
+    Generates a QAOA ansatz for a nearest-neighbor Ising Hamiltonian.
+
+    Args:
+        num_qubits (int): Number of qubits for the Ising Hamiltonian.
+        num_layers (int): Number of QAOA layers (reps).
+
+    Returns:
+        QuantumCircuit: QAOA ansatz circuit.
+    """
+    # Define the parameters for the nearest-neighbor Ising Hamiltonian
+    J = 1.0  # Interaction strength
+    h = [0.5] * num_qubits  # Local field terms for each qubit (adjustable if needed)
+
+    # Construct the Ising Hamiltonian using SparsePauliOp
+    pauli_strings = []
+    coefficients = []
+
+    # Build the Pauli strings and coefficients for the Hamiltonian
+    for i in range(num_qubits):
+        if i < num_qubits - 1:
+            # Nearest-neighbor interaction Z_i Z_{i+1}
+            pauli = ['I'] * num_qubits
+            pauli[i] = 'Z'
+            pauli[i + 1] = 'Z'
+            pauli_strings.append("".join(pauli))
+            coefficients.append(J)
+
+        # Local field term Z_i
+        pauli = ['I'] * num_qubits
+        pauli[i] = 'Z'
+        pauli_strings.append("".join(pauli))
+        coefficients.append(h[i])
+
+    # Define the Ising Hamiltonian as a SparsePauliOp
+    ising_hamiltonian = SparsePauliOp(pauli_strings, coeffs=np.array(coefficients))
+
+    # Create the QAOA ansatz circuit
+    qaoa_circuit = QAOAAnsatz(cost_operator=ising_hamiltonian, reps=num_layers, initial_state=None)
+
+    return qaoa_circuit
+
