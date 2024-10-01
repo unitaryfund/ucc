@@ -104,7 +104,9 @@ class CXCancellation(TransformationPass):
             if is_inverse:
                 self._remove_cancelling_nodes(new_dag, node1, node2, phase_update)
             elif self.commute(node1.op, node1.qargs, node2.op, node2.qargs):
-                if 0 < i < len(topo_sorted_nodes) - 3:
+                if i == 0:
+                    adjacent_node_pairs = [(node1, topo_sorted_nodes[i+2])]
+                elif 0 < i < len(topo_sorted_nodes) - 3:
                     adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2), (node1, topo_sorted_nodes[i+2])]
                 else:
                     adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2)] # avoid checking a node out of range 
@@ -113,4 +115,3 @@ class CXCancellation(TransformationPass):
                     if is_inverse:
                         self._remove_cancelling_nodes(new_dag, n1, n2, phase_update)
         return dag
-
