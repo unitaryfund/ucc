@@ -73,10 +73,10 @@ class SpectralMapping(AnalysisPass):
 def spectral_graph_matching(A, B):
 
     """
-    Perform spectral graph matching between two graphs of unequal sizes.
+    Perform spectral graph matching between two graphs of equal sizes.
     Parameters:
-    adj1 (np.array): Adjacency matrix or Laplacian of graph 1
-    adj2 (np.array): Adjacency matrix or Laplacian of graph 2
+    A (np.array): Adjacency matrix or Laplacian of graph 1
+    B (np.array): Adjacency matrix or Laplacian of graph 2
     Returns:
     np.array: Index mapping from graph 1 to graph 2
     """
