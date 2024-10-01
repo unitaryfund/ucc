@@ -10,7 +10,8 @@ from qiskit.transpiler import Layout
 
 
 class SpectralMapping(AnalysisPass):
-    """Map the circuit to the coupling map using spectral techniques."""
+    """Map the circuit to the coupling map using spectral techniques.
+    Implementation is based on https://par.nsf.gov/servlets/purl/10181414."""
 
     def __init__(self, coupling_list):
         """
