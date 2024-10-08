@@ -18,7 +18,6 @@ from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.quantum_info import Operator
 from qiskit.circuit.operation import Operation
 from qiskit.circuit import Qubit
-from qiskit.quantum_info import Operator
 from qiskit.quantum_info.operators.predicates import matrix_equal
  
 from typing import List
@@ -34,29 +33,28 @@ class CXCancellation(TransformationPass):
     def __init__(self):
         super().__init__()
 
-
     def commute(
         self,
-        op1: Operation,
-        qargs1: List[Qubit],
-        op2: Operation,
-        qargs2: List[Qubit],
+        op1,
+        qargs1,
+        op2,
+        qargs2,
         ) -> bool:
         """Checks whether two operators ``op1`` and ``op2`` commute with one another."""
         commuting = False 
         if op1.name == "cx": 
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[0] or qargs1[1] == qargs2[1]) or (qargs1[0] != qargs2[0] and qargs1[1] != qargs2[1])
+                commuting = (qargs1[0] == qargs2[0] or qargs1[1] == qargs2[1])
             elif op2.name == "rx":
-                commuting = (qargs1[1] == qargs2[0]) or (qargs2[0] not in (qargs1[0], qargs1[1]))
+                commuting = (qargs1[1] == qargs2[0])
             elif op2.name == "rz":
-                commuting = (qargs1[0] == qargs2[0]) or (qargs2[0] not in (qargs1[0], qargs1[1]))
+                commuting = (qargs1[0] == qargs2[0])
         elif op1.name == "rx":
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[1]) or (qargs1[0] not in (qargs2[0], qargs2[1]))
+                commuting = (qargs1[0] == qargs2[1])
         elif op1.name == "rz":
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[0]) or (qargs1[0] not in (qargs2[0], qargs2[1]))
+                commuting = (qargs1[0] == qargs2[0])
         return commuting
 
 
@@ -85,11 +83,13 @@ class CXCancellation(TransformationPass):
 
     def _remove_cancelling_nodes(self, dag, node1, node2, phase_update):
         dag._multi_graph.remove_node_retain_edges_by_id(node1._node_id)
+        # dag._multi_graph.remove_node(node1._node_id)
         self._decrement_cx_op(dag, node1.name)
         dag._multi_graph.remove_node_retain_edges_by_id(node2._node_id)
+        # dag._multi_graph.remove_node(node2._node_id)
         self._decrement_cx_op(dag, node2.name)
         dag.global_phase += phase_update
-
+        return dag
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """
@@ -103,16 +103,21 @@ class CXCancellation(TransformationPass):
             is_inverse, phase_update = self._check_inverse(node1, node2)
             if is_inverse:
                 self._remove_cancelling_nodes(new_dag, node1, node2, phase_update)
-            elif self.commute(node1.op, node1.qargs, node2.op, node2.qargs) and len(list(new_dag.topological_op_nodes()))>1:
+            elif self.commute(node1.op, node1.qargs, node2.op, node2.qargs):
+                print(f"attempt {i}")
                 new_dag.swap_nodes(node1, node2)
+                topo_sorted_nodes[i] = node2
+                topo_sorted_nodes[i+1] = node1
                 if i == 0:
-                    adjacent_node_pairs = [(topo_sorted_nodes[i+1], topo_sorted_nodes[i+2])]
+                    adjacent_node_pairs = [(node1, topo_sorted_nodes[i+2])]
                 elif 0 < i < len(topo_sorted_nodes) - 3:
-                    adjacent_node_pairs = [(topo_sorted_nodes[i-1], topo_sorted_nodes[i]), (topo_sorted_nodes[i+1], topo_sorted_nodes[i+2])]
+                    adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2), (node1, topo_sorted_nodes[i+2])]
                 else:
-                    adjacent_node_pairs = [(topo_sorted_nodes[i-1], topo_sorted_nodes[i])] # avoid checking a node out of range 
+                    adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2)] # avoid checking a node out of range 
                 for n1, n2 in adjacent_node_pairs:
                     is_inverse, phase_update = self._check_inverse(n1, n2)
                     if is_inverse:
                         self._remove_cancelling_nodes(new_dag, n1, n2, phase_update)
+            if len(list(new_dag.topological_op_nodes())) < 2:
+                    break
         return new_dag

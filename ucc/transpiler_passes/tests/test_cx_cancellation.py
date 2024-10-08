@@ -17,6 +17,7 @@ for i_layer in range(3):
         cx_only.cx(j, k)
         cx_only.cx(i, k)
 cx_only_compiled = QuantumCircuit(num_qubits)
+cx_only_compiled.cx(2, 4)
 
 
 def test_cx_cancellation():
