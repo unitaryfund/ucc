@@ -1,8 +1,9 @@
-from ucc.quantum_translator import QuantumTranslator
 from ucc.transpilers import UCCTranspiler
 from qbraid.transpiler import transpile
 from qbraid.programs.alias_manager import get_program_type_alias
+from qbraid.transpiler import ConversionGraph
 
+supported_circuit_formats = ConversionGraph().nodes()
 
 def compile(circuit, return_format='original', mode='ucc', target_device=None, get_gate_counts=False):
     """
@@ -12,7 +13,7 @@ def compile(circuit, return_format='original', mode='ucc', target_device=None, g
         circuit (object): The quantum circuit to be compiled.
         return_format (str): The format in which your circuit will be 
             returned. e.g. "TKET", "OpenQASM2" 
-            Check `ucc.QuantumTranslator.supported_circuit_formats()`
+            Check `ucc.supported_circuit_formats()`
             Defaults to format of input circuit. 
             mode (str): 'ucc' or 'qiskit, specifies transpiler mode to use
     
@@ -22,6 +23,7 @@ def compile(circuit, return_format='original', mode='ucc', target_device=None, g
     if return_format == "original":
         return_format = get_program_type_alias(circuit)
     
+    # Currently all circuits are translated to Qiskit Circuit objects before DAG optimization
     qiskit_circuit = transpile(circuit, "qiskit") 
     compiled_circuit, gate_counts = UCCTranspiler.transpile(qiskit_circuit, mode=mode,  get_gate_counts=get_gate_counts, target_device=target_device)
 

@@ -11,14 +11,14 @@ The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnos
 ### Installation
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/unitaryfund/ucc.git
 cd ucc
 pip install -e . # Editable mode
 ```
 
 ### Example with Qiskit, Cirq, and PyTKET
 
-Define a circuit in Qiskit and compile it!
+Define a circuit with your preferred quantum SDK and compile it!
 
 ```python
 from ucc import compile
@@ -45,3 +45,7 @@ def test_cirq_compile():
     circuit = CirqCircuit(H(qubits[0]), CNOT(qubits[0], qubits[1]))
     compile(circuit, qasm_version='2', return_format='original')
 ```
+
+## License
+ucc is distributed under [GNU GPL 3.0](https://github.com/unitaryfund/ucc?tab=GPL-3.0-1-ov-file#readme) license. 
+Parts of ucc contain code or modified code that is part of Qiskit, which is distributed under Apache 2.0 license.
