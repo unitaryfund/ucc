@@ -7,6 +7,8 @@ from qiskit.transpiler import CouplingMap
 from ..transpiler_passes import BasisTranslator, CommutativeCancellation, Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis, Optimize1qGatesDecomposition
 from ..transpiler_passes import SpectralMapping, SabreLayout
 
+from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation
+
 
 
 
@@ -39,7 +41,12 @@ class UCCDefault1:
             self.pass_manager.append(Collect2qBlocks())
             self.pass_manager.append(ConsolidateBlocks())
             self.pass_manager.append(UnitarySynthesis(basis_gates=self.target_basis))
-            self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))            
+            self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
+
+            #Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
+            # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
+            # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
+            
     
     def add_map_passes(self, coupling_list = None):
         if coupling_list is not None:              
