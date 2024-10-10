@@ -24,7 +24,7 @@ setup(
         "qiskit>=0.41.0",  
         "cirq>=0.13.0",  
         "pytket>=1.3.0",  
-        "qbraid">=0.7.3",
+        "qbraid>=0.7.3",
         "ply"
     ],
     extras_require={
