@@ -17,6 +17,9 @@ for i_layer in range(3):
         cx_only.cx(j, k)
         cx_only.cx(i, k)
 cx_only_compiled = QuantumCircuit(num_qubits)
+qubits = [(0, 2), (0, 1), (2, 4), (1, 3), (0, 1), (3, 4), (0, 2), (1, 3), (0, 1), (2, 4), (0, 2), (3, 4), (1, 3), (3, 4), (2, 4)]
+for q in qubits:
+    cx_only_compiled.cx(q[0], q[1])
 
 
 def test_cx_cancellation():
@@ -36,9 +39,29 @@ for i in range(num_qubits):
 
 def test_cx_cancellation_qft():
     pass_manager = PassManager()
-    target_basis = ['rz', 'rx', 'ry', 'h'] +  ['cx']
+    target_basis = ['rz', 'rx', 'ry', 'h', 'cx']
     pass_manager.append(BasisTranslator(sel, target_basis))
     pass_manager.append(CXCancellation())
     result_circuit = pass_manager.run(qft)
     # check against result from default Qiskit transpiler
     assert 0 < result_circuit.count_ops().get("cx", 0) < 78
+
+
+num_qubits = 2
+rz_angle = 0.9823754  # random angle
+CX_RZ_CX_circuit = QuantumCircuit(num_qubits)
+CX_RZ_CX_circuit.cx(0, 1)
+CX_RZ_CX_circuit.rz(rz_angle, 0)
+CX_RZ_CX_circuit.cx(0, 1)
+
+CX_RZ_CX_circuit_ideal_compiled = QuantumCircuit(num_qubits)
+CX_RZ_CX_circuit_ideal_compiled.rz(rz_angle, 0)
+
+
+def test_commutation_rule_used():
+    pass_manager = PassManager()
+    target_basis = ['rz', 'rx', 'ry', 'h', 'cx']
+    pass_manager.append(BasisTranslator(sel, target_basis))
+    pass_manager.append(CXCancellation())
+    compiled_circuit = pass_manager.run(CX_RZ_CX_circuit)
+    assert compiled_circuit == CX_RZ_CX_circuit_ideal_compiled

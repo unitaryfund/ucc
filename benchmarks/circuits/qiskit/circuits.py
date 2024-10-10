@@ -16,8 +16,8 @@
 
 import numpy as np
 from qiskit import QuantumCircuit
+from qiskit.circuit import Parameter, ParameterVector
 from qiskit.circuit.library.standard_gates import XGate
-
 
 def dtc_unitary(num_qubits, g=0.95, seed=12345):
     """Generate a Floquet unitary for DTC evolution
@@ -167,5 +167,60 @@ def random_clifford_optimized(num_qubits, seed=12345):
 
     cliff = random_clifford(num_qubits, seed=seed)
     qc = cliff.to_circuit()
+
+    return qc
+
+
+# Step 1: Create a Parameterized Quantum Circuit (Ansatz)
+def VQE_ansatz(num_qubits, num_layers):
+    params = ParameterVector('θ', length=num_qubits * num_layers)
+    qc = QuantumCircuit(num_qubits)
+
+    param_index = 0
+    for layer in range(num_layers):
+        # Add RX rotation for each qubit
+        for qubit in range(num_qubits):
+            qc.rx(params[param_index], qubit)
+            param_index += 1
+        # Add entangling gates (CX) in a linear chain
+        for qubit in range(num_qubits - 1):
+            qc.cx(qubit, qubit + 1)
+    return qc
+
+
+def qaoa_ising_ansatz(num_qubits, num_layers):
+    """
+    Generates a custom QAOA ansatz for a nearest-neighbor Ising Hamiltonian.
+
+    Args:
+        num_qubits (int): Number of qubits for the Ising Hamiltonian.
+        num_layers (int): Number of QAOA layers.
+
+    Returns:
+        QuantumCircuit: Custom QAOA ansatz circuit.
+    """
+    # Initialize a quantum circuit with the required number of qubits
+    qc = QuantumCircuit(num_qubits)
+
+    # Define the parameters for each layer (gamma for cost and beta for mixer)
+    gamma = [Parameter(f"γ_{i}") for i in range(num_layers)]
+    beta = [Parameter(f"β_{i}") for i in range(num_layers)]
+
+    # Create the QAOA circuit layer by layer
+    for layer in range(num_layers):
+        # Cost Hamiltonian Evolution: Apply ZZ interactions and single-qubit Z rotations
+        for i in range(num_qubits):
+            # Apply nearest-neighbor ZZ interaction if not at the last qubit
+            if i < num_qubits - 1:
+                qc.cx(i, i + 1)
+                qc.rz(2 * gamma[layer], i + 1)
+                qc.cx(i, i + 1)
+
+            # Apply local Z rotation (Z_i) for each qubit
+            qc.rz(2 * gamma[layer], i)
+
+        # Mixer Hamiltonian Evolution: Apply RX rotations
+        for i in range(num_qubits):
+            qc.rx(2 * beta[layer], i)
 
     return qc
