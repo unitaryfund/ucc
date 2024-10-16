@@ -31,7 +31,7 @@ class CXCancellation(TransformationPass):
     def __init__(self):
         super().__init__()
 
-    def commute(
+    def _is_commuting(
         self,
         op1,
         qargs1,
@@ -56,16 +56,37 @@ class CXCancellation(TransformationPass):
         return commuting
 
 
-    def _check_inverse(self, node1, node2):
-        """Checks whether two nodes ``node1`` and ``node2`` are inverses of one another."""
+    def _connected_gates(self, dag, node1, node2):
+        try:
+            dag._multi_graph.get_all_edge_data(node1._node_id, node2._node_id)
+            connected = True
+        except:
+            connected = False
+        return connected
+
+
+    def _inverse_gates(self, node1, node2):
+        """Checks whether two nodes ``node1`` and ``node2`` are inverses of one
+        another and whether they are connected."""
         phase_difference = 0
         mat1 = Operator(node1.op.inverse()).data
         mat2 = Operator(node2.op).data
         props = {}
+
         is_inverse = matrix_equal(mat1, mat2, ignore_phase=True, props=props) and node1.qargs == node2.qargs
         if is_inverse:
             phase_difference = props["phase_difference"]
         return is_inverse, phase_difference
+
+    
+    def _check_and_remove_inverse_gates(self, dag, node1, node2):
+        removed = False
+        if self._connected_gates(dag, node1, node2): #only check inverses of connected gates
+            is_inverse, phase_update = self._inverse_gates(node1, node2) 
+            if is_inverse:
+                self._remove_cancelling_nodes(dag, node1, node2, phase_update)
+                removed = True
+        return removed
 
 
     def _decrement_cx_op(self, dag, op_name):
@@ -93,33 +114,34 @@ class CXCancellation(TransformationPass):
         Remove pairs of nodes which cancel one another.
         """
         new_dag = copy(dag)
-        for _ in range(2): # run through twice to cancel newly adjacent gates after first run
-            topo_sorted_nodes = list(new_dag.topological_op_nodes()) # convert DAG object to list of nodes
-            # Check pairs of adjacent nodes for inverses and commutation
-            for i, node1 in enumerate(topo_sorted_nodes[:-1]): 
-                node2 = topo_sorted_nodes[i+1]
-                is_inverse, phase_update = self._check_inverse(node1, node2) 
-                if is_inverse:
-                    self._remove_cancelling_nodes(new_dag, node1, node2, phase_update)
-                elif self.commute(node1.op, node1.qargs, node2.op, node2.qargs):
-                    # Swap commuting and connected nodes 
-                    try:
-                        new_dag.swap_nodes(node1, node2)
-                        topo_sorted_nodes[i] = node2
-                        topo_sorted_nodes[i+1] = node1 
-                        # collect pair(s) of nodes for checking inverses after swap          
-                        if i == 0: # avoid checking nodes out of range
-                            adjacent_node_pairs = [(node1, topo_sorted_nodes[i+2])]
-                        elif 0 < i < len(topo_sorted_nodes) - 3:
-                            # check for inverses to the right of the first node and to the left of the second
-                            adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2), (node1, topo_sorted_nodes[i+2])]
-                        else:
-                            adjacent_node_pairs = [(topo_sorted_nodes[i-1], node2)] # avoid checking a node out of range
-                        # check if each node pair is inverse
-                        for n1, n2 in adjacent_node_pairs:
-                            is_inverse, phase_update = self._check_inverse(n1, n2)
-                            if is_inverse:
-                                self._remove_cancelling_nodes(new_dag, n1, n2, phase_update)
-                    except DAGCircuitError: # skip nodes that are not connected
-                        continue
+        topo_sorted_nodes = list(new_dag.topological_op_nodes())
+        for i in range(len(topo_sorted_nodes[:-1])):
+            node1 = topo_sorted_nodes[i]
+            node2 = topo_sorted_nodes[i+1]
+            removed = self._check_and_remove_inverse_gates(dag, node1, node2) 
+            if removed:
+                del topo_sorted_nodes[i: i + 2]
+            elif self._is_commuting(node1.op, node1.qargs, node2.op, node2.qargs):
+                # Swap commuting and connected pairs of nodes 
+                try:
+                    new_dag.swap_nodes(node1, node2)
+                    topo_sorted_nodes[i] = node2
+                    topo_sorted_nodes[i+1] = node1 
+                    # collect pair(s) of nodes for checking inverses after swap          
+                    if i == 0: # avoid checking nodes out of range
+                        idxs = [(i + 1, i + 2)]
+                    elif 0 < i < len(topo_sorted_nodes) - 3:
+                        # check for inverses to the left of the first node and to the right of the second
+                        idxs = [(i - 1, i), (i + 1, i + 2)]
+                    else:
+                        idxs = [(i - 1, i)] # avoid checking a node out of range
+                    # check if each node pair is inverse
+                    for idx1, idx2 in idxs:
+                        removed = self._check_and_remove_inverse_gates(dag, topo_sorted_nodes[idx1], topo_sorted_nodes[idx2]) 
+                        if removed:
+                           del topo_sorted_nodes[idx1: idx2 + 1]
+                except: # skip nodes that are not connected
+                    pass
+            if i > len(topo_sorted_nodes) - 3:
+                break
         return new_dag
