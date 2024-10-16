@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="ucc",  # Package name
-    version="0.1.0",  # Initial release version
+    version="0.1.1",  
     author="Jordan Sullivan",
     author_email="jordan@unitary.fund",
     description="Unitary Compiler Collection: A quantum circuit interface and compiler for multiple quantum frameworks",
@@ -24,7 +24,7 @@ setup(
         "qiskit>=0.41.0",  
         "cirq>=0.13.0",  
         "pytket>=1.3.0",  
-        "qbraid">=0.7.3",
+        "qbraid>=0.7.3",
         "ply"
     ],
     extras_require={
