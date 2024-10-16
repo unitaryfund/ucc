@@ -8,3 +8,5 @@ from .collect_2q_blocks import Collect2qBlocks
 from .collect_1q_runs import Collect1qRuns
 from .optimize_1q_decomposition import Optimize1qGatesDecomposition
 from .custom_cx import CXCancellation
+from .spectral_mapping import SpectralMapping
+from .sabre_layout import SabreLayout
