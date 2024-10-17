@@ -23,7 +23,7 @@ setup(
     install_requires=[
         "qiskit>=0.41.0",  
         "cirq>=0.13.0",  
-        "pytket>=1.3.0",  
+        "pytket>=1.30.0",  
         "qbraid>=0.7.3",
         "ply"
     ],
