@@ -1,13 +1,15 @@
+from copy import copy
 import pytest
 
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
-from qiskit.quantum_info import Statevector 
+from qiskit.quantum_info import Statevector
 from qiskit.dagcircuit import DAGOpNode
 from qiskit.circuit.quantumregister import QuantumRegister, Qubit
 from qiskit.circuit.instruction import Instruction
+from qiskit.converters import circuit_to_dag
 
 
 from ..basis_translator import BasisTranslator
@@ -17,19 +19,33 @@ from ..custom_cx import CXCancellation
 num_qubits = 5
 cx_only = QuantumCircuit(num_qubits)
 for i_layer in range(3):
-    for i in range(num_qubits-2):    
-        j = (i + 1)
-        k = (i + 2)
+    for i in range(num_qubits - 2):
+        j = i + 1
+        k = i + 2
         cx_only.cx(i, j)
         cx_only.cx(j, k)
         cx_only.cx(i, k)
 cx_only_compiled = QuantumCircuit(num_qubits)
 # Construct the baseline compiled circuit
-cx_only_compiled.cx(0, 1)
-cx_only_compiled.cx(0, 2)
-cx_only_compiled.cx(1, 3)
-cx_only_compiled.cx(3, 4)
-cx_only_compiled.cx(2, 4)
+qubits = [
+    (0, 2),
+    (0, 1),
+    (2, 4),
+    (1, 3),
+    (0, 1),
+    (3, 4),
+    (0, 2),
+    (1, 3),
+    (0, 1),
+    (2, 4),
+    (0, 2),
+    (3, 4),
+    (1, 3),
+    (3, 4),
+    (2, 4),
+]
+for q in qubits:
+    cx_only_compiled.cx(q[0], q[1])
 
 sv1 = Statevector(cx_only)
 sv2 = Statevector(cx_only_compiled)
@@ -39,26 +55,27 @@ def test_cx_cancellation():
     pass_manager = PassManager()
     pass_manager.append(CXCancellation())
     result_circuit = pass_manager.run(cx_only)
-    sv3 =  Statevector(result_circuit)
+    sv3 = Statevector(result_circuit)
     # test that transpiler pass gives expected compiled
     assert result_circuit == cx_only_compiled
     # show that expected compiled is logically equivalent to original
-    assert sv1.equiv(sv2) 
+    assert sv1.equiv(sv2)
     # test that result circuit is logically equivalent to original
     assert sv1.equiv(sv3)
 
 
-#QFT circuit
+# QFT circuit
 num_qubits = 8
 qft = QuantumCircuit(num_qubits)
 for i in range(num_qubits):
     qft.h(i)
-    for j in range(i+1, num_qubits):
-        qft.cp(np.pi/(2**(j-i)), j, i)
+    for j in range(i + 1, num_qubits):
+        qft.cp(np.pi / (2 ** (j - i)), j, i)
+
 
 def test_cx_cancellation_qft():
     pass_manager = PassManager()
-    target_basis = ['rz', 'rx', 'ry', 'h', 'cx']
+    target_basis = ["rz", "rx", "ry", "h", "cx"]
     pass_manager.append(BasisTranslator(sel, target_basis))
     pass_manager.append(CXCancellation())
     result_circuit = pass_manager.run(qft)
@@ -79,38 +96,148 @@ CX_RZ_CX_circuit_ideal_compiled.rz(rz_angle, 0)
 
 def test_commutation_rule_used():
     pass_manager = PassManager()
-    target_basis = ['rz', 'rx', 'ry', 'h', 'cx']
+    target_basis = ["rz", "rx", "ry", "h", "cx"]
     pass_manager.append(BasisTranslator(sel, target_basis))
     pass_manager.append(CXCancellation())
     compiled_circuit = pass_manager.run(CX_RZ_CX_circuit)
     assert compiled_circuit == CX_RZ_CX_circuit_ideal_compiled
 
 
-node1_list = [DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 1))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1), Qubit(QuantumRegister(3, 'q'), 2))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 1))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1), Qubit(QuantumRegister(3, 'q'), 2))),
-              DAGOpNode(op=Instruction(name='rx', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1),)),
-              DAGOpNode(op=Instruction(name='rz', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1),)),
-              ] * 2
+node1_list = [
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 1)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1), Qubit(QuantumRegister(3, "q"), 2)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 1)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1), Qubit(QuantumRegister(3, "q"), 2)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rx", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1),),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rz", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1),),
+    ),
+] * 2
 
-node2_list = [DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 2))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 2))),
-              DAGOpNode(op=Instruction(name='rx', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1),)),
-              DAGOpNode(op=Instruction(name='rz', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1),)),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 1))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1), Qubit(QuantumRegister(3, 'q'), 2))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 1), Qubit(QuantumRegister(3, 'q'), 0))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 2), Qubit(QuantumRegister(3, 'q'), 1))),
-              DAGOpNode(op=Instruction(name='rx', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0),)),
-              DAGOpNode(op=Instruction(name='rz', num_qubits=1, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 2),)),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 2), Qubit(QuantumRegister(3, 'q'), 0))),
-              DAGOpNode(op=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qargs=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 1))),
-              ]
+node2_list = [
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 2)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 2)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rx", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1),),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rz", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1),),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 1)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1), Qubit(QuantumRegister(3, "q"), 2)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 1), Qubit(QuantumRegister(3, "q"), 0)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 2), Qubit(QuantumRegister(3, "q"), 1)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rx", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0),),
+    ),
+    DAGOpNode(
+        op=Instruction(name="rz", num_qubits=1, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 2),),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 2), Qubit(QuantumRegister(3, "q"), 0)),
+    ),
+    DAGOpNode(
+        op=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]),
+        qargs=(Qubit(QuantumRegister(3, "q"), 0), Qubit(QuantumRegister(3, "q"), 1)),
+    ),
+]
 expected_results = [True] * 6 + [False] * 6
 test_data = list(zip(node1_list, node2_list, expected_results))
+
 
 @pytest.mark.parametrize("node1, node2, expected_result", test_data)
 def test_is_commuting(node1, node2, expected_result):
     pm = CXCancellation()
-    assert pm._is_commuting(node1.op, node1.qargs, node2.op, node2.qargs) == expected_result
+    assert (
+        pm._is_commuting(node1.op, node1.qargs, node2.op, node2.qargs)
+        == expected_result
+    )
+
+
+CX_RZ_CX_dag = circuit_to_dag(CX_RZ_CX_circuit)
+node_list = list(CX_RZ_CX_dag.topological_op_nodes())
+nodes_to_check = [node_list[0:2], node_list[1:], [node_list[-1], node_list[0]]]
+connected = [True, True, False]
+
+
+@pytest.mark.parametrize("nodes, connected", list(zip(nodes_to_check, connected)))
+def test_is_connected(nodes, connected):
+    pm = CXCancellation()
+    assert pm._is_connected(CX_RZ_CX_dag, nodes[0], nodes[1]) == connected
+
+
+circuit = QuantumCircuit(3)
+circuit.cx(0, 1)
+circuit.rz(np.pi / 4, 1)
+circuit.cx(0, 1)
+circuit.cx(2, 0)
+nodes = list(circuit_to_dag(circuit).topological_op_nodes())
+gates = [(nodes[0], nodes[2]), (nodes[0], nodes[1]), (nodes[2], nodes[-1])]
+inverse = [True, False, False]
+
+
+@pytest.mark.parametrize("gates, inverse", list(zip(gates, inverse)))
+def test_inverse_gates(gates, inverse):
+    pm = CXCancellation()
+    is_inverse, _ = pm._is_inverse(gates[0], gates[1])
+    assert is_inverse == inverse
+
+
+num_nodes = 5
+index = [0, num_nodes - 4, num_nodes - 3]
+idxs = [[(1, 2)], [(0, 1), (2, 3)], [(1, 2)]]
+
+
+@pytest.mark.parametrize("index, idxs", list(zip(index, idxs)))
+def test_select_node_indices(index, idxs):
+    pm = CXCancellation()
+    assert pm._select_node_indices(index, num_nodes) == idxs
+
+
+def test_remove_cancelling_nodes():
+    CX_RZ_CX_dag_copy = copy(CX_RZ_CX_dag)
+    remove_nodes = [True, False, True]
+    nodes = list(CX_RZ_CX_dag_copy.topological_op_nodes())
+    pm = CXCancellation()
+    for idx in range(0, 3):
+        pm._remove_cancelling_nodes(idx, remove_nodes[idx], nodes, CX_RZ_CX_dag_copy)
+    assert CX_RZ_CX_dag_copy == circuit_to_dag(CX_RZ_CX_circuit_ideal_compiled)
