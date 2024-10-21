@@ -47,5 +47,5 @@ def test_cirq_compile():
 ```
 
 ## License
-ucc is distributed under [GNU GPL 3.0](https://github.com/unitaryfund/ucc?tab=GPL-3.0-1-ov-file#readme) license. 
+UCC is distributed under [GNU Affero General Public License version 3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)(AGPLv3). 
 Parts of ucc contain code or modified code that is part of Qiskit, which is distributed under Apache 2.0 license.
