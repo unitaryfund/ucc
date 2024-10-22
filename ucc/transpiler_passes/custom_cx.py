@@ -17,7 +17,6 @@ from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.quantum_info import Operator
 from qiskit.quantum_info.operators.predicates import matrix_equal
-from qiskit.dagcircuit.exceptions import DAGCircuitError
  
 from copy import copy
 
@@ -34,35 +33,32 @@ class CXCancellation(TransformationPass):
     def _is_commuting(
         self,
         op1,
-        qargs1,
         op2,
-        qargs2,
         ) -> bool:
         """Checks whether two operators ``op1`` and ``op2`` commute with one another."""
-        commuting = False 
-        if op1.name == "cx": 
+        is_commuting = False
+        qargs1 = op1.qargs
+        if not op1.is_standard_gate():
+                op1 = op1.op
+        qargs2 = op2.qargs
+        if not op2.is_standard_gate():
+                op2 = op2.op
+        if set(qargs1).isdisjoint(qargs2):
+            is_commuting = True
+        elif op1.name == "cx": 
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[0] or qargs1[1] == qargs2[1])
+                is_commuting = ((qargs1[0] == qargs2[0]) or (qargs1[1] == qargs2[1]))
             elif op2.name == "rx":
-                commuting = (qargs1[1] == qargs2[0])
+                is_commuting = (qargs1[1] == qargs2[0])
             elif op2.name == "rz":
-                commuting = (qargs1[0] == qargs2[0])
+                is_commuting = (qargs1[0] == qargs2[0])
         elif op1.name == "rx":
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[1])
+                is_commuting = (qargs1[0] == qargs2[1])
         elif op1.name == "rz":
             if op2.name == "cx":
-                commuting = (qargs1[0] == qargs2[0])
-        return commuting
-
-
-    def _is_connected(self, dag, node1, node2):
-        try:
-            dag._multi_graph.get_all_edge_data(node1._node_id, node2._node_id)
-            connected = True
-        except:
-            connected = False
-        return connected
+                is_commuting = (qargs1[0] == qargs2[0])
+        return is_commuting
 
 
     def _is_inverse(self, node1, node2):
@@ -72,7 +68,7 @@ class CXCancellation(TransformationPass):
         mat1 = Operator(node1.op.inverse()).data
         mat2 = Operator(node2.op).data
         props = {}
-        is_inverse = matrix_equal(mat1, mat2, ignore_phase=True, props=props) and node1.qargs == node2.qargs
+        is_inverse = matrix_equal(mat1, mat2, ignore_phase=True, props=props)
         if is_inverse:
             phase_difference = props["phase_difference"]
         return is_inverse, phase_difference
@@ -89,28 +85,11 @@ class CXCancellation(TransformationPass):
             dag._op_names[op_name] -= 1
 
 
-    def _remove_cancelling_nodes(self, idx, remove, node_list, dag):
-        if remove:
-                dag._multi_graph.remove_node_retain_edges_by_id(node_list[idx]._node_id)
-                self._decrement_cx_op(dag, node_list[idx].name) # update dictionary of node names
+    def _remove_cancelling_nodes(self, idx, node_list, dag):
+        dag._multi_graph.remove_node_retain_edges_by_id(node_list[idx]._node_id)
+        self._decrement_cx_op(dag, node_list[idx].name) # update dictionary of node names
         return dag
 
-
-    def _select_node_indices(self, index, num_nodes):
-        if index == 0: # avoid checking nodes out of range
-            idxs = [(index + 1, index + 2)]
-        elif 0 < index < num_nodes - 3:
-            # check for inverses to the left of the first node and to the right of the second
-            idxs = [(index - 1, index), (index + 1, index + 2)]
-        else:
-            idxs = [(index - 1, index)] # avoid checking a node out of range
-        return idxs
-
-    def update_removal_and_phase_lists(self, remove_nodes, phase_update_list, idx1, idx2):
-        remove, phase = self._is_inverse(topo_sorted_nodes[idx1], topo_sorted_nodes[idx2]) 
-        if remove:
-            remove_nodes[idx1 : idx2 + 1] = [remove] * 2                       
-            phase_update_list[idx1] = phase
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """
@@ -120,34 +99,29 @@ class CXCancellation(TransformationPass):
         new_dag = copy(dag)
         topo_sorted_nodes = list(new_dag.topological_op_nodes())
         remove_nodes = [False] * len(topo_sorted_nodes)
-        phase_update_list = [0] * len(topo_sorted_nodes)
-        for i in range(len(topo_sorted_nodes)- 1):
-            if remove_nodes[i] or remove_nodes[i + 1]:
-                continue
-            else:
-                node1 = topo_sorted_nodes[i]
-                node2 = topo_sorted_nodes[i+1]
-                remove, phase = self._is_inverse(node1, node2)
-                if remove:
-                    remove_nodes[i : i + 2] = [remove] * 2
-                    phase_update_list[i] = phase
-                elif self._is_commuting(node1.op, node1.qargs, node2.op, node2.qargs):
-                    # Swap commuting and connected pairs of nodes 
-                    try:
-                        new_dag.swap_nodes(node1, node2)
-                        topo_sorted_nodes[i: i + 2] = [node2, node1]
-                        idxs = self._select_node_indices(i, len(topo_sorted_nodes))
-                        # check if each node pair is inverse
-                        for idx1, idx2 in idxs:
-                            remove, phase = self._is_inverse(topo_sorted_nodes[idx1], topo_sorted_nodes[idx2]) 
-                            if remove:
-                                remove_nodes[idx1 : idx2 + 1] = [remove] * 2                       
-                                phase_update_list[idx1] = phase
-                    except: # skip nodes that are not connected
-                        pass
-        
-        for idx, remove in enumerate(remove_nodes):
-            self._remove_cancelling_nodes(idx, remove, topo_sorted_nodes, new_dag)
-        new_dag.global_phase += sum(phase_update_list)
+        phase_update = 0
+        for i in range(len(topo_sorted_nodes)):
+            matched_j = -1
+            for j in range(i - 1, -1, -1):
+                if remove_nodes[j]:
+                    continue
+                if (topo_sorted_nodes[j].qargs == topo_sorted_nodes[i].qargs
+                    and topo_sorted_nodes[j].cargs == topo_sorted_nodes[i].cargs
+                ):
+                    is_inverse, phase = self._is_inverse(topo_sorted_nodes[i], topo_sorted_nodes[j])
+                    if is_inverse:
+                        phase_update += phase
+                        matched_j = j
+                        break
+                if not (self._is_commuting(topo_sorted_nodes[i], topo_sorted_nodes[j])):
+                    break
+            if matched_j != -1:
+                remove_nodes[i] = True
+                remove_nodes[matched_j] = True
+        for idx in range(len(topo_sorted_nodes)):
+            if remove_nodes[idx]:
+                self._remove_cancelling_nodes(idx, topo_sorted_nodes, new_dag)
+        if phase_update != 0:
+            dag.global_phase += phase_update
 
         return new_dag
