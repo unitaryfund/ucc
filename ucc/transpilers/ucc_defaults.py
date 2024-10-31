@@ -2,6 +2,7 @@
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
 from qiskit.transpiler import CouplingMap
+from qiskit.transpiler.passes import CollectCliffords
 
 from ..transpiler_passes import BasisTranslator, CommutativeCancellation, Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, CXCancellation, SpectralMapping, SabreLayout
 
@@ -44,6 +45,7 @@ class UCCDefault1:
             self.pass_manager.append(ConsolidateBlocks())
             self.pass_manager.append(UnitarySynthesis(basis_gates=self.target_basis))
             self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
+            self.pass_manager.append(CollectCliffords())
 
             #Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
