@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="ucc",  # Package name
-    version="0.1.0",  # Initial release version
+    version="0.1.1",  
     author="Jordan Sullivan",
     author_email="jordan@unitary.fund",
     description="Unitary Compiler Collection: A quantum circuit interface and compiler for multiple quantum frameworks",
@@ -19,11 +19,13 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",  # Minimum Python version required
+    python_requires=">=3.12",  # Minimum Python version required
     install_requires=[
-        "qiskit>=0.41.0",  # Required version of Qiskit
-        "cirq>=0.13.0",  # Required version of Cirq
-        "pytket>=1.3.0",  # Required version of PyTKET
+        "qiskit>=0.41.0",  
+        "cirq>=0.13.0",  
+        "pytket>=1.30.0",  
+        "qbraid>=0.7.3",
+        "ply"
     ],
     extras_require={
         "dev": [

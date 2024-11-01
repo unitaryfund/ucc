@@ -45,3 +45,7 @@ def test_cirq_compile():
     circuit = CirqCircuit(H(qubits[0]), CNOT(qubits[0], qubits[1]))
     compile(circuit, qasm_version='2', return_format='original')
 ```
+
+## License
+UCC is distributed under [GNU Affero General Public License version 3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)(AGPLv3). 
+Parts of ucc contain code or modified code that is part of Qiskit, which is distributed under Apache 2.0 license.
