@@ -34,4 +34,4 @@ import pandas as pd
 from datetime import datetime
 df = pd.DataFrame(results_log)
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-df.to_csv(f"pytket_results_{timestamp}.csv", index=False)
+df.to_csv(f"pytket-results_{timestamp}.csv", index=False)

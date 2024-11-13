@@ -20,4 +20,4 @@ import pandas as pd
 from datetime import datetime
 df = pd.DataFrame(results_log)
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-df.to_csv(f"ucc_results_{timestamp}.csv", index=False)
+df.to_csv(f"../results/ucc-results_{timestamp}.csv", index=False)
