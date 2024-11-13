@@ -15,7 +15,6 @@ qasm_files = [folder + file for file in [
 
 def log_performance(compiler_function, raw_circuit, compiler_alias):
     log_entry = {"compiler": compiler_alias}
-    log_entry['raw_circuit'] = raw_circuit
     log_entry["raw_multiq_gates"] = count_multi_qubit_gates(
         raw_circuit, compiler_alias
     )
@@ -29,7 +28,6 @@ def log_performance(compiler_function, raw_circuit, compiler_alias):
     )
     [print(f"{key}: {value}") for key, value in log_entry.items() if key != 'raw_circuit']
     print('\n')
-    log_entry['compiled_circuit'] = compiled_circuit
     
     return log_entry
 
