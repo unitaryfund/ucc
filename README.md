@@ -10,6 +10,10 @@ The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnos
 
 ### Installation
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9d08e6b6097bbc6ae37e423b880becd56a428eb2
 ```bash
 git clone https://github.com/unitaryfund/ucc.git
 cd ucc
@@ -32,18 +36,30 @@ def test_tket_compile():
     circuit = TketCircuit(2)
     circuit.H(0)
     circuit.CX(0, 1)
+<<<<<<< HEAD
     compile(circuit, qasm_version='2', return_format='original')
+=======
+    compile(circuit, return_format='original')
+>>>>>>> 9d08e6b6097bbc6ae37e423b880becd56a428eb2
 
 def test_qiskit_compile():
     circuit = QiskitCircuit(2)
     circuit.h(0)
     circuit.cx(0, 1)
+<<<<<<< HEAD
     compile(circuit, qasm_version='2', return_format='original')
+=======
+    compile(circuit, return_format='original')
+>>>>>>> 9d08e6b6097bbc6ae37e423b880becd56a428eb2
 
 def test_cirq_compile():
     qubits = LineQubit.range(2)
     circuit = CirqCircuit(H(qubits[0]), CNOT(qubits[0], qubits[1]))
+<<<<<<< HEAD
     compile(circuit, qasm_version='2', return_format='original')
+=======
+    compile(circuit, return_format='original')
+>>>>>>> 9d08e6b6097bbc6ae37e423b880becd56a428eb2
 ```
 
 ## License
