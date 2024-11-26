@@ -1,0 +1,90 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up AWS CLI
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Deploy CloudFormation stack
+      - name: Deploy CloudFormation stack
+        run: |
+          aws cloudformation create-stack --stack-name ucc-deployment \
+            --template-body file://ecs-deployment.yaml \
+            --capabilities CAPABILITY_IAM
+          
+      # Push Docker image to ECR
+      - name: Build and push Docker image to ECR
+        run: |
+          REPO_NAME=ucc-benchmark-repo
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          REGION=us-east-1
+          ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${REPO_NAME}"
+
+          # Log in to ECR
+          $(aws ecr get-login --no-include-email --region ${REGION})
+
+          # Build the Docker image
+          docker build -t ${ECR_URI}:latest .
+
+          # Tag and push the Docker image
+          docker push ${ECR_URI}:latest
+
+      # Register ECS Task Definition and Run Task
+      - name: Register ECS Task Definition and Run Task
+        run: |
+          TASK_DEFINITION_ARN=$(aws ecs register-task-definition \
+            --family ucc-benchmark-task \
+            --execution-role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole \
+            --task-role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskRole \
+            --network-mode awsvpc \
+            --container-definitions '[
+                {
+                  "name": "ucc-benchmark-container",
+                  "image": "${ECR_URI}:latest",
+                  "memory": 1024,
+                  "cpu": 512,
+                  "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                      "awslogs-group": "/ecs/ucc-benchmark",
+                      "awslogs-region": "us-east-1",
+                      "awslogs-stream-prefix": "ecs"
+                    }
+                  }
+                }
+              ]' \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          # Run ECS task
+          SUBNET_ID=$(aws ec2 describe-subnets --query 'Subnets[0].SubnetId' --output text)
+          SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --query 'SecurityGroups[0].GroupId' --output text)
+
+          aws ecs run-task \
+            --cluster ucc-cluster \
+            --task-definition ${TASK_DEFINITION_ARN} \
+            --count 1 \
+            --launch-type FARGATE \
+            --network-configuration '{
+              "awsvpcConfiguration": {
+                "subnets": ["${SUBNET_ID}"],
+                "securityGroups": ["${SECURITY_GROUP_ID}"],
+                "assignPublicIp": "ENABLED"
+              }
+            }'
