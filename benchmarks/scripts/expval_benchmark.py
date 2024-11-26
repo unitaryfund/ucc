@@ -1,17 +1,6 @@
 import cirq
 import pytket
 from cirq.contrib.qasm_import import circuit_from_qasm
-from cirq.transformers import CZTargetGateset, optimize_for_target_gateset
-from pytket.circuit import OpType
-from pytket.passes import (
-    DecomposeBoxes,
-    RemoveRedundancies,
-    SequencePass,
-    SimplifyInitial,
-    auto_rebase_pass,
-)
-from pytket.predicates import CompilationUnit
-from qiskit import transpile as qiskit_transpile
 from qiskit.quantum_info import Operator, Statevector
 from qiskit import qasm2
 from qiskit_aer import AerSimulator
@@ -19,29 +8,7 @@ from qiskit_aer.noise import NoiseModel, depolarizing_error
 
 from ucc import compile as ucc_compile
 
-
-def qiskit_compile(qiskit_circuit):
-    return qiskit_transpile(
-        qiskit_circuit, optimization_level=3, basis_gates=["rz", "rx", "ry", "h", "cx"]
-    )
-
-
-def pytket_compile(pytket_circuit):
-    compilation_unit = CompilationUnit(pytket_circuit)
-    seqpass = SequencePass(
-        [
-            SimplifyInitial(),
-            DecomposeBoxes(),
-            RemoveRedundancies(),
-            auto_rebase_pass({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
-        ]
-    )
-    seqpass.apply(compilation_unit)
-    return compilation_unit.circuit
-
-
-def cirq_compile(cirq_circuit):
-    return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
+from common import cirq_compile, qiskit_compile, pytket_compile
 
 
 with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
