@@ -10,11 +10,15 @@ from qiskit import qasm2
 from qiskit.quantum_info import Operator, Statevector
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
+from pandas import DataFrame
 import numpy as np
 
-from common import cirq_compile, pytket_compile, qiskit_compile
+from common import cirq_compile, pytket_compile, qiskit_compile, save_results
 from ucc import compile as ucc_compile
 
+# Alternate files
+# "../circuits/qasm2/ucc/random_Clifford_N10_basis_rz_rx_ry_h_cx.qasm"
+# "../circuits/qasm2/ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
 with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
     qasm_string = f.read()
 
@@ -86,18 +90,14 @@ ideal_circuit = qasm2.loads(qasm_string)
 ideal_state = Statevector.from_instruction(ideal_circuit)
 ideal_expval = np.real(ideal_state.expectation_value(observable))
 
-results = {
-    compiler: {
-        "expval": expval,
-        "absoluate_error": abs(ideal_expval - expval),
-        "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
+results = [{
+    "compiler":compiler,
+    "expval": expval,
+    "absoluate_error": abs(ideal_expval - expval),
+    "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
+    "ideal": ideal_expval,
     }
     for compiler, expval in expectation_values.items()
-}
-results["ideal"] = ideal_expval
-print(results)
+]
 
-filename = f"expval-results_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json"
-
-with open(os.path.join("../results", filename), "w") as f:
-    json.dump(results, f)
+save_results(results, "expval")

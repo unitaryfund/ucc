@@ -1,4 +1,4 @@
-from common import qasm_files, log_performance, pytket_compile
+from common import qasm_files, log_performance, pytket_compile, save_results
 from qbraid.transpiler import transpile as translate
 
 
@@ -14,9 +14,4 @@ for filename in qasm_files:
         results_log.append(log_entry)
 
 # Save results
-import pandas as pd
-from datetime import datetime
-
-df = pd.DataFrame(results_log)
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-df.to_csv(f"../results/pytket-results_{timestamp}.csv", index=False)
+save_results(results_log, "gates")

@@ -1,6 +1,8 @@
 from time import time
+import pandas as pd
+from datetime import datetime
 
-from gate_counters import (
+from .gate_counters import (
     count_multi_qubit_gates_cirq,
     count_multi_qubit_gates_pytket,
     count_multi_qubit_gates_qiskit,
@@ -89,3 +91,15 @@ def qiskit_compile(qiskit_circuit):
 
 def cirq_compile(cirq_circuit):
     return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
+
+
+def save_results(results_log, benchmark_name = "gates", folder = "../results"):
+    """Save the results of the benchmarking to a CSV file.
+    Parameters:
+        results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
+        benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
+    """
+    df = pd.DataFrame(results_log)
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    df.to_csv(f"{folder}/{benchmark_name}_{timestamp}.csv", index=False)
