@@ -98,8 +98,9 @@ class BasisTranslator(TransformationPass):
     When this error occurs it typically means that either the target basis
     is not universal or there are additional equivalence rules needed in the
     :class:`~.EquivalenceLibrary` instance being used by the
-    :class:`~.BasisTranslator` pass. You can refer to
-    :ref:`custom_basis_gates` for details on adding custom equivalence rules.
+    :class:`~.BasisTranslator` pass. You can refer to the
+    `Custom Basis Gates <https://docs.quantum.ibm.com/api/qiskit/providers#custom-basis-gates>`_
+    section of the Qiskit docs for details on adding custom equivalence rules.
     """
 
     def __init__(self, equivalence_library, target_basis, target=None, min_qubits=0):
