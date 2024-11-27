@@ -1,0 +1,28 @@
+{
+  "uncompiled": {
+    "expval": 9.324138683375338e-18,
+    "absoluate_error": 3.453529368990418e-17,
+    "relative_error": 1.3698417895158195
+  },
+  "ucc": {
+    "expval": 8.673617379884035e-18,
+    "absoluate_error": 3.388477238641288e-17,
+    "relative_error": 1.344038873968204
+  },
+  "cirq": {
+    "expval": 1.148929042182889e-15,
+    "absoluate_error": 1.174140197189418e-15,
+    "relative_error": 46.57224934301324
+  },
+  "qiskit": {
+    "expval": 6.505213034913027e-19,
+    "absoluate_error": 2.5861676310020146e-17,
+    "relative_error": 1.0258029155476154
+  },
+  "pytket": {
+    "expval": 4.336808689942018e-18,
+    "absoluate_error": 2.954796369647086e-17,
+    "relative_error": 1.1720194369841022
+  },
+  "ideal": -2.5211155006528843e-17
+}
