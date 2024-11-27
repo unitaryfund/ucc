@@ -49,20 +49,6 @@ def log_performance(compiler_function, raw_circuit, compiler_alias):
     return log_entry
 
 
-def count_multi_qubit_gates(circuit, compiler_alias):
-    match compiler_alias:
-        case "ucc":
-            return count_multi_qubit_gates_qiskit(circuit)
-        case "qiskit":
-            return count_multi_qubit_gates_qiskit(circuit)
-        case "cirq":
-            return count_multi_qubit_gates_cirq(circuit)
-        case "pytket":
-            return count_multi_qubit_gates_pytket(circuit)
-        case _:
-            return "Unknown compiler alias."
-
-
 def pytket_compile(pytket_circuit):
     compilation_unit = CompilationUnit(pytket_circuit)
     seqpass = SequencePass(
@@ -138,6 +124,19 @@ def count_multi_qubit_gates_cirq(cirq_circuit):
     return multi_qubit_gate_count
 
 
+def count_multi_qubit_gates(circuit, compiler_alias):
+    match compiler_alias:
+        case "ucc":
+            return count_multi_qubit_gates_qiskit(circuit)
+        case "qiskit":
+            return count_multi_qubit_gates_qiskit(circuit)
+        case "cirq":
+            return count_multi_qubit_gates_cirq(circuit)
+        case "pytket":
+            return count_multi_qubit_gates_pytket(circuit)
+        case _:
+            return "Unknown compiler alias."
+
 def save_results(results_log, benchmark_name = "gates", folder = "../results"):
     """Save the results of the benchmarking to a CSV file.
     Parameters:
@@ -148,3 +147,27 @@ def save_results(results_log, benchmark_name = "gates", folder = "../results"):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     df.to_csv(f"{folder}/{benchmark_name}_{timestamp}.csv", index=False)
+
+
+def pytket_compile(pytket_circuit):
+    compilation_unit = CompilationUnit(pytket_circuit)
+    seqpass = SequencePass(
+        [
+            SimplifyInitial(),
+            DecomposeBoxes(),
+            RemoveRedundancies(),
+            auto_rebase_pass({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+        ]
+    )
+    seqpass.apply(compilation_unit)
+    return compilation_unit.circuit
+
+
+def qiskit_compile(qiskit_circuit):
+    return qiskit_transpile(
+        qiskit_circuit, optimization_level=3, basis_gates=["rz", "rx", "ry", "h", "cx"]
+    )
+
+
+def cirq_compile(cirq_circuit):
+    return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())

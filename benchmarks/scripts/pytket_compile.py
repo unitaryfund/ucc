@@ -9,7 +9,9 @@ for filename in qasm_files:
         print(f"Compiling {filename} with PyTKET")
         qasm_string = file.read()
         native_circuit = translate(qasm_string, "pytket")
+        native_circuit = translate(qasm_string, "pytket")
         log_entry = log_performance(pytket_compile, native_circuit, "pytket")
+        log_entry["circuit_name"] = filename.split("/")[-1].split("_N")[0]
         log_entry["circuit_name"] = filename.split("/")[-1].split("_N")[0]
         results_log.append(log_entry)
 
