@@ -77,14 +77,14 @@ density_matrices = {
 observable = Operator.from_label("ZZZZZZZZZZ")
 
 expectation_values = {
-    compiler: np.real_if_close(dm.expectation_value(observable)).item()
+    compiler: np.real(dm.expectation_value(observable))
     for compiler, dm in density_matrices.items()
 }
 
 
 ideal_circuit = qasm2.loads(qasm_string)
 ideal_state = Statevector.from_instruction(ideal_circuit)
-ideal_expval = np.real_if_close(ideal_state.expectation_value(observable)).item()
+ideal_expval = np.real(ideal_state.expectation_value(observable))
 
 results = {
     compiler: {
