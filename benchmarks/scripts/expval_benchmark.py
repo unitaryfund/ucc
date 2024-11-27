@@ -1,7 +1,3 @@
-import json
-import os.path
-from datetime import datetime
-
 import cirq
 import pytket
 import qiskit
@@ -10,18 +6,14 @@ from qiskit import qasm2
 from qiskit.quantum_info import Operator, Statevector
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
-from pandas import DataFrame
 import numpy as np
 
 from common import cirq_compile, pytket_compile, qiskit_compile, save_results
 from ucc import compile as ucc_compile
 
-# Alternate files
-# "../circuits/qasm2/ucc/random_Clifford_N10_basis_rz_rx_ry_h_cx.qasm"
-# "../circuits/qasm2/ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
+
 with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
     qasm_string = f.read()
-
 
 def generate_compiled_circuits(qasm: str) -> dict[str, qiskit.QuantumCircuit]:
     """Compiles the circuit represented in a QASM string using different
