@@ -148,26 +148,3 @@ def save_results(results_log, benchmark_name = "gates", folder = "../results"):
 
     df.to_csv(f"{folder}/{benchmark_name}_{timestamp}.csv", index=False)
 
-
-def pytket_compile(pytket_circuit):
-    compilation_unit = CompilationUnit(pytket_circuit)
-    seqpass = SequencePass(
-        [
-            SimplifyInitial(),
-            DecomposeBoxes(),
-            RemoveRedundancies(),
-            auto_rebase_pass({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
-        ]
-    )
-    seqpass.apply(compilation_unit)
-    return compilation_unit.circuit
-
-
-def qiskit_compile(qiskit_circuit):
-    return qiskit_transpile(
-        qiskit_circuit, optimization_level=3, basis_gates=["rz", "rx", "ry", "h", "cx"]
-    )
-
-
-def cirq_compile(cirq_circuit):
-    return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
