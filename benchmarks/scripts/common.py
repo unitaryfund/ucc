@@ -14,6 +14,7 @@ from pytket.predicates import CompilationUnit
 from qiskit import transpile as qiskit_transpile
 from qbraid.transpiler import transpile as translate
 import sys  # Add sys to accept command line arguments
+import os
 from ucc import compile as ucc_compile
 
 def log_performance(compiler_function, raw_circuit, compiler_alias):
@@ -122,18 +123,34 @@ def count_multi_qubit_gates_cirq(cirq_circuit):
     return sum(1 for operation in cirq_circuit.all_operations() if len(operation.qubits) > 1)
 
 
-# Save results to CSV
-def save_results(results_log, benchmark_name="gates", folder="../results"):
+def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
     """Save the results of the benchmarking to a CSV file.
     Parameters:
         results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
         benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
         folder: Folder where the results will be stored. Default is "../results".
+        append: Whether to append to an existing file created on the same date (if True) or overwrite (if False). Default is False.
     """
     df = pd.DataFrame(results_log)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    # Create the filename based on the current date
+    file_name = f"{benchmark_name}_{current_date}.csv"
+    file_path = os.path.join(folder, file_name)
+    
+    # Check if the file exists and append if needed
+    if append:
+        # If the file exists and the date matches, append data
+        if os.path.exists(file_path):
+            df.to_csv(file_path, mode='a', header=False, index=False)
+        else:
+            # If the file doesn't exist, create a new one with headers
+            df.to_csv(file_path, mode='w', header=True, index=False)
+    else:
+        # If append is False, overwrite the file (or create a new one if it doesn't exist)
+        df.to_csv(file_path, mode='w', header=True, index=False)
 
-    df.to_csv(f"{folder}/{benchmark_name}_{timestamp}.csv", index=False)
+    print(f"Results saved to {file_path}")
 
 
 # Read the QASM files passed as command-line arguments

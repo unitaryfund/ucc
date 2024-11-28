@@ -23,4 +23,5 @@ with open(qasm_file, "r") as file:
     results_log = [log_entry]
 
 # Save the results to a CSV file
-save_results(results_log)
+save_results(results_log, benchmark_name="gates", folder="../results", append=True)
+
