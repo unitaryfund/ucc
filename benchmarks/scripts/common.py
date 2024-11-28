@@ -141,7 +141,8 @@ def save_results(results_log, benchmark_name = "gates", folder = "../results"):
     """Save the results of the benchmarking to a CSV file.
     Parameters:
         results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
-        benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
+        benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates", other option is currently "exp-val"
+        folder: Folder where the results will be stored. Default is "../results".
     """
     df = pd.DataFrame(results_log)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
