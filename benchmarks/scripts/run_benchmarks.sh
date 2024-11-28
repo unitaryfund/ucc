@@ -1,54 +1,41 @@
 #!/bin/bash
 
-# Limit parallelism via an optional command-line argument (default: 4)
-PARALLELISM=${1:-4}
+# Define the common folder path
+QASM_FOLDER="../circuits/qasm2/"
 
-# Trap to kill all background jobs on exit
-trap "kill 0" EXIT
-
-COMPILERS=("ucc_compile.py" "pytket_compile.py" "qiskit_compile.py" "cirq_compile.py")
+# Define your list of QASM file names (without the common path)
 QASM_FILES=(
-    "./circuits/qasm2/benchpress/qaoa_barabasi_albert_N100_3reps_basis_rz_rx_ry_cx.qasm"
-    "./circuits/qasm2/benchpress/qv_N100_12345_basis_rz_rx_ry_cx.qasm"
-    "./circuits/qasm2/benchpress/qft_N100_basis_rz_rx_ry_cx.qasm"
-    "./circuits/qasm2/benchpress/square_heisenberg_N100_basis_rz_rx_ry_cx.qasm"
-    "./circuits/qasm2/ucc/prep_select_N25_ghz_basis_rz_rx_ry_h_cx.qasm"
-    "./circuits/qasm2/ucc/qcnn_N100_7layers_basis_rz_rx_ry_h_cx.qasm"
+    "benchpress/qaoa_barabasi_albert_N100_3reps_basis_rz_rx_ry_cx.qasm"
+    "benchpress/qv_N100_12345_basis_rz_rx_ry_cx.qasm"
+    "benchpress/qft_N100_basis_rz_rx_ry_cx.qasm"
+    "benchpress/square_heisenberg_N100_basis_rz_rx_ry_cx.qasm"
+    "ucc/prep_select_N25_ghz_basis_rz_rx_ry_h_cx.qasm"
+    "ucc/qcnn_N100_7layers_basis_rz_rx_ry_h_cx.qasm"
 )
 
-# Function to run a single compiler on a QASM file
-run_job() {
-    qasm_file=$1
-    compiler=$2
-    echo "Processing $qasm_file with $compiler..."
-    python "$compiler" "$qasm_file"
-}
+# Define your list of compilers
+COMPILERS=("ucc" "qiskit" "pytket" "cirq")
 
-# Array to track background job PIDs
-job_pids=()
+# Default parallelism (can be overridden by a command line argument)
+PARALLELISM="${1:-4}"
 
-# Loop through QASM files and compilers
+# Function to handle the kill signal
+trap 'echo "All jobs killed"; exit' SIGINT SIGTERM
+
+# Run the jobs in parallel using GNU Parallel
+
+# Prepare the list of commands to run in parallel
+commands=()
 for qasm_file in "${QASM_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
-        # Run the job in the background
-        run_job "$qasm_file" "$compiler" &
-        job_pids+=($!)  # Store the PID of the background job
-
-        # If the number of running jobs reaches the parallelism limit, wait for one to finish
-        while (( ${#job_pids[@]} >= PARALLELISM )); do
-            for i in "${!job_pids[@]}"; do
-                if ! kill -0 "${job_pids[i]}" 2>/dev/null; then
-                    unset 'job_pids[i]'  # Remove finished job from the list
-                fi
-            done
-            sleep 0.1  # Avoid busy-waiting
-        done
+        # Combine the common folder path with the QASM file
+        full_qasm_file="${QASM_FOLDER}${qasm_file}"
+        
+        # Build the command
+        command="python3 benchmark_script.py \"$full_qasm_file\" \"$compiler\""
+        commands+=("$command")
     done
 done
 
-# Wait for any remaining jobs to finish
-for pid in "${job_pids[@]}"; do
-    wait "$pid"
-done
-
-echo "All benchmarks completed."
+# Execute all the commands in parallel up to the specified number of parallel jobs
+parallel -j "$PARALLELISM" ::: "${commands[@]}"
