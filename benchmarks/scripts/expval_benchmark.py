@@ -1,7 +1,3 @@
-import json
-import os.path
-from datetime import datetime
-
 import cirq
 import pytket
 import qiskit
@@ -12,12 +8,12 @@ from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 import numpy as np
 
-from common import cirq_compile, pytket_compile, qiskit_compile
+from common import cirq_compile, pytket_compile, qiskit_compile, save_results
 from ucc import compile as ucc_compile
+
 
 with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
     qasm_string = f.read()
-
 
 def generate_compiled_circuits(qasm: str) -> dict[str, qiskit.QuantumCircuit]:
     """Compiles the circuit represented in a QASM string using different
@@ -86,18 +82,14 @@ ideal_circuit = qasm2.loads(qasm_string)
 ideal_state = Statevector.from_instruction(ideal_circuit)
 ideal_expval = np.real(ideal_state.expectation_value(observable))
 
-results = {
-    compiler: {
-        "expval": expval,
-        "absoluate_error": abs(ideal_expval - expval),
-        "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
+results = [{
+    "compiler":compiler,
+    "expval": expval,
+    "absoluate_error": abs(ideal_expval - expval),
+    "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
+    "ideal": ideal_expval,
     }
     for compiler, expval in expectation_values.items()
-}
-results["ideal"] = ideal_expval
-print(results)
+]
 
-filename = f"expval-results_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json"
-
-with open(os.path.join("../results", filename), "w") as f:
-    json.dump(results, f)
+save_results(results, "expval")
