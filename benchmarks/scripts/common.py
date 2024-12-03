@@ -75,11 +75,9 @@ def cirq_compile(cirq_circuit):
 
 def count_multi_qubit_gates_pytket(pytket_circuit):
     """
-    Counts the number of multi-qubit operations in a given PyTkets circuit.
-
+    Counts the number of multi-qubit operations in a given PyTket circuit.
     Args:
         circuit (Circuit): The input PyTkets circuit.
-
     Returns:
         int: The number of multi-qubit gates in the circuit.
     """
