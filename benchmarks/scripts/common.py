@@ -9,7 +9,7 @@ from pytket.passes import (
     RemoveRedundancies,
     SequencePass,
     SimplifyInitial,
-    auto_rebase_pass,
+    RebaseTket,
 )
 from pytket.predicates import CompilationUnit
 from qiskit import transpile as qiskit_transpile
@@ -56,7 +56,7 @@ def pytket_compile(pytket_circuit):
             SimplifyInitial(),
             DecomposeBoxes(),
             RemoveRedundancies(),
-            auto_rebase_pass({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+            RebaseTket({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
         ]
     )
     seqpass.apply(compilation_unit)
