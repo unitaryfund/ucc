@@ -1,6 +1,4 @@
-# ucc_compile.py
-
-from common import qasm_files, log_performance
+from common import qasm_files, log_performance, save_results
 from ucc import compile as ucc_compile
 from qbraid.transpiler import transpile as translate
 
@@ -10,14 +8,10 @@ for filename in qasm_files:
     with open(filename, "r") as file:
         print(f"Compiling {filename} with UCC")
         qasm_string = file.read()
-        native_circuit = translate(qasm_string, 'qiskit')
+        native_circuit = translate(qasm_string, "qiskit")
         log_entry = log_performance(ucc_compile, native_circuit, "ucc")
-        log_entry['circuit_name'] = filename.split('/')[-1].split('_N')[0]
+        log_entry["circuit_name"] = filename.split("/")[-1].split("_N")[0]
         results_log.append(log_entry)
 
 # Save results
-import pandas as pd
-from datetime import datetime
-df = pd.DataFrame(results_log)
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-df.to_csv(f"../results/ucc-results_{timestamp}.csv", index=False)
+save_results(results_log, "gates")
