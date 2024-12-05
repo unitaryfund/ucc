@@ -72,7 +72,7 @@ class UCCDefault1:
         out_circuits = circuits
         if is_qrack:
             if isinstance(circuits, list):
-                _circuits = []
+                out_circuits = []
                 for c in circuits:
                     opt_circuit = QrackCircuit.in_from_qiskit_circuit(c)
                     opt_circuit = opt_circuit.to_qiskit_circuit()
