@@ -76,12 +76,12 @@ class UCCDefault1:
                 for c in circuits:
                     opt_circuit = QrackCircuit.in_from_qiskit_circuit(c)
                     opt_circuit = opt_circuit.to_qiskit_circuit()
-                    opt_circuit = transpile(opt_circuit, optimization_level=0, basis_gates=['rz', 'rx', 'ry', 'h', 'cx'])
+                    opt_circuit = transpile(opt_circuit, optimization_level=0, basis_gates=self.target_basis)
                     out_circuits.append(opt_circuit)
             else:
                 out_circuits = QrackCircuit.in_from_qiskit_circuit(circuits)
                 out_circuits = out_circuits.to_qiskit_circuit()
-                out_circuits = transpile(out_circuits, optimization_level=0, basis_gates=['rz', 'rx', 'ry', 'h', 'cx'])
+                out_circuits = transpile(out_circuits, optimization_level=0, basis_gates=self.target_basis)
 
         self.add_map_passes(coupling_list)
         out_circuits = self.pass_manager.run(out_circuits)
