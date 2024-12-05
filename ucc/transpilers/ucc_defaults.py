@@ -68,21 +68,24 @@ class UCCDefault1:
             self.pass_manager.append(SabreLayout(coupling_map=coupling_map))
             self.add_local_passes(1)
 
-    def run(self, circuits, coupling_list=None, is_qrack=False):
+    def run_qrack_prepass(self, circuits):
         out_circuits = circuits
-        if is_qrack:
-            if isinstance(circuits, list):
-                out_circuits = []
-                for c in circuits:
-                    opt_circuit = QrackCircuit.in_from_qiskit_circuit(c)
-                    opt_circuit = opt_circuit.to_qiskit_circuit()
-                    opt_circuit = transpile(opt_circuit, optimization_level=0, basis_gates=self.target_basis)
-                    out_circuits.append(opt_circuit)
-            else:
-                out_circuits = QrackCircuit.in_from_qiskit_circuit(circuits)
-                out_circuits = out_circuits.to_qiskit_circuit()
-                out_circuits = transpile(out_circuits, optimization_level=0, basis_gates=self.target_basis)
+        if isinstance(circuits, list):
+            out_circuits = []
+            for c in circuits:
+                opt_circuit = QrackCircuit.in_from_qiskit_circuit(c)
+                opt_circuit = opt_circuit.to_qiskit_circuit()
+                opt_circuit = transpile(opt_circuit, optimization_level=0, basis_gates=self.target_basis)
+                out_circuits.append(opt_circuit)
+        else:
+            out_circuits = QrackCircuit.in_from_qiskit_circuit(circuits)
+            out_circuits = out_circuits.to_qiskit_circuit()
+            out_circuits = transpile(out_circuits, optimization_level=0, basis_gates=self.target_basis)
 
+        return out_circuits
+
+    def run(self, circuits, coupling_list=None, is_qrack=False):
+        out_circuits = self.run_qrack_prepass(circuits) if is_qrack else circuits
         self.add_map_passes(coupling_list)
         out_circuits = self.pass_manager.run(out_circuits)
 
