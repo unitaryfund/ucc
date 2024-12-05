@@ -18,7 +18,7 @@ from pyqrack import QrackCircuit
 # from ucc_passes.entanglement_net_to_layout import Decompose2qNetworkWithMap
 
 class UCCDefault1:
-    def __init__(self, local_iterations=1, is_qrack=False):
+    def __init__(self, is_qrack=False, local_iterations=1):
         self.pass_manager = PassManager()
         self._1q_basis = ['rz', 'rx', 'ry', 'h']
         self._2q_basis = ['cx']
@@ -33,6 +33,7 @@ class UCCDefault1:
                 (1,): False,
             },
         }
+        self.is_qrack = is_qrack
         if not is_qrack:
             # Since we translate basis at the end of the pass set,
             # we only need one initial basis translation pass on the input,
@@ -81,8 +82,8 @@ class UCCDefault1:
 
         return out_circuits
 
-    def run(self, circuits, coupling_list=None, is_qrack=False):
-        out_circuits = self.run_qrack_prepass(circuits) if is_qrack else circuits
+    def run(self, circuits, coupling_list=None):
+        out_circuits = self.run_qrack_prepass(circuits) if self.is_qrack else circuits
         self.add_map_passes(coupling_list)
         out_circuits = self.pass_manager.run(out_circuits)
 
