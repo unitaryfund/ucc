@@ -69,17 +69,14 @@ class UCCDefault1:
             self.add_local_passes(1)
 
     def run_qrack_prepass(self, circuits):
-        out_circuits = circuits
+        out_circuits = []
         if isinstance(circuits, list):
-            out_circuits = []
             for c in circuits:
-                opt_circuit = QrackCircuit.in_from_qiskit_circuit(c)
-                opt_circuit = opt_circuit.to_qiskit_circuit()
+                opt_circuit = QrackCircuit.in_from_qiskit_circuit(c).to_qiskit_circuit()
                 opt_circuit = transpile(opt_circuit, optimization_level=0, basis_gates=self.target_basis)
                 out_circuits.append(opt_circuit)
         else:
-            out_circuits = QrackCircuit.in_from_qiskit_circuit(circuits)
-            out_circuits = out_circuits.to_qiskit_circuit()
+            out_circuits = QrackCircuit.in_from_qiskit_circuit(circuits).to_qiskit_circuit()
             out_circuits = transpile(out_circuits, optimization_level=0, basis_gates=self.target_basis)
 
         return out_circuits
