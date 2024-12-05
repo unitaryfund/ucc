@@ -21,7 +21,7 @@ class UCCTranspiler:
         Returns:
             QuantumCircuit: The transpiled quantum circuit.
         """
-        if mode == 'ucc':
+        if mode in ['ucc', 'ucc-qrack']:
             if target_device is None:
                 coupling_list = None
             elif isinstance(target_device, BackendV2):
@@ -36,9 +36,10 @@ class UCCTranspiler:
         # Transpile the circuit
         if mode == 'qiskit':
             transpiled_circuit = transpile(circuit, optimization_level=3, backend = target_device)
-        elif mode == 'ucc':
-            ucc_transpiler = UCCDefault1()
-            transpiled_circuit = ucc_transpiler.run(circuit, coupling_list=coupling_list)
+        elif mode in ['ucc', 'ucc-qrack']:
+            is_qrack = (mode=='ucc-qrack')
+            ucc_transpiler = UCCDefault1(1, is_qrack)
+            transpiled_circuit = ucc_transpiler.run(circuit, coupling_list=coupling_list, is_qrack=is_qrack)
 
         if get_gate_counts:
             gate_counts = transpiled_circuit.count_ops()

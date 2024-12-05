@@ -24,6 +24,7 @@ setup(
         "qiskit>=0.41.0",
         "cirq-core>=1.4.0",
         "pytket>=1.3.0",
+        "pyqrack",
         "qbraid>=0.7.3",
         "ply",
     ],
