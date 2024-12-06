@@ -98,7 +98,6 @@ def cirq_compile(cirq_circuit):
     return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
 
 
-
 # Multi-qubit gate count for PyTkets
 def count_multi_qubit_gates_pytket(pytket_circuit):
     return pytket_circuit.n_gates - pytket_circuit.n_1qb_gates()
@@ -112,6 +111,7 @@ def count_multi_qubit_gates_qiskit(qiskit_circuit):
 # Multi-qubit gate count for Cirq
 def count_multi_qubit_gates_cirq(cirq_circuit):
     return sum(1 for operation in cirq_circuit.all_operations() if len(operation.qubits) > 1)
+
 
 def count_multi_qubit_gates(circuit, compiler_alias):
     match compiler_alias:
