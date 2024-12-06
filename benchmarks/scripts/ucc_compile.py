@@ -7,9 +7,10 @@ results_log = []
 for filename in qasm_files:
     with open(filename, "r") as file:
         print(f"Compiling {filename} with UCC")
+        circuit_name = filename.split('/')[-1].split('_N')[0]
         qasm_string = file.read()
         native_circuit = translate(qasm_string, "qiskit")
-        log_entry = log_performance(ucc_compile, native_circuit, "ucc")
+        log_entry = log_performance(ucc_compile, native_circuit, "ucc", circuit_name)
         log_entry["circuit_name"] = filename.split("/")[-1].split("_N")[0]
         results_log.append(log_entry)
 

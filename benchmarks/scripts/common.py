@@ -8,7 +8,7 @@ from pytket.passes import (
     RemoveRedundancies,
     SequencePass,
     SimplifyInitial,
-    RebaseTket,
+    AutoRebase,
 )
 from pytket.predicates import CompilationUnit
 from qiskit import transpile as qiskit_transpile
@@ -17,8 +17,11 @@ import sys  # Add sys to accept command line arguments
 import os
 from ucc import compile as ucc_compile
 
-def log_performance(compiler_function, raw_circuit, compiler_alias):
+
+def log_performance(compiler_function, raw_circuit, compiler_alias, circuit_name):
     log_entry = {"compiler": compiler_alias}
+    log_entry["circuit_name"] = circuit_name
+    
     log_entry["raw_multiq_gates"] = count_multi_qubit_gates(raw_circuit, compiler_alias)
 
     t1 = time()
@@ -76,7 +79,7 @@ def pytket_compile(pytket_circuit):
             SimplifyInitial(),
             DecomposeBoxes(),
             RemoveRedundancies(),
-            RebaseTket({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+            AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
         ]
     )
     seqpass.apply(compilation_unit)
@@ -95,17 +98,6 @@ def cirq_compile(cirq_circuit):
     return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
 
 
-def count_multi_qubit_gates(circuit, compiler_alias):
-    match compiler_alias:
-        case "ucc" | "qiskit":
-            return count_multi_qubit_gates_qiskit(circuit)
-        case "cirq":
-            return count_multi_qubit_gates_cirq(circuit)
-        case "pytket":
-            return count_multi_qubit_gates_pytket(circuit)
-        case _:
-            return "Unknown compiler alias."
-
 
 # Multi-qubit gate count for PyTkets
 def count_multi_qubit_gates_pytket(pytket_circuit):
@@ -120,6 +112,18 @@ def count_multi_qubit_gates_qiskit(qiskit_circuit):
 # Multi-qubit gate count for Cirq
 def count_multi_qubit_gates_cirq(cirq_circuit):
     return sum(1 for operation in cirq_circuit.all_operations() if len(operation.qubits) > 1)
+
+def count_multi_qubit_gates(circuit, compiler_alias):
+    match compiler_alias:
+        case "ucc" | "qiskit":
+            return count_multi_qubit_gates_qiskit(circuit)
+        case "cirq":
+            return count_multi_qubit_gates_cirq(circuit)
+        case "pytket":
+            return count_multi_qubit_gates_pytket(circuit)
+        case _:
+            return "Unknown compiler alias."
+
 
 
 def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
