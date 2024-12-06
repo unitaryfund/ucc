@@ -9,7 +9,7 @@ from pytket.passes import (
     RemoveRedundancies,
     SequencePass,
     SimplifyInitial,
-    RebaseTket,
+    AutoRebase,
 )
 from pytket.predicates import CompilationUnit
 from qiskit import transpile as qiskit_transpile
@@ -56,7 +56,7 @@ def pytket_compile(pytket_circuit):
             SimplifyInitial(),
             DecomposeBoxes(),
             RemoveRedundancies(),
-            RebaseTket({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+            AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
         ]
     )
     seqpass.apply(compilation_unit)
@@ -75,9 +75,11 @@ def cirq_compile(cirq_circuit):
 
 def count_multi_qubit_gates_pytket(pytket_circuit):
     """
-    Counts the number of multi-qubit operations in a given PyTket circuit.
+    Counts the number of multi-qubit operations in a given PyTkets circuit.
+
     Args:
         circuit (Circuit): The input PyTkets circuit.
+
     Returns:
         int: The number of multi-qubit gates in the circuit.
     """
