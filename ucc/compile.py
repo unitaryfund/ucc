@@ -30,7 +30,7 @@ def compile(
     if return_format == "original":
         return_format = get_program_type_alias(circuit)
 
-    # Currently all circuits are translated to Qiskit Circuit objects before DAG optimization
+    # Translate to Qiskit Circuit object
     qiskit_circuit = transpile(circuit, "qiskit")
     compiled_circuit, gate_counts = UCCTranspiler.transpile(
         qiskit_circuit,
@@ -39,6 +39,7 @@ def compile(
         target_device=target_device,
     )
 
+    # Translate the compiled circuit to the desired format
     final_result = transpile(compiled_circuit, return_format)
     if get_gate_counts:
         return final_result, gate_counts
