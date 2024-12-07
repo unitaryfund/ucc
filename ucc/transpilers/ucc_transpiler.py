@@ -1,4 +1,4 @@
-from qiskit import transpile, QuantumCircuit
+from qiskit import transpile
 from qiskit.providers import BackendV2
 from qiskit.transpiler import CouplingMap
 
@@ -15,7 +15,7 @@ class UCCTranspiler:
         Parameters:
             circuit (qiskit.QuantumCircuit): The Qiskit circuit to transpile.
             mode (str): 'qiskit' or 'ucc', specifies which set of transpiler    passes to use.
-            target_device: Can be a Qiskit backend or coupling map, or a list of connections between qubits. If None, all-to-all connectivity is assumed.
+            target_device: Can be a Qiskit backend or Qiskit CouplingMap, or a list of connections between qubits. If None, all-to-all connectivity is assumed.
                         If Qiskit backend or coupling map, only the coupling list extracted from the backend is used.
 
         Returns:
@@ -27,20 +27,26 @@ class UCCTranspiler:
             elif isinstance(target_device, BackendV2):
                 coupling_list = list(target_device.coupling_map.get_edges())
             elif isinstance(target_device, CouplingMap):
+                # rustworkx.EdgeList object
                 coupling_list = target_device.get_edges()
             elif isinstance(target_device, list):
+                # What kind of list is this?
                 coupling_list = target_device
             else:
                 raise ValueError("Invalid backend type. Must be a Qiskit backend, coupling map, or a list of connections between qubits.")
         
         # Transpile the circuit
         if mode == 'qiskit':
-            transpiled_circuit = transpile(circuit, optimization_level=3, backend = target_device)
+            transpiled_circuit = transpile(circuit, optimization_level=3, backend=target_device)
         elif mode in ['ucc', 'ucc-qrack']:
             is_qrack = (mode=='ucc-qrack')
             ucc_transpiler = UCCDefault1(is_qrack)
             transpiled_circuit = ucc_transpiler.run(circuit, coupling_list=coupling_list)
-
+            if isinstance(target_device, BackendV2):
+                # Map the transpiled circuit to the target backend's basis gates
+                # TODO: Need to implement different final mapping passes for different backends
+                transpiled_circuit = transpile(circuit, optimization_level=0, backend=target_device)
+        
         if get_gate_counts:
             gate_counts = transpiled_circuit.count_ops()
         else:

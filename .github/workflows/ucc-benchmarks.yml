@@ -1,0 +1,40 @@
+name: Run Benchmarks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-benchmarks:
+    runs-on: ucc-benchmarks
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: docker build -t ucc-benchmark .
+
+      # Run the benchmarks in the Docker container
+      - name: Run benchmarks
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh"
+
+      # Push benchmark results to the repository
+      - name: Commit and push results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add benchmarks
+          git commit -m "Update benchmark results"
+          git push origin main

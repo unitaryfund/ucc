@@ -4,6 +4,10 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+# Read the requirements from the requirements.txt file
+with open("requirements.txt", "r") as req_file:
+    requirements = req_file.read().splitlines()
+
 setup(
     name="ucc",  # Package name
     version="0.1.1",  
@@ -20,14 +24,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.12",  # Python version required
-    install_requires=[
-        "qiskit>=0.41.0",
-        "cirq-core>=1.4.0",
-        "pytket>=1.3.0",
-        "pyqrack>=1.33.0",
-        "qbraid>=0.7.3",
-        "ply",
-    ],
+    install_requires=requirements,  # Read dependencies from requirements.txt
     extras_require={
         "dev": [
             "pytest>=6.0",  # Testing framework
