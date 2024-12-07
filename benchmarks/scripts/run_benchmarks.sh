@@ -18,23 +18,10 @@ COMPILERS=("ucc" "qiskit" "pytket" "cirq")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"
+echo "Running with parallelism: $PARALLELISM"
 
 # Function to handle the kill signal
 trap 'echo "All jobs killed"; exit' SIGINT SIGTERM
-
-# Run the jobs in parallel using GNU Parallel
-if command -v parallel &> /dev/null; then
-    echo "Running benchmarks with GNU Parallel."
-else
-    echo "Installing GNU Parallel..."
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sudo apt update && sudo apt install parallel -y
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install parallel
-    else
-        echo "Please install GNU Parallel manually."
-    fi
-fi
 
 # Prepare the list of commands to run in parallel
 commands=()
@@ -44,7 +31,8 @@ for qasm_file in "${QASM_FILES[@]}"; do
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
         
         # Build the command
-        command="python3 benchmark_script.py \"$full_qasm_file\" \"$compiler\""
+        command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\""
+
         commands+=("$command")
     done
 done
