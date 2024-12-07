@@ -1,0 +1,46 @@
+name: UCC Benchmark Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger only when changes are pushed to the main branch
+
+jobs:
+  run-benchmarks:
+    runs-on: ubuntu-latest # Use GitHub-hosted runner
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Python environment
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      # Run the benchmarks
+      - name: Run benchmarks
+        run: |
+          source .venv/bin/activate
+          bash ./benchmarks/scripts/run_benchmarks.sh
+
+      # Commit and push benchmark results
+      - name: Push results to GitHub
+        run: |
+          git checkout main
+          git add benchmarks/
+          git commit -m "Update benchmark results"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
