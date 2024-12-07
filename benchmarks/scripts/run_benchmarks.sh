@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the common folder path
-QASM_FOLDER="../circuits/qasm2/"
+QASM_FOLDER="../qasm_circuits/qasm2/"
 
 # Define your list of QASM file names (without the common path)
 QASM_FILES=(

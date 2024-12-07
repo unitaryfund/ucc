@@ -1,6 +1,5 @@
 
 from qbraid.transpiler import transpile as translate
-from qbraid.programs.alias_manager import get_program_type_alias
 from qiskit import transpile as qiskit_transpile
 
 def write_qasm(circuit, circuit_name, version='2', basis_gates=[]):
