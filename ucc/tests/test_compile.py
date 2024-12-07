@@ -36,12 +36,13 @@ def test_tket_compile():
     assert isinstance(result_circuit, TketCircuit)
 
 
+@pytest.mark.parametrize("is_qrack", [False, True])
 @pytest.mark.parametrize("circuit_function", [qcnn_circuit, random_clifford_circuit])
 @pytest.mark.parametrize("num_qubits", [6, 7, 8, 9, 10])
 @pytest.mark.parametrize("seed", [1, 326, 5678, 12345])
-def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
+def test_compilation_retains_gateset(is_qrack, circuit_function, num_qubits, seed):
     circuit = circuit_function(num_qubits, seed)
-    transpiler = UCCDefault1()
+    transpiler = UCCDefault1(is_qrack)
     target_basis = transpiler.target_basis
     transpiled_circuit = transpiler.run(circuit)
     dag = circuit_to_dag(transpiled_circuit)
@@ -50,12 +51,19 @@ def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     assert analysis_pass.property_set["all_gates_in_basis"] == True
 
 
+@pytest.mark.parametrize("is_qrack", [False, True])
 @pytest.mark.parametrize("circuit_function", [qcnn_circuit, random_clifford_circuit])
 @pytest.mark.parametrize("num_qubits", [6, 7, 8, 9, 10, 15])
 @pytest.mark.parametrize("seed", [1, 326, 5678, 12345])
-def test_compiled_circuits_equivalent(circuit_function, num_qubits, seed):
+def test_compiled_circuits_equivalent(is_qrack, circuit_function, num_qubits, seed):
     circuit = circuit_function(num_qubits, seed)
-    transpiled = compile(circuit, return_format="qiskit")
+    transpiled = compile(circuit, return_format="qiskit", mode='ucc-qrack' if is_qrack else 'ucc')
     sv1 = Statevector(circuit)
     sv2 = Statevector(transpiled)
-    assert sv1.equiv(sv2)
+    if is_qrack:
+        # Qrack builds for 32-bit floating-point precision by default.
+        # 32-bit floating-point tolerance is between 10^-6 and 10^-7.
+        # Note that Qrack can also build for 64-bit and 128-bit precision.
+        assert (1 - abs(sv2.inner(sv1)) ** 2) < 1e-6
+    else:
+        assert sv2.equiv(sv1)
