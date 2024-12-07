@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# Get the absolute path of the current script's directory
+# Get the absolute path of the current directory
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-# Define the common folder path with absolute path
-QASM_FOLDER="$SCRIPT_DIR/../circuits/qasm2/"
+# Define the results folder path
+RESULTS_FOLDER="$SCRIPT_DIR/../results"
+
+# Ensure the results folder exists
+mkdir -p "$RESULTS_FOLDER"
+
+# Define the common folder path
+QASM_FOLDER="../circuits/qasm2/"
 
 # Define your list of QASM file names (without the common path)
 QASM_FILES=(
@@ -32,12 +38,9 @@ for qasm_file in "${QASM_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-
-        # Ensure benchmark_script.py is referenced correctly
-        benchmark_script="$SCRIPT_DIR/benchmark_script.py"
         
-        # Build the command
-        command="python3 \"$benchmark_script\" \"$full_qasm_file\" \"$compiler\""
+        # Build the command, passing the results folder as an argument
+        command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\""
 
         commands+=("$command")
     done
