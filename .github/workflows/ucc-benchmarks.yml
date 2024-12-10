@@ -16,6 +16,8 @@ jobs:
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       # Build the Docker image
       - name: Build Docker image
@@ -35,6 +37,9 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add benchmarks
+          ls
+          cd ucc
+          git status
+          git add *
           git commit -m "Update benchmark results"
           git push origin main
