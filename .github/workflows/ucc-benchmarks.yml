@@ -16,8 +16,6 @@ jobs:
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       # Build the Docker image
       - name: Build Docker image
