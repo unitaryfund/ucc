@@ -1,7 +1,7 @@
 from time import time
 import pandas as pd
 from datetime import datetime
-from cirq.transformers import CZTargetGateset, optimize_for_target_gateset
+from cirq import CZTargetGateset, optimize_for_target_gateset
 from pytket.circuit import OpType
 from pytket.passes import (
     DecomposeBoxes,
