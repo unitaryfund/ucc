@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-benchmarks:
-    runs-on: ucc-benchmarks
+    runs-on: ucc-benchmarks-8-core
 
     steps:
       # Checkout the repository
@@ -35,7 +35,7 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
-            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh"
+            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh 8"
 
       
       # Commit and push benchmark results using a dedicated action
