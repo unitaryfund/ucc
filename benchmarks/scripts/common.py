@@ -1,7 +1,7 @@
 from time import time
 import pandas as pd
 from datetime import datetime
-from cirq.transformers import CZTargetGateset, optimize_for_target_gateset
+from cirq import CZTargetGateset, optimize_for_target_gateset
 from pytket.circuit import OpType
 from pytket.passes import (
     DecomposeBoxes,
@@ -137,10 +137,12 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
     df = pd.DataFrame(results_log)
     current_date = datetime.now().strftime("%Y-%m-%d")
     
+    # Ensure the folder exists
+    os.makedirs(folder, exist_ok=True)
+
     # Create the filename based on the current date
     file_name = f"{benchmark_name}_{current_date}.csv"
     file_path = os.path.join(folder, file_name)
-    
     # Check if the file exists and append if needed
     if append:
         # If the file exists and the date matches, append data

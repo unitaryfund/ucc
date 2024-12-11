@@ -2,7 +2,7 @@ from .basis_translator import BasisTranslator
 from .commutative_cancellation import CommutativeCancellation
 from .collect_2q_blocks import Collect2qBlocks
 from .commutation_analysis import CommutationAnalysis
-from .consolidate_blocks import ConsolidateBlocks
+# from .consolidate_blocks import ConsolidateBlocks
 from .unitary_synthesis import UnitarySynthesis
 from .collect_2q_blocks import Collect2qBlocks
 from .collect_1q_runs import Collect1qRuns

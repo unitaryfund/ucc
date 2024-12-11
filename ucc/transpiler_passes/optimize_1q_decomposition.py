@@ -37,7 +37,7 @@ from qiskit.circuit.library.standard_gates import (
 )
 from qiskit.circuit import Qubit
 from qiskit.circuit.quantumcircuitdata import CircuitInstruction
-from qiskit.dagcircuit.dagcircuit import DAGCircuit
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.dagcircuit.dagnode import DAGOpNode
 
 
@@ -113,37 +113,13 @@ class Optimize1qGatesDecomposition(TransformationPass):
         Returns:
             DAGCircuit: the optimized DAG.
         """
-        runs = []
-        qubits = []
-        bases = []
-        for run in dag.collect_1q_runs():
-            qubit = dag.find_bit(run[0].qargs[0]).index
-            runs.append(run)
-            qubits.append(qubit)
-            bases.append(self._global_decomposers)
-        best_sequences = euler_one_qubit_decomposer.optimize_1q_gates_decomposition(
-            runs, qubits, bases, simplify=True
+        euler_one_qubit_decomposer.optimize_1q_gates_decomposition(
+            dag,
+            global_decomposers=self._global_decomposers,
+            basis_gates=self._basis_gates,
         )
-        for index, best_circuit_sequence in enumerate(best_sequences):
-            run = runs[index]
-            qubit = qubits[index]
-            if best_circuit_sequence is not None:
-                (_, _, best_circuit_sequence) = best_circuit_sequence
-
-                first_node_id = run[0]._node_id
-                qubit = run[0].qargs
-                for gate, angles in best_circuit_sequence:
-                    op = CircuitInstruction.from_standard(gate, qubit, angles)
-                    node = DAGOpNode.from_instruction(op, dag=dag)
-                    node._node_id = dag._multi_graph.add_node(node)
-                    dag._increment_op(gate.name)
-                    dag._multi_graph.insert_node_on_in_edges(node._node_id, first_node_id)
-                dag.global_phase += best_circuit_sequence.global_phase
-                # Delete the other nodes in the run
-                for current_node in run:
-                    dag.remove_op_node(current_node)
-
         return dag
+        
 
 def _possible_decomposers(basis_set):
     decomposers = []
