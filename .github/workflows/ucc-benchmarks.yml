@@ -36,7 +36,14 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
             ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/small_test.sh 8 && python ./benchmarks/scripts/generate_latest_benchmark_plot.py"
-
+      
+      - name: Check if PNG file exists
+        run: |
+          ls -l benchmarks/compiler_benchmarks_over_time.png
+    
+      - name: Check git status
+        run: git status
+      
       # Commit and push benchmark results using a dedicated action
       - name: Commit and push results
         uses: EndBug/add-and-commit@v9
