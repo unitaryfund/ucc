@@ -1,9 +1,11 @@
 import glob
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
-# Use glob to find all CSV files in the current directory
-csv_files = glob.glob("../results/gates*.csv")
+directory_of_this_file = os.path.dirname(os.path.abspath(__file__))
+# Use glob to find all CSV files in the results folder
+csv_files = glob.glob(directory_of_this_file + "../results/gates*.csv")
 
 # List to hold DataFrames
 dataframes = []
