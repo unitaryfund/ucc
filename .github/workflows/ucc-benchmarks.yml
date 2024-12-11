@@ -37,6 +37,7 @@ jobs:
         with:
           author_name: GitHub Actions
           author_email: actions@github.com
+          branch: ${{ github.head_ref || github.ref }}
           message: "Update benchmark results"
           add: "benchmarks/*"
           push: true
