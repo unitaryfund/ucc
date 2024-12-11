@@ -26,7 +26,7 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
-            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh && python generate_latest_benchmark_plot.py"
+            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh && python ./benchmarks/scripts/generate_latest_benchmark_plot.py"
 
       # Commit and push benchmark results using a dedicated action
       - name: Commit and push results
