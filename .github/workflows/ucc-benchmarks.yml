@@ -40,13 +40,22 @@ jobs:
       - name: Check if PNG file exists
         run: |
           ls -l benchmarks/compiler_benchmarks_over_time.png
-        
+
+      - name: Check check git hooks
+        run: |
+          ls .git/hooks
+
       - name: Force add PNG file
         run: |
           git rm --cached benchmarks/compiler_benchmarks_over_time.png
           git add -f benchmarks/compiler_benchmarks_over_time.png
           git status
 
+      - name: Git add all
+        run: |
+          git add --all
+          git status
+      
       # Commit and push benchmark results using a dedicated action
       - name: Commit and push results
         uses: EndBug/add-and-commit@v9
