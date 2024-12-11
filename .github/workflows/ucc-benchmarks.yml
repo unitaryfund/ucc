@@ -13,12 +13,18 @@ jobs:
     runs-on: ucc-benchmarks-8-core
 
     steps:
-      # Checkout the repository and ensure the correct branch
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch full history to enable branch operations
-          ref: ${{ github.head_ref || github.ref }} # Checkout the PR branch or current ref
+          fetch-depth: 0 # Ensure the full history is fetched for branch operations
+
+      # Checkout the correct branch
+      - name: Checkout the branch
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          echo "Checking out branch: $BRANCH_NAME"
+          git checkout $BRANCH_NAME
 
       # Build the Docker image
       - name: Build Docker image
@@ -37,7 +43,6 @@ jobs:
         with:
           author_name: GitHub Actions
           author_email: actions@github.com
-          branch: ${{ github.head_ref || github.ref }}
           message: "Update benchmark results"
           add: "benchmarks/*"
           push: true
