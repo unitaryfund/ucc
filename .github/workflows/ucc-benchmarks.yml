@@ -11,11 +11,21 @@ on:
 jobs:
   run-benchmarks:
     runs-on: ucc-benchmarks-8-core
+    runs-on: ucc-benchmarks-8-core
 
     steps:
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure the full history is fetched for branch operations
+
+      # Checkout the correct branch
+      - name: Checkout the branch
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          echo "Checking out branch: $BRANCH_NAME"
+          git checkout $BRANCH_NAME
         with:
           fetch-depth: 0 # Ensure the full history is fetched for branch operations
 
@@ -75,4 +85,5 @@ jobs:
           author_email: actions@github.com
           message: "Update benchmark results"
           add: "benchmarks/compiler_benchmarks_over_time.png"
+          add: "."
           push: true
