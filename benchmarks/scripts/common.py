@@ -13,6 +13,11 @@ from pytket.passes import (
 from pytket.predicates import CompilationUnit
 from qiskit import transpile as qiskit_transpile
 from qbraid.transpiler import transpile as translate
+from qiskit import __version__ as qiskit_version
+from cirq import __version__ as cirq_version
+from pytket import __version__ as pytket_version
+from ucc import __version__ as ucc_version
+
 import sys  # Add sys to accept command line arguments
 import os
 from ucc import compile as ucc_compile
@@ -125,9 +130,9 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return "Unknown compiler alias."
 
 
-
 def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
-    """Save the results of the benchmarking to a CSV file.
+    """Save the results of the benchmarking to a CSV file with compiler versions as a header.
+    
     Parameters:
         results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
         benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
@@ -143,17 +148,44 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
     # Create the filename based on the current date
     file_name = f"{benchmark_name}_{current_date}.csv"
     file_path = os.path.join(folder, file_name)
-    # Check if the file exists and append if needed
-    if append:
-        # If the file exists and the date matches, append data
+
+    # Get version information for the compilers
+    compiler_versions = {
+        "qiskit": qiskit_version,
+        "cirq": cirq_version,
+        "pytket": pytket_version,
+        "ucc": ucc_version,
+    }
+
+    # Create version header as a string formatted for CSV
+    version_header = "# Compiler versions: " + ", ".join(
+        f"{key}={value}" for key, value in compiler_versions.items()
+    )
+
+    def prepend_header_if_missing(file_path, header):
+        """Check if the file has a header, and prepend it if not."""
         if os.path.exists(file_path):
-            df.to_csv(file_path, mode='a', header=False, index=False)
+            with open(file_path, "r+") as f:
+                content = f.read()
+                if not content.startswith("# Compiler versions:"):
+                    # Prepend the header and write back
+                    f.seek(0)
+                    f.write(f"{header}\n{content}")
         else:
-            # If the file doesn't exist, create a new one with headers
-            df.to_csv(file_path, mode='w', header=True, index=False)
+            # Create a new file with the header
+            with open(file_path, "w") as f:
+                f.write(f"{header}\n")
+
+    # Ensure the header is present in the file
+    prepend_header_if_missing(file_path, version_header)
+
+    # Write results to the file
+    if append:
+        # Append results without adding column headers again
+        df.to_csv(file_path, mode="a", header=False, index=False)
     else:
-        # If append is False, overwrite the file (or create a new one if it doesn't exist)
-        df.to_csv(file_path, mode='w', header=True, index=False)
+        # Overwrite or create the file
+        df.to_csv(file_path, mode="w", header=True, index=False)
 
     print(f"Results saved to {file_path}")
 
