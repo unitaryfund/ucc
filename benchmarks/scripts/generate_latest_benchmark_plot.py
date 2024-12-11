@@ -3,9 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
+# Get the directory of the current script
 directory_of_this_file = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the correct path to the results folder
+results_folder = os.path.join(directory_of_this_file, "../results")
+
 # Use glob to find all CSV files in the results folder
-csv_files = glob.glob(directory_of_this_file + "../results/gates*.csv")
+csv_files = glob.glob(os.path.join(results_folder, "gates*.csv"))
+
+# Print the files found for verification
+print(csv_files)
 
 # List to hold DataFrames
 dataframes = []
