@@ -12,10 +12,6 @@ results_folder = os.path.join(directory_of_this_file, "../results")
 # Use glob to find all CSV files in the results folder
 csv_files = glob.glob(os.path.join(results_folder, "gates*.csv"))
 
-# Print the files found for verification
-print(csv_files)
-
-# List to hold DataFrames
 dataframes = []
 
 # Loop through each CSV file and read it into a DataFrame
