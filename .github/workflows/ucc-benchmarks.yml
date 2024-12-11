@@ -61,9 +61,6 @@ jobs:
         run: |
           git ls-files --stage benchmarks/compiler_benchmarks_over_time.png
 
-      - name: Check git modules
-        run: |
-          cat .gitmodules
           
       - name: Check git ignore
         run: |
