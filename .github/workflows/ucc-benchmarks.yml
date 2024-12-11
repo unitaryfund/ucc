@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-benchmarks:
-    runs-on: ucc-benchmarks
+    runs-on: ucc-benchmarks-8-core
 
     steps:
       # Checkout the repository
