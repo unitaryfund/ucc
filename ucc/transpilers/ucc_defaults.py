@@ -2,11 +2,11 @@
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
 from qiskit.transpiler import CouplingMap
-from qiskit.transpiler.passes import CollectCliffords, HighLevelSynthesis, HLSConfig
+from qiskit.transpiler.passes import BasisTranslator, ConsolidateBlocks, CollectCliffords, HighLevelSynthesis, HLSConfig
 from qiskit.transpiler.passes.synthesis.unitary_synthesis import DefaultUnitarySynthesis
 
 
-from ..transpiler_passes import BasisTranslator, CommutativeCancellation, Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, CXCancellation, SpectralMapping, SabreLayout
+from ..transpiler_passes import  CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, CXCancellation, SpectralMapping, SabreLayout
 
 from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation
 
@@ -45,7 +45,7 @@ class UCCDefault1:
             self.pass_manager.append(Collect2qBlocks())
             self.pass_manager.append(ConsolidateBlocks(force_consolidate=True))
             self.pass_manager.append(UnitarySynthesis(basis_gates=self.target_basis))
-            self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
+            # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
             self.pass_manager.append(HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"])))
             self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 

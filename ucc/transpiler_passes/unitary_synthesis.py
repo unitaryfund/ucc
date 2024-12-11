@@ -53,7 +53,7 @@ from qiskit.circuit.library.standard_gates import (
     RGate,
 )
 from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit.dagcircuit.dagcircuit import DAGCircuit, DAGOpNode
+from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.exceptions import QiskitError
 from qiskit.providers.models.backendproperties import BackendProperties
 from qiskit.quantum_info import Operator
@@ -574,14 +574,12 @@ class UnitarySynthesis(TransformationPass):
                                     params=user_gate_node.params,
                                     qubits=tuple(qubits[x] for x in qargs),
                                 ),
-                                dag=out_dag,
                             )
                         else:
                             node = DAGOpNode.from_instruction(
                                 CircuitInstruction.from_standard(
                                     gate, tuple(qubits[x] for x in qargs), params
                                 ),
-                                dag=out_dag,
                             )
                         out_dag._apply_op_node_back(node)
                     out_dag.global_phase += global_phase

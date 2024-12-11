@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Get the absolute path of the current directory
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+
+# Define the results folder path
+RESULTS_FOLDER="$SCRIPT_DIR/../results"
+
+# Ensure the results folder exists
+mkdir -p "$RESULTS_FOLDER"
+
 # Define the common folder path
 QASM_FOLDER="../qasm_circuits/qasm2/"
 
@@ -18,23 +27,10 @@ COMPILERS=("ucc" "qiskit" "pytket" "cirq")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"
+echo "Running with parallelism: $PARALLELISM"
 
 # Function to handle the kill signal
 trap 'echo "All jobs killed"; exit' SIGINT SIGTERM
-
-# Run the jobs in parallel using GNU Parallel
-if command -v parallel &> /dev/null; then
-    echo "Running benchmarks with GNU Parallel."
-else
-    echo "Installing GNU Parallel..."
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sudo apt update && sudo apt install parallel -y
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install parallel
-    else
-        echo "Please install GNU Parallel manually."
-    fi
-fi
 
 # Prepare the list of commands to run in parallel
 commands=()
@@ -43,8 +39,9 @@ for qasm_file in "${QASM_FILES[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
         
-        # Build the command
-        command="python3 benchmark_script.py \"$full_qasm_file\" \"$compiler\""
+        # Build the command, passing the results folder as an argument
+        command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\""
+
         commands+=("$command")
     done
 done
