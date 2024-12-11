@@ -35,5 +35,5 @@ jobs:
           author_name: GitHub Actions
           author_email: actions@github.com
           message: "Update benchmark results"
-          add: "benchmarks/results/*"
+          add: "benchmarks/*"
           push: true
