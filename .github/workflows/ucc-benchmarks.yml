@@ -41,9 +41,10 @@ jobs:
         run: |
           ls -l benchmarks/compiler_benchmarks_over_time.png
         
-      - name: Manually add PNG file to git
+      - name: Force add PNG file
         run: |
-          git add benchmarks/compiler_benchmarks_over_time.png
+          git rm --cached benchmarks/compiler_benchmarks_over_time.png
+          git add -f benchmarks/compiler_benchmarks_over_time.png
           git status
 
       # Commit and push benchmark results using a dedicated action
