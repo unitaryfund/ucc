@@ -44,5 +44,5 @@ jobs:
           author_name: GitHub Actions
           author_email: actions@github.com
           message: "Update benchmark results"
-          add: "benchmarks/*"
+          add: "benchmarks/compiler_benchmarks_over_time.png"
           push: true
