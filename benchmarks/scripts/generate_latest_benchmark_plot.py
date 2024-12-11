@@ -14,6 +14,7 @@ csv_files = glob.glob(os.path.join(results_folder, "gates*.csv"))
 
 dataframes = []
 
+print("Loading data files...", )
 # Loop through each CSV file and read it into a DataFrame
 for file in csv_files:
     print(file)
@@ -78,7 +79,9 @@ ax[1].set_yscale("log")
 
 # Adjust layout and save the figure
 plt.tight_layout()
-fig.savefig("../compiler_benchmarks_over_time.png")
+filename = os.path.join(directory_of_this_file, "../compiler_benchmarks_over_time.png")
+print(f"\n Saving plot to {filename}")
+fig.savefig(filename)
 
 # Show the plot (optional)
 # plt.show()
