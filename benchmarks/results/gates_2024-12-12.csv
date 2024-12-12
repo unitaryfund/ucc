@@ -1,0 +1,6 @@
+compiler,circuit_name,raw_multiq_gates,compile_time,compiled_multiq_gates
+cirq,prep_select,9744,72.80442070960999,9712
+ucc,qv,15000,4.721451282501221,14856
+qiskit,qv,15000,5.220624923706055,14856
+pytket,qv,15000,4.386897802352905,15000
+cirq,qv,15000,189.21238803863525,14856
