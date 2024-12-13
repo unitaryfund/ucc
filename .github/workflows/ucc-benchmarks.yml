@@ -35,35 +35,12 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
-            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/small_test.sh 8 && python ./benchmarks/scripts/generate_latest_benchmark_plot.py"
-      
-      - name: Check if PNG file exists
-        run: |
-          ls -l benchmarks/compiler_benchmarks_over_time.png
-
-      - name: Check check git hooks
-        run: |
-          ls .git/hooks
-
-      - name: Force add PNG file
-        run: |
-          git rm --cached benchmarks/compiler_benchmarks_over_time.png
-          git add -f benchmarks/compiler_benchmarks_over_time.png
-          git status
+            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/small_test.sh 8 && python ./benchmarks/scripts/generate_latest_benchmark_plot.py && touch benchmarks/compiler_benchmarks_over_time.png"
 
       - name: Git add all
         run: |
           git add --all
           git status
-
-      - name: Check git index
-        run: |
-          git ls-files --stage benchmarks/compiler_benchmarks_over_time.png
-
-        
-      - name: Check git ignore
-        run: |
-          git check-ignore -v benchmarks/compiler_benchmarks_over_time.png
 
       # Commit and push benchmark results using a dedicated action
       - name: Commit and push results
