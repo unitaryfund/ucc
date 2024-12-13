@@ -4,13 +4,16 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("VERSION.txt", "r") as f:
+    __version__ = f.read().strip()
+
 # Read the requirements from the requirements.txt file
 with open("requirements.txt", "r") as req_file:
     requirements = req_file.read().splitlines()
 
 setup(
-    name="ucc",  # Package name
-    version="0.1.1",  
+    name="ucc",
+    version=__version__,
     author="Jordan Sullivan",
     author_email="jordan@unitary.fund",
     description="Unitary Compiler Collection: A quantum circuit interface and compiler for multiple quantum frameworks",
