@@ -10,13 +10,5 @@ This page details the publicly accessible functions available in ``ucc``.
     :members:
 
 .. automodule:: ucc.transpiler_passes
-    :members: BasisTranslator, 
-              CommutativeCancellation, 
-              Collect2qBlocks,
-              CommutationAnalysis, 
-              ConsolidateBlocks,
-              UnitarySynthesis,
-              Collect1qRuns,
-              Optimize1qGatesDecomposition,
-              SpectralMapping,
-              SabreLayout
+    :members:
+    :imported-members:
