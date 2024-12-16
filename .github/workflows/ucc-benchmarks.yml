@@ -27,7 +27,7 @@ jobs:
       - name: Run benchmarks
         run: |
           docker run --rm \
-            -v "/home/runner/work/ucc/ucc:/ucc" \ # Mount the workspace to sync files
+            -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
               ./benchmarks/scripts/small_test.sh 8 && \
@@ -39,17 +39,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Check the files that were generated
           ls -l /home/runner/work/ucc/ucc/benchmarks/compiler_benchmarks_over_time.png
 
-          # Ensure we're on the right branch
           git switch ${{ github.head_ref || github.ref_name }}
 
-          # Add and commit changes
           git add benchmarks/*
           git status
 
           git commit -m "Update benchmark results" || echo "No changes to commit"
 
-          # Push changes to the branch
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
