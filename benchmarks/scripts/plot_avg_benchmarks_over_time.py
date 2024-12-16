@@ -19,7 +19,7 @@ print("Loading data files...", )
 for file in csv_files:
     print(file)
     # Note, this will combine results from the same date
-    date_label = str(file).split('_')[1]
+    date_label = str(file).split('_')[1].split('.')[0]
     df = pd.read_csv(file)  # Load the CSV file into a DataFrame
     df['date'] = date_label
     df['reduction_factor'] = df['raw_multiq_gates'] / df['compiled_multiq_gates'] 
@@ -39,7 +39,7 @@ avg_compile_time = df_dates.groupby(["compiler", "date"])["compile_time"].mean()
 plt.rcParams['figure.dpi'] = 150  # Adjust DPI as needed
 
 # Create a colormap for unique compilers
-unique_compilers = df_dates["compiler"].unique()
+unique_compilers = sorted(df_dates["compiler"].unique())
 colormap = plt.get_cmap("tab10", len(unique_compilers))
 color_map = {compiler: colormap(i) for i, compiler in enumerate(unique_compilers)}
 
@@ -77,11 +77,9 @@ ax[1].set_ylabel("Compile Time")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
 
-fig.autofmt_xdate(rotation=45)
-
 # Adjust layout and save the figure
 plt.tight_layout()
-filename = os.path.join(directory_of_this_file, "../compiler_benchmarks_over_time.png")
+filename = os.path.join(directory_of_this_file, "../avg_compiler_benchmarks_over_time.png")
 print(f"\n Saving plot to {filename}")
 fig.savefig(filename)
 
