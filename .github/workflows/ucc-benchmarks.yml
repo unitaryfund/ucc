@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ensure the full history is fetched
+          fetch-depth: 0
 
       # Build the Docker image
       - name: Build Docker image
@@ -27,7 +27,7 @@ jobs:
       - name: Run benchmarks
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/ucc" \ # Mount the workspace to sync files
+            -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
               ./benchmarks/scripts/small_test.sh 8 && \
@@ -41,5 +41,5 @@ jobs:
           author_name: GitHub Actions
           author_email: actions@github.com
           message: "Update benchmark results"
-          add: "benchmarks/*" # Add only relevant files
+          add: "benchmarks/*"
           push: true
