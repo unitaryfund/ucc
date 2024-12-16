@@ -129,26 +129,7 @@ def count_multi_qubit_gates(circuit, compiler_alias):
         case _:
             return "Unknown compiler alias."
 
-
-def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
-    """Save the results of the benchmarking to a CSV file with compiler versions as a header.
-    
-    Parameters:
-        results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
-        benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
-        folder: Folder where the results will be stored. Default is "../results".
-        append: Whether to append to an existing file created on the same date (if True) or overwrite (if False). Default is False.
-    """
-    df = pd.DataFrame(results_log)
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    
-    # Ensure the folder exists
-    os.makedirs(folder, exist_ok=True)
-
-    # Create the filename based on the current date
-    file_name = f"{benchmark_name}_{current_date}.csv"
-    file_path = os.path.join(folder, file_name)
-
+def get_header(df):
     # Get version information for the compilers
     compiler_versions = {
         "qiskit": qiskit_version,
@@ -161,6 +142,30 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
     version_header = "# Compiler versions: " + ", ".join(
         f"{key}={value}" for key, value in compiler_versions.items()
     )
+
+    return version_header
+
+def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
+    """Save the results of the benchmarking to a CSV file with compiler versions as a header.
+    
+    Parameters:
+        results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
+        benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
+        folder: Folder where the results will be stored. Default is "../results".
+        append: Whether to append to an existing file created on the same date (if True) or overwrite (if False). Default is False.
+    """
+    df = pd.DataFrame(results_log)
+    # This will store results run during the same date and hour in the same file
+    current_date = datetime.now().strftime("%Y-%m-%d_%H")
+    
+    # Ensure the folder exists
+    os.makedirs(folder, exist_ok=True)
+
+    # Create the filename based on the current date
+    file_name = f"{benchmark_name}_{current_date}.csv"
+    file_path = os.path.join(folder, file_name)
+
+    header = get_header(df)
 
     def prepend_header_if_missing(file_path, header):
         """Check if the file has a header, and prepend it if not."""
@@ -177,7 +182,7 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
                 f.write(f"{header}\n")
 
     # Ensure the header is present in the file
-    prepend_header_if_missing(file_path, version_header)
+    prepend_header_if_missing(file_path, header)
 
     # Write results to the file
     if append:

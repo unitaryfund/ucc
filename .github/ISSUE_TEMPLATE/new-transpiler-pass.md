@@ -2,7 +2,7 @@
 name: New transpiler pass
 about: If you want to propose a new transpilation routine to go in UCC
 title: "[NEW PASS]"
-labels: feature
+labels: feature, transpiler_pass
 assignees: ''
 
 ---
