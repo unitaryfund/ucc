@@ -1,0 +1,1 @@
+python ./benchmarks/scripts/benchmark_script.py ./benchmarks/circuits/qasm2/benchpress/square_heisenberg_N100_basis_rz_rx_ry_cx.qasm ucc ./benchmarks/results
