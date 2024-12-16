@@ -39,8 +39,13 @@ jobs:
 
       - name: Git add all
         run: |
-          git add --all
+          git add .
           git status
+
+      - name: Check git index
+        run: |
+          git ls-files --stage benchmarks/compiler_benchmarks_over_time.png
+
 
       # Commit and push benchmark results using a dedicated action
       - name: Commit and push results

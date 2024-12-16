@@ -77,6 +77,8 @@ ax[1].set_ylabel("Compile Time")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
 
+fig.autofmt_xdate(rotation=45)
+
 # Adjust layout and save the figure
 plt.tight_layout()
 filename = os.path.join(directory_of_this_file, "../compiler_benchmarks_over_time.png")
