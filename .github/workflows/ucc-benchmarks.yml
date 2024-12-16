@@ -23,20 +23,20 @@ jobs:
       - name: Build Docker image
         run: docker build -t ucc-benchmark .
 
-      # Run the benchmarks in the Docker container
-      - name: Run benchmarks
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/ucc \ # Mount the entire workspace to ensure changes persist
-            -e GITHUB_REF_NAME="${{ github.ref_name }}" \ # Pass the branch name into the container
-            ucc-benchmark bash -c "
-              git fetch --all && \
-              git checkout ${GITHUB_REF_NAME} && \
-              source /venv/bin/activate && \
-              ./benchmarks/scripts/small_test.sh 8 && \
-              python ./benchmarks/scripts/generate_latest_benchmark_plot.py && \
-              touch benchmarks/compiler_benchmarks_over_time.png
-            "
+       # Run the benchmarks in the Docker container
+       - name: Run benchmarks
+       run: |
+         docker run --rm \
+           -v ${{ github.workspace }}:/ucc \
+           -e GITHUB_REF_NAME="${{ github.ref_name }}" \
+           ucc-benchmark bash -c "
+             git fetch --all && \
+             git checkout ${GITHUB_REF_NAME} && \
+             source /venv/bin/activate && \
+             ./benchmarks/scripts/small_test.sh 8 && \
+             python ./benchmarks/scripts/generate_latest_benchmark_plot.py && \
+             touch benchmarks/compiler_benchmarks_over_time.png
+           "
 
       # Verify generated file
       - name: Verify generated files
