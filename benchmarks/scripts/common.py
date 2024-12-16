@@ -135,7 +135,8 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
         append: Whether to append to an existing file created on the same date (if True) or overwrite (if False). Default is False.
     """
     df = pd.DataFrame(results_log)
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    # This will store results run during the same date and hour in the same file
+    current_date = datetime.now().strftime("%Y-%m-%d_%H")
     
     # Ensure the folder exists
     os.makedirs(folder, exist_ok=True)
