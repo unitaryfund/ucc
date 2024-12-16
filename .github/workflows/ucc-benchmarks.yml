@@ -30,7 +30,7 @@ jobs:
             -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
-              ./benchmarks/scripts/small_test.sh 8 && \
+              ./benchmarks/scripts/run_benchmarks.sh 8 && \
               python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
               python ./benchmarks/scripts/plot_latest_benchmarks.py
             "
