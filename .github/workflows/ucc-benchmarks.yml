@@ -17,14 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ensure the full history is fetched for branch operations
-
-      # Checkout the correct branch
-      - name: Checkout the branch
-        run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          echo "Checking out branch: $BRANCH_NAME"
-          git checkout $BRANCH_NAME
+          fetch-depth: 0 # Ensure full history for branch operations
 
       # Build the Docker image
       - name: Build Docker image
@@ -34,20 +27,28 @@ jobs:
       - name: Run benchmarks
         run: |
           docker run --rm \
-            -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
-            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/small_test.sh 8 && python ./benchmarks/scripts/generate_latest_benchmark_plot.py && touch benchmarks/compiler_benchmarks_over_time.png"
+            -v ${{ github.workspace }}:/ucc \ # Mount the entire workspace to ensure changes persist
+            -e GITHUB_REF_NAME="${{ github.ref_name }}" \ # Pass the branch name into the container
+            ucc-benchmark bash -c "
+              git fetch --all && \
+              git checkout ${GITHUB_REF_NAME} && \
+              source /venv/bin/activate && \
+              ./benchmarks/scripts/small_test.sh 8 && \
+              python ./benchmarks/scripts/generate_latest_benchmark_plot.py && \
+              touch benchmarks/compiler_benchmarks_over_time.png
+            "
 
+      # Verify generated file
+      - name: Verify generated files
+        run: ls -l benchmarks/compiler_benchmarks_over_time.png
+
+      # Add benchmark results to Git
       - name: Git add all
         run: |
           git add .
           git status
 
-      - name: Check git index
-        run: |
-          git ls-files --stage benchmarks/compiler_benchmarks_over_time.png
-
-
-      # Commit and push benchmark results using a dedicated action
+      # Commit and push benchmark results
       - name: Commit and push results
         uses: EndBug/add-and-commit@v9
         with:
