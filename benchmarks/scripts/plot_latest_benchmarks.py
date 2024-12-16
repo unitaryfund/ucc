@@ -32,6 +32,7 @@ df_all = pd.concat(dfs, ignore_index=True)
 
 # Find the most recent date in the 'date' column
 latest_date = df_all['date'].max()
+print("latest date is", latest_date)
 
 # Filter the dataframe to only include rows from the most recent date
 df_latest = df_all[df_all['date'] == latest_date]
@@ -73,7 +74,7 @@ for i, (key, grp) in enumerate(df_latest.groupby("compiler")):
     # Plot gate count
     ax[1].bar(
         [grp_indices + i * bar_width for grp_indices in grp_indices],  # Shift bars for each compiler
-        grp['raw_multiq_gates'],  # Gate count data
+        grp['compiled_multiq_gates'],  # Gate count data
         width=bar_width,
         label=key,
         color=color_map[key]
@@ -89,7 +90,7 @@ ax[0].set_yscale("log")
 
 ax[1].set_title(f"Gate Counts on Circuits (Date: {latest_date})")
 ax[1].set_xlabel("Circuit Name")
-ax[1].set_ylabel("Raw Gate Count")
+ax[1].set_ylabel("Compiled Count")
 ax[1].set_xticks(x_positions)
 ax[1].set_xticklabels(circuit_names, rotation=75)
 ax[1].set_yscale("log")

@@ -3,8 +3,17 @@
 [![Unitary Fund](https://img.shields.io/badge/Supported%20By-Unitary%20Fund-FFFF00.svg)](https://unitary.fund)
 [![Discord Chat](https://img.shields.io/badge/dynamic/json?color=blue&label=Discord&query=approximate_presence_count&suffix=%20online.&url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2FJqVGmpkP96%3Fwith_counts%3Dtrue)](http://discord.unitary.fund)
 
-The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnostic, high performance compilation of quantum circuits. It interfaces with multiple quantum computing frameworks, including [Qiskit](https://github.com/Qiskit/qiskit), [Cirq](https://github.com/quantumlib/Cirq), and [PyTKET](https://github.com/CQCL/tket) via OpenQASM2. 
 
+The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnostic, high performance compilation of quantum circuits. 
+
+UCC interfaces automatically with multiple quantum computing frameworks, including [Qiskit](https://github.com/Qiskit/qiskit), [Cirq](https://github.com/quantumlib/Cirq), and [PyTKET](https://github.com/CQCL/tket) and supports programs in OpenQASM 2 and [OpenQASM 3](https://openqasm.com/). For a full list of the latest supported interfaces, just call `ucc.supported_formats`.
+
+
+**Want to know more?** 
+- Check out our
+documentation, which you can build locally after installation by running `make html` in [ucc/docs/source](https://github.com/unitaryfund/ucc/tree/nts-releases/docs/source).
+- For code, repo, or theory questions, especially those requiring more detailed responses, submit a [Discussion](https://github.com/unitaryfund/ucc/discussions).
+- For casual or time sensitive questions, chat with us on [Discord](http://discord.unitary.fund).
 
 ## Quickstart
 
@@ -32,18 +41,20 @@ def test_tket_compile():
     circuit = TketCircuit(2)
     circuit.H(0)
     circuit.CX(0, 1)
-    compile(circuit, return_format='original')
+    compile(circuit)
 
 def test_qiskit_compile():
     circuit = QiskitCircuit(2)
     circuit.h(0)
     circuit.cx(0, 1)
-    compile(circuit, return_format='original')
+    compile(circuit)
 
 def test_cirq_compile():
     qubits = LineQubit.range(2)
-    circuit = CirqCircuit(H(qubits[0]), CNOT(qubits[0], qubits[1]))
-    compile(circuit, return_format='original')
+    circuit = CirqCircuit(
+        H(qubits[0]), 
+        CNOT(qubits[0], qubits[1]))
+    compile(circuit)
 ```
 
 ## License

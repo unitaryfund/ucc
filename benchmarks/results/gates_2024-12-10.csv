@@ -1,3 +1,4 @@
+# Compiler versions: qiskit=1.2.0, cirq=1.4.1, pytket=1.35.0, ucc=0.1.1
 compiler,circuit_name,raw_multiq_gates,compile_time,compiled_multiq_gates
 pytket,qaoa_barabasi_albert,1176,0.02424311637878418,1176
 ucc,qaoa_barabasi_albert,1176,0.7855277061462402,1176
