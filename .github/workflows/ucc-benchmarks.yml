@@ -31,7 +31,8 @@ jobs:
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
               ./benchmarks/scripts/small_test.sh 8 && \
-              python ./benchmarks/scripts/generate_latest_benchmark_plot.py
+              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
+              python ./benchmarks/scripts/plot_latest_benchmarks.py
             "
 
       # Commit and push benchmark results
