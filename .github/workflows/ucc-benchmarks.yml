@@ -35,17 +35,17 @@ jobs:
             "
 
       # Commit and push benchmark results
+      - name: Configure Git for commit
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
       - name: Commit and push results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls -l /home/runner/work/ucc/ucc/benchmarks/compiler_benchmarks_over_time.png
-
           git switch ${{ github.head_ref || github.ref_name }}
-
           git add benchmarks/*
           git status
-
           git commit -m "Update benchmark results" || echo "No changes to commit"
-
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
