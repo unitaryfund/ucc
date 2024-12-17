@@ -90,7 +90,7 @@ ax[0].set_yscale("log")
 
 ax[1].set_title(f"Gate Counts on Circuits (Date: {latest_date})")
 ax[1].set_xlabel("Circuit Name")
-ax[1].set_ylabel("Compiled Count")
+ax[1].set_ylabel("Compiled Gate Count")
 ax[1].set_xticks(x_positions)
 ax[1].set_xticklabels(circuit_names, rotation=75)
 ax[1].set_yscale("log")
