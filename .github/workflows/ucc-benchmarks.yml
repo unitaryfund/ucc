@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allows the workflow to be triggered manually
+    inputs:  # Optional inputs to customize the workflow when triggered manually
+      branch:
+        description: 'Branch to run benchmarks on'
+        required: false
+        default: 'main'
 
 jobs:
   run-benchmarks:
@@ -14,14 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ensure the full history is fetched for branch operations
-
-      # Checkout the correct branch
-      - name: Checkout the branch
-        run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          echo "Checking out branch: $BRANCH_NAME"
-          git checkout $BRANCH_NAME
+          fetch-depth: 0 # Ensure the full history is fetched
 
       # Build the Docker image
       - name: Build Docker image
@@ -31,16 +30,26 @@ jobs:
       - name: Run benchmarks
         run: |
           docker run --rm \
-            -v ${{ github.workspace }}/benchmarks/results:/ucc/benchmarks/results \
-            ucc-benchmark bash -c "source /venv/bin/activate && ./benchmarks/scripts/run_benchmarks.sh 8"
+            -v "/home/runner/work/ucc/ucc:/ucc" \
+            ucc-benchmark bash -c "
+              source /venv/bin/activate && \
+              ./benchmarks/scripts/run_benchmarks.sh 8 && \
+              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
+              python ./benchmarks/scripts/plot_latest_benchmarks.py
+            "
 
-      
-      # Commit and push benchmark results using a dedicated action
+      # Commit and push benchmark results
+      - name: Configure Git for commit
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
       - name: Commit and push results
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: GitHub Actions
-          author_email: actions@github.com
-          message: "Update benchmark results"
-          add: "."
-          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git switch ${{ github.head_ref || github.ref_name }}
+          git add benchmarks/*
+          git status
+          git commit -m "Update benchmark results" || echo "No changes to commit"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
