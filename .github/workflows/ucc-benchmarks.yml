@@ -44,7 +44,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-           # Ensure the latest changes from the remote branch are fetched
+      # Ensure the latest changes from the remote branch are fetched
       - name: Fetch latest changes and auto-resolve conflicts for .png files
         run: |
           git fetch origin ${{ github.head_ref || github.ref_name }}
@@ -53,14 +53,13 @@ jobs:
           # Merge changes and resolve conflicts favoring the generated .png files
           git merge origin/${{ github.head_ref || github.ref_name }} || true
           git checkout --theirs -- benchmarks/*.png
-          git add benchmarks/*.png
 
       # Commit and push results
       - name: Commit and push results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git add benchmarks/*
+          git add benchmarks/*  # Add all changes in benchmarks/
           git status
           git commit -m "Update benchmark results" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
