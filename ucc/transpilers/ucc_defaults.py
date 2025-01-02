@@ -20,7 +20,7 @@ from qiskit.transpiler.passes import (
 )
 from qiskit.transpiler.passes.synthesis.unitary_synthesis import DefaultUnitarySynthesis
 # from ucc.transpiler_passes.sabre_swap import SabreSwap
-from ucc.transpiler_passes.py2qan_plugin import Py2QAN_Mapping_Routing
+from ucc.transpiler_passes.py2qan_plugin import Py2QAN_Routing
 
 from ..transpiler_passes import  CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, CXCancellation, SpectralMapping
 
@@ -78,14 +78,14 @@ class UCCDefault1:
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
-            # self.pass_manager.append(
-            #    SabreLayout(
-            #       coupling_map,
-            #       max_iterations=4,
-            #       swap_trials=_get_trial_count(20),
-            #       layout_trials=_get_trial_count(20),
-            #    )
-            # )
+            self.pass_manager.append(
+               SabreLayout(
+                  coupling_map,
+                  max_iterations=4,
+                  swap_trials=_get_trial_count(20),
+                  layout_trials=_get_trial_count(20),
+               )
+            )
             # self.pass_manager.append(
             #     SabreSwap(
             #         coupling_map,
@@ -93,7 +93,8 @@ class UCCDefault1:
             #         trials=_get_trial_count(20),
             #     )
             # )
-            self.pass_manager.append(Py2QAN_Mapping_Routing(coupling_map=coupling_map))
+            init_map = self.pass_manager.property_set["layout"]
+            self.pass_manager.append(Py2QAN_Routing(init_map=init_map,coupling_map=coupling_map))
             self.add_local_passes(1)
 
     def run(self, circuits, coupling_list=None):
