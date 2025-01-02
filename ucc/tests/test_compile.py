@@ -8,7 +8,7 @@ from qiskit.converters import circuit_to_dag
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler.passes import GatesInBasis
 
-from benchmarks.circuits import qcnn_circuit, random_clifford_circuit
+from benchmarks.scripts import qcnn_circuit, random_clifford_circuit
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
 

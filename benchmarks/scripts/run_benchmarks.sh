@@ -10,7 +10,7 @@ RESULTS_FOLDER="$SCRIPT_DIR/../results"
 mkdir -p "$RESULTS_FOLDER"
 
 # Define the common folder path
-QASM_FOLDER="$SCRIPT_DIR/../circuits/qasm2/"
+QASM_FOLDER="$SCRIPT_DIR/../qasm_circuits/qasm2/"
 
 # Define your list of QASM file names (without the common path)
 QASM_FILES=(
