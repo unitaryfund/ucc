@@ -39,27 +39,26 @@ jobs:
             "
 
       # Commit and push benchmark results
-      - name: Configure Git for commit
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      # Ensure the latest changes from the remote branch are fetched
-      - name: Fetch latest changes and auto-resolve conflicts for .png files
-        run: |
-          git fetch origin ${{ github.head_ref || github.ref_name }}
-          git switch ${{ github.head_ref || github.ref_name }}
-
-          # Merge changes and resolve conflicts favoring the generated .png files
-          git merge origin/${{ github.head_ref || github.ref_name }} || true
-          git checkout --theirs -- benchmarks/*.png
-
-      # Commit and push results
-      - name: Commit and push results
+      - name: Commit and push benchmark results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git add benchmarks/*  # Add all changes in benchmarks/
+          # Configure Git
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+      
+          # Ensure we are on the correct branch
+          git fetch origin ${{ github.head_ref || github.ref_name }}
+          git switch ${{ github.head_ref || github.ref_name }}
+      
+          # Merge latest changes and resolve conflicts for .png files
+          git merge origin/${{ github.head_ref || github.ref_name }} || true
+          git checkout --theirs -- benchmarks/*.png
+      
+          # Stage all changes (including resolved .png files)
+          git add benchmarks/*
           git status
+      
+          # Commit and push changes
           git commit -m "Update benchmark results" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
