@@ -3,7 +3,6 @@ import os
 from qiskit.utils.parallel import CPU_COUNT
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
-from qiskit.utils.parallel import CPU_COUNT
 from qiskit import user_config
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import (
@@ -78,14 +77,14 @@ class UCCDefault1:
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
-            self.pass_manager.append(
-               SabreLayout(
-                  coupling_map,
-                  max_iterations=4,
-                  swap_trials=_get_trial_count(20),
-                  layout_trials=_get_trial_count(20),
-               )
-            )
+            # self.pass_manager.append(
+            #    SabreLayout(
+            #       coupling_map,
+            #       max_iterations=4,
+            #       swap_trials=_get_trial_count(20),
+            #       layout_trials=_get_trial_count(20),
+            #    )
+            # )
             # self.pass_manager.append(
             #     SabreSwap(
             #         coupling_map,
@@ -93,8 +92,7 @@ class UCCDefault1:
             #         trials=_get_trial_count(20),
             #     )
             # )
-            init_map = self.pass_manager.property_set["layout"]
-            self.pass_manager.append(Py2QAN_Routing(init_map=init_map,coupling_map=coupling_map))
+            self.pass_manager.append(Py2QAN_Routing(coupling_map=coupling_map))
             self.add_local_passes(1)
 
     def run(self, circuits, coupling_list=None):
