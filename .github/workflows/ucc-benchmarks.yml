@@ -38,25 +38,18 @@ jobs:
               python ./benchmarks/scripts/plot_latest_benchmarks.py
             "
       # Commit and push benchmark results
-      - name: Commit and push benchmark results
+      - name: Configure Git for commit
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Commit and push results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure Git
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-      
-          # Ensure we're on the correct branch
-          git fetch origin ${{ github.head_ref || github.ref_name }}
           git switch ${{ github.head_ref || github.ref_name }}
-      
-          # Resolve any conflicts by always taking local .png files
-          git checkout --ours benchmarks/*.png || true
-      
-          # Stage and commit all changes, including .png files
-          git add benchmarks/*                   # Add everything under benchmarks/
+          git add benchmarks/*
           git status
-      
           git commit -m "Update benchmark results" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
 
