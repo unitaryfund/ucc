@@ -26,31 +26,55 @@ jobs:
       - name: Build Docker image
         run: docker build -t ucc-benchmark .
 
-      # Run the benchmarks in the Docker container
+      # Start the container and keep it running
+      - name: Start Docker container
+        run: |
+          docker run -dit --name ucc-container \
+            -v "/home/runner/work/ucc/ucc:/ucc" \
+            ucc-benchmark
+
+      # Run the benchmarks and generate plots inside the container
       - name: Run benchmarks
         run: |
-          docker run --rm \
-            -v "/home/runner/work/ucc/ucc:/ucc" \
-            ucc-benchmark bash -c "
-              source /venv/bin/activate && \
-              ./benchmarks/scripts/run_benchmarks.sh 8 && \
-              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
-              python ./benchmarks/scripts/plot_latest_benchmarks.py
-            "
-      # Commit and push benchmark results
-      - name: Configure Git for commit
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
+          docker exec ucc-container bash -c "
+            source /venv/bin/activate && \
+            ./benchmarks/scripts/run_benchmarks.sh 8 && \
+            python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
+            python ./benchmarks/scripts/plot_latest_benchmarks.py
+          "
 
-      - name: Commit and push results
+      # Configure Git inside the container
+      - name: Configure Git inside container
+        run: |
+          docker exec ucc-container bash -c "
+            git config --global user.email 'actions@github.com'
+            git config --global user.name 'GitHub Actions'
+          "
+
+      # Resolve conflicts and stage changes inside the container
+      - name: Resolve conflicts and stage changes
+        run: |
+          docker exec ucc-container bash -c "
+            git fetch origin ${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+            git switch ${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+            git checkout --ours benchmarks/*.png || true
+            git add benchmarks/*
+            git status
+          "
+
+      # Commit and push changes inside the container
+      - name: Commit and push changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git switch ${{ github.head_ref || github.ref_name }}
-          git add benchmarks/*
-          git status
-          git commit -m "Update benchmark results" || echo "No changes to commit"
-          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          docker exec ucc-container bash -c "
+            git commit -m 'Update benchmark results' || echo 'No changes to commit'
+            git push origin HEAD:${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}
+          "
+
+      # Stop and remove the container after use
+      - name: Cleanup Docker container
+        run: docker rm -f ucc-container
+
 
       
