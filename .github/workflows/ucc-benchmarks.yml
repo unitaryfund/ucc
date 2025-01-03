@@ -51,14 +51,15 @@ jobs:
           git fetch origin ${{ github.head_ref || github.ref_name }}
           git switch ${{ github.head_ref || github.ref_name }}
       
-          # Merge latest changes and resolve conflicts for .png files
-          git merge origin/${{ github.head_ref || github.ref_name }} || true
-          git checkout --theirs -- benchmarks/*.png
+          # Force resolve conflicts by always taking the locally generated .png files
+          git checkout -- benchmarks/*.png  # Keep local versions
+          git add benchmarks/*.png          # Explicitly stage .png files
       
-          # Stage all changes (including resolved .png files)
+          # Stage all other changes
           git add benchmarks/*
           git status
       
           # Commit and push changes
           git commit -m "Update benchmark results" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
+      
