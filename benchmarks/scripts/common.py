@@ -155,7 +155,7 @@ def get_header(df):
 
     # Combine the information into a header
     header_info = f"OS: {os_info} {os_version}, Architecture: {architecture[0]}, CPU Cores: {cpu_count}"
-    version_header += f"\n# {header_info}"
+    version_header += f" # {header_info}"
     return version_header
 
 def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
