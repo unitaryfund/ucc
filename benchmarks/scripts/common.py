@@ -1,4 +1,6 @@
 from time import time
+import platform
+import os
 import pandas as pd
 from datetime import datetime
 from cirq import CZTargetGateset, optimize_for_target_gateset
@@ -143,6 +145,17 @@ def get_header(df):
         f"{key}={value}" for key, value in compiler_versions.items()
     )
 
+    # Get Operating System Info
+    os_info = platform.system()  # OS name (e.g., 'Darwin' for macOS, 'Linux', 'Windows')
+    os_version = platform.version()  # OS version
+    architecture = platform.architecture()  # System architecture (e.g., '64bit')
+
+    # Get Parallelism Info (number of CPU cores)
+    cpu_count = os.cpu_count()  # Number of available CPU cores
+
+    # Combine the information into a header
+    header_info = f"OS: {os_info} {os_version}, Architecture: {architecture[0]}, CPU Cores: {cpu_count}"
+    version_header += f"\n# {header_info}"
     return version_header
 
 def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
