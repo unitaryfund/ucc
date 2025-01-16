@@ -91,19 +91,21 @@ for compiler in unique_compilers:
             annotations.append(annotation)
             last_version_seen[compiler] = current_version
     
-    # Adjust the text to avoid overlap
-    adjust_text(
-        annotations,
-        ax=ax[0],
-        only_move={'points': 'y', 'texts': 'y'},  # Constrain movement to vertical axis
-        autoalign='y',
-        force_text=0.5,
-        force_points=0.1
-    )
+    # # Adjust the text to avoid overlap
+    # adjust_text(
+    #     annotations,
+    #     ax=ax[0],
+    #     only_move={'points': 'y', 'texts': 'y'},  # Constrain movement to vertical axis
+    #     autoalign='y',
+    #     force_text=0.5,
+    #     force_points=0.1
+    # )
 
 ax[0].set_title("Average Compiled Ratio over Time")
 ax[0].set_ylabel("Compiled Ratio")
 ax[0].legend(title="Compiler")
+# Expand axes to be slightly larger than data range
+ax[0].set_ylim(0.74, 0.96)
 
 # Repeat for avg_compile_time
 for compiler in unique_compilers:
@@ -124,11 +126,12 @@ for compiler in unique_compilers:
         current_version = df_dates[(df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])][f'{compiler}_version'].values[0]
         
         if current_version != last_version_seen[compiler]:
+            # Create annotation with textcoords="data" for better alignment
             annotation = ax[1].annotate(
                 f"{compiler}={current_version}",
-                (row["date"], row["compile_time"]),
+                (row["date"], row["compile_time"]),  # Attach to the exact data point
                 textcoords="offset points",
-                xytext=(10, -15),  # Default offset
+                xytext=(10, 15),  # Default offset
                 ha='center',
                 fontsize=8,
                 color=color_map[compiler],
@@ -136,7 +139,7 @@ for compiler in unique_compilers:
                     arrowstyle="->",
                     color=color_map[compiler],
                     lw=0.5,
-                    shrinkA=5,  # Shrink arrow length
+                    shrinkA=5,  # Shrink arrow length to avoid overlap
                     shrinkB=5
                 ),
                 bbox=dict(
@@ -148,21 +151,26 @@ for compiler in unique_compilers:
             )
             annotations.append(annotation)
             last_version_seen[compiler] = current_version
-    
-    # Adjust the text to avoid overlap
-    adjust_text(
-        annotations,
-        ax=ax[1],
-        only_move={'points': 'y', 'texts': 'y'},  # Constrain movement to vertical axis
-        autoalign='y',
-        force_text=0.5,
-        force_points=0.1
-    )
+
+    # # # Adjust the text to avoid overlap
+    # adjust_text(
+    #     annotations,
+    #     ax=ax[1],
+    #     only_move={'points': 'y', 'texts': 'y'},  # Restrict movement to vertical axis
+    #     autoalign='y',  # Prefer vertical alignment
+    #     force_text=0.001,  # Increase text repulsion
+    #     force_points=0.01,  # Increase repulsion from points
+    #     expand_text=(1.2, 1.4),  # Slightly expand spacing for clarity,
+    #     expand_points=(1.01, 1.01),  # Limit how far annotations move from data points
+    #     lim=100  # Limit iterations to avoid excessive adjustment time
+    # )
+
 
 ax[1].set_title("Average Compile Time over Time")
 ax[1].set_ylabel("Compile Time")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
+ax[1].legend(title="Compiler")
 
 plt.xticks(rotation=45)
 plt.tight_layout()
