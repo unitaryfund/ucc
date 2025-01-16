@@ -2,6 +2,7 @@ from time import time
 import platform
 import os
 import pandas as pd
+import matplotlib
 from datetime import datetime
 from cirq import CZTargetGateset, optimize_for_target_gateset
 from pytket.circuit import OpType
@@ -21,7 +22,6 @@ from pytket import __version__ as pytket_version
 from ucc import __version__ as ucc_version
 
 import sys  # Add sys to accept command line arguments
-import os
 from ucc import compile as ucc_compile
 
 
@@ -188,6 +188,7 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
 
     print(f"Results saved to {file_path}")
 
+
 # Read the QASM files passed as command-line arguments
 def get_qasm_files():
     if len(sys.argv) < 2:
@@ -195,3 +196,130 @@ def get_qasm_files():
         sys.exit(1)
     
     return sys.argv[1:]
+
+
+def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20):
+    """
+    Annotates the plot while dynamically adjusting the position to avoid overlaps. In-place operation.
+
+    Parameters:
+        ax (matplotlib.axes.Axes): The axis object to annotate.
+        text (str): The annotation text.
+        xy (tuple): The (x, y) coordinates for the annotation anchor point.
+        color (str): The color for the text and arrow.
+        previous_bboxes (list): A list to track previous annotation bounding boxes (in data coordinates).
+        offset (tuple): The initial offset in points (x_offset, y_offset).
+        increment (int): The vertical adjustment increment in points to resolve overlaps.
+        fontsize (int): Font size of the annotation text.
+        max_attempts (int): The maximum number of position adjustments to resolve overlaps.
+
+    Returns:
+        None
+    """
+    # Create the annotation
+    annotation = ax.annotate(
+        text,
+        xy,
+        textcoords="offset points",
+        xytext=offset,  # Default offset
+        ha='center',
+        fontsize=fontsize,
+        color=color,
+        arrowprops=dict(
+            arrowstyle="->",
+            color=color,
+            lw=0.5,
+            shrinkA=5,  # Shrink arrow length to avoid overlap
+            shrinkB=5
+        ),
+        bbox=dict(
+            boxstyle="round,pad=0.2",
+            edgecolor=color,
+            facecolor="white",
+            alpha=0.8
+        )
+    )
+
+    # Get the bounding box of the annotation in data coordinates
+    renderer = ax.figure.canvas.get_renderer()
+    bbox = annotation.get_window_extent(renderer).transformed(ax.transData.inverted())
+
+    attempts = 0
+    # Adjust position to avoid overlap
+    while any(bbox.overlaps(prev_bbox) for prev_bbox in previous_bboxes):
+        # Increase vertical offset to move annotation upward
+        current_offset = annotation.xyann[1]
+        annotation.set_position((offset[0], current_offset + increment))
+        # Update the bounding box after adjustment
+        bbox = annotation.get_window_extent(renderer).transformed(ax.transData.inverted())
+
+        # Increment the attempt counter and check for max attempts
+        attempts += 1
+        if attempts >= max_attempts:
+            print(f"Warning: Maximum adjustment attempts reached for annotation '{text}'.")
+            break
+    # Add the final bounding box to the list of previous bounding boxes
+    previous_bboxes.append(bbox)
+    # Needed to plot points in correct order
+    ax.figure.canvas.flush_events()
+
+import matplotlib
+import numpy as np
+
+def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False):
+    """
+    Adjust the axes limits to ensure all labels and annotations fit within the view. In-place operation.
+
+    Parameters:
+    - ax: The Matplotlib axes object to adjust.
+    - x_scale: The factor by which to expand the x-axis limits.
+    - y_scale: The factor by which to expand the y-axis limits.
+    - x_log: Set to True if the x-axis uses a logarithmic scale.
+    - y_log: Set to True if the y-axis uses a logarithmic scale.
+    """
+    renderer = ax.figure.canvas.get_renderer()
+
+    # Get the current axes limits
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+
+    # Check the position of all annotations
+    all_bboxes = [
+        child.get_window_extent(renderer=renderer).transformed(ax.transData.inverted())
+        for child in ax.get_children() if isinstance(child, matplotlib.text.Annotation)
+    ]
+
+    # Expand x-axis limits if annotations are off the edge
+    for bbox in all_bboxes:
+        if bbox.x0 < x_min:  # Left edge
+            x_min = bbox.x0
+        if bbox.x1 > x_max:  # Right edge
+            x_max = bbox.x1
+
+    # Expand y-axis limits if annotations are off the edge
+    for bbox in all_bboxes:
+        if bbox.y0 < y_min:  # Bottom edge
+            y_min = bbox.y0
+        if bbox.y1 > y_max:  # Top edge
+            y_max = bbox.y1
+
+    # Apply scaling factors based on whether axes are logarithmic
+    if x_log:
+        x_min = x_min / x_scale
+        x_max = x_max * x_scale
+    else:
+        x_range = x_max - x_min
+        x_min -= (x_scale - 1) * x_range
+        x_max += (x_scale - 1) * x_range
+
+    if y_log:
+        y_min = y_min / y_scale
+        y_max = y_max * y_scale
+    else:
+        y_range = y_max - y_min
+        y_min -= (y_scale - 1) * y_range
+        y_max += (y_scale - 1) * y_range
+
+    # Set the new axis limits
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
