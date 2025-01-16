@@ -7,6 +7,7 @@ from qiskit.utils.parallel import CPU_COUNT
 from qiskit import user_config
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import (
+    ApplyLayout,
     BasisTranslator,
     ConsolidateBlocks,
     CollectCliffords,
@@ -14,16 +15,13 @@ from qiskit.transpiler.passes import (
     HLSConfig,
     SabreLayout,
     SabreSwap,
-    BasicSwap,
-    LookaheadSwap,
-    StochasticSwap,
+    VF2Layout,
 )
 from qiskit.transpiler.passes.synthesis.unitary_synthesis import DefaultUnitarySynthesis
 # from ucc.transpiler_passes.sabre_swap import SabreSwap
 
 
-from ..transpiler_passes import  CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, SpectralMapping
-
+from ..transpiler_passes import CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, SpectralMapping, VF2PostLayout
 from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation, ElidePermutations
 
 
@@ -65,42 +63,58 @@ class UCCDefault1:
             # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
             self.pass_manager.append(HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"])))
-            self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
 
             #Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
             # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
             
-    
     def add_map_passes(self, coupling_list = None):
         if coupling_list is not None:              
             coupling_map = CouplingMap(couplinglist=coupling_list)
-            self.pass_manager.append(ElidePermutations())
+            # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
-            self.pass_manager.append(SabreLayout(
-                coupling_map,
-                max_iterations=4,
-                swap_trials=_get_trial_count(20),
-                layout_trials=_get_trial_count(20),
-            ))
+            self.pass_manager.append(
+                SabreLayout(
+                    coupling_map,
+                    seed=1,
+                    max_iterations=4,
+                    swap_trials=_get_trial_count(20),
+                    layout_trials=_get_trial_count(20),
+                )
+            )
+
+            self.pass_manager.append(VF2Layout(coupling_map=coupling_map))
+            self.pass_manager.append(ApplyLayout())
             self.pass_manager.append(
                 SabreSwap(
                     coupling_map,
                     heuristic="decay",
+                    seed=1,
                     trials=_get_trial_count(20),
                 )
             )
+            # self.pass_manager.append(MapomaticLayout(coupling_map))
+            self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
+            self.pass_manager.append(ApplyLayout())
             self.add_local_passes(1)
+            self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
+            self.pass_manager.append(ApplyLayout())
+
 
     def run(self, circuits, coupling_list=None):
         self.add_map_passes(coupling_list)
+        self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
         out_circuits = self.pass_manager.run(circuits)
         return out_circuits
+
 
 
 def _get_trial_count(default_trials=5):
     if CONFIG.get("sabre_all_threads", None) or os.getenv("QISKIT_SABRE_ALL_THREADS"):
         return max(CPU_COUNT, default_trials)
     return default_trials
+
+
+
 
