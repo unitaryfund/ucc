@@ -50,6 +50,9 @@ all_texts = []
 
 from adjustText import adjust_text
 
+# Store annotations for adjust_text
+annotations = []
+
 # Plot avg_compiled_ratio for each compiler
 for compiler in unique_compilers:
     compiler_data = avg_compiled_ratio[avg_compiled_ratio["compiler"] == compiler]
@@ -62,8 +65,7 @@ for compiler in unique_compilers:
         color=color_map[compiler]
     )
 
-    # Store annotations for adjust_text
-    annotations = []
+    
     for index, row in compiler_data.iterrows():
         # Get the version for this date and compiler from the original DataFrame
         current_version = df_dates[(df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])][f'{compiler}_version'].values[0]
@@ -113,8 +115,11 @@ ax[0].set_ylim(0.74, 0.96)
 # Plot only compiler runtime data after we created GitHub Actions pipeline for standardization
 avg_compile_time = avg_compile_time[avg_compile_time["date"] >= "2024-12-16"]
 
+annotations = []
+last_version_seen = {}
 # Repeat for avg_compile_time
 for compiler in unique_compilers:
+    last_version_seen[compiler] = None
     compiler_data = avg_compile_time[avg_compile_time["compiler"] == compiler]
     ax[1].plot(
         compiler_data["date"],
@@ -126,11 +131,10 @@ for compiler in unique_compilers:
     )
     print('Compiler: ', compiler)
     # Store annotations for adjust_text
-    annotations = []
+    
     for index, row in compiler_data.iterrows():
         # Get the version for this date and compiler
         current_version = df_dates[(df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])][f'{compiler}_version'].values[0]
-        print('Current version: ', current_version)
         if current_version != last_version_seen[compiler]:
             print('New version: ', current_version)
             # Create annotation with textcoords="data" for better alignment
@@ -156,24 +160,25 @@ for compiler in unique_compilers:
                     alpha=0.8
                 )
             )
+            print(annotation._text)
             annotations.append(annotation)
             last_version_seen[compiler] = current_version
 
-    # # # Adjust the text to avoid overlap
-    # adjust_text(
-    #     annotations,
-    #     ax=ax[1],
-    #     only_move={'points': 'y', 'texts': 'y'},  # Restrict movement to vertical axis
-    #     autoalign='y',  # Prefer vertical alignment
-    #     force_text=0.001,  # Increase text repulsion
-    #     force_points=0.01,  # Increase repulsion from points
-    #     expand_text=(1.2, 1.4),  # Slightly expand spacing for clarity,
-    #     expand_points=(1.01, 1.01),  # Limit how far annotations move from data points
-    #     lim=100  # Limit iterations to avoid excessive adjustment time
-    # )
+    # # Adjust the text to avoid overlap
+    adjust_text(
+        annotations,
+        ax=ax[1],
+        only_move={'points': 'y', 'texts': 'y'},  # Restrict movement to vertical axis
+        autoalign='y',  # Prefer vertical alignment
+        force_text=0.001,  # Increase text repulsion
+        force_points=0.01,  # Increase repulsion from points
+        expand_text=(1.2, 1.4),  # Slightly expand spacing for clarity,
+        expand_points=(1.01, 1.01),  # Limit how far annotations move from data points
+        lim=100  # Limit iterations to avoid excessive adjustment time
+    )
 
 ax[1].set_title("Average Compile Time over Time")
-ax[1].set_ylabel("Compile Time")
+ax[1].set_ylabel("Compile Time (s)")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
 ax[1].legend(title="Compiler")
