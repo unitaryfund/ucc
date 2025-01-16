@@ -41,7 +41,10 @@ unique_compilers = sorted(df_dates["compiler"].unique())
 colormap = plt.get_cmap("tab10", len(unique_compilers))
 color_map = {compiler: colormap(i) for i, compiler in enumerate(unique_compilers)}
 
-fig, ax = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+fig, ax = plt.subplots(2, 1, figsize=(8, 8), sharex=False)
+# Rotate x labels on axes 0
+plt.setp(ax[0].xaxis.get_majorticklabels(), rotation=45)
+
 last_version_seen = {compiler: None for compiler in unique_compilers}
 all_texts = []
 
@@ -107,6 +110,9 @@ ax[0].legend(title="Compiler")
 # Expand axes to be slightly larger than data range
 ax[0].set_ylim(0.74, 0.96)
 
+# Plot only compiler runtime data after we created GitHub Actions pipeline for standardization
+avg_compile_time = avg_compile_time[avg_compile_time["date"] >= "2024-12-16"]
+
 # Repeat for avg_compile_time
 for compiler in unique_compilers:
     compiler_data = avg_compile_time[avg_compile_time["compiler"] == compiler]
@@ -118,14 +124,15 @@ for compiler in unique_compilers:
         linestyle="-",
         color=color_map[compiler]
     )
-
+    print('Compiler: ', compiler)
     # Store annotations for adjust_text
     annotations = []
     for index, row in compiler_data.iterrows():
         # Get the version for this date and compiler
         current_version = df_dates[(df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])][f'{compiler}_version'].values[0]
-        
+        print('Current version: ', current_version)
         if current_version != last_version_seen[compiler]:
+            print('New version: ', current_version)
             # Create annotation with textcoords="data" for better alignment
             annotation = ax[1].annotate(
                 f"{compiler}={current_version}",
@@ -164,7 +171,6 @@ for compiler in unique_compilers:
     #     expand_points=(1.01, 1.01),  # Limit how far annotations move from data points
     #     lim=100  # Limit iterations to avoid excessive adjustment time
     # )
-
 
 ax[1].set_title("Average Compile Time over Time")
 ax[1].set_ylabel("Compile Time")
