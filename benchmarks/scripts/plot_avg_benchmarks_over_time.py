@@ -29,12 +29,12 @@ for file in csv_files:
     df['gate_reduction_per_s'] = df['reduction_factor'] / df['compile_time']
     df['compiled_ratio'] = df['compiled_multiq_gates'] / df['raw_multiq_gates']
     for compiler, version in compiler_versions.items():
-        df[f'{compiler}_version'] = version
+        df['compiler_version'] = version
     dataframes.append(df)
 
 df_dates = pd.concat(dataframes, ignore_index=True)
-avg_compiled_ratio = df_dates.groupby(["compiler", "date"])["compiled_ratio"].mean().reset_index().sort_values("date")
-avg_compile_time = df_dates.groupby(["compiler", "date"])["compile_time"].mean().reset_index().sort_values("date")
+avg_compiled_ratio = df_dates.groupby(["compiler", "date", "compiler_version"])["compiled_ratio"].mean().reset_index().sort_values("date")
+avg_compile_time = df_dates.groupby(["compiler", "date", "compiler_version"])["compile_time"].mean().reset_index().sort_values("date")
 
 # Ensure colors are consistently assigned to each compiler
 unique_compilers = sorted(df_dates["compiler"].unique())
@@ -51,7 +51,6 @@ all_texts = []
 # Store previous boundary boxes for annotations
 previous_bboxes = []
 print("Plotting compiled ratio...")
-# Plot avg_compiled_ratio for each compiler
 for compiler in unique_compilers:
     print('Compiler:', compiler)
     compiler_data = avg_compiled_ratio[avg_compiled_ratio["compiler"] == compiler]
@@ -66,20 +65,15 @@ for compiler in unique_compilers:
 
     sorted_compiler_data = compiler_data.sort_values(by=["date", "compiled_ratio"])
 
-
     for date in sorted_compiler_data["date"].unique():
-        # Filter data for this specific date
         date_data = sorted_compiler_data[sorted_compiler_data["date"] == date]
-
-        # Sort the data by compiled_ratio within this date
         date_data = date_data.sort_values(by="compiled_ratio")
 
         # Now iterate over this sorted date data and annotate
         for index, row in date_data.iterrows():
+            print(row, '\n')
             # Get the version for this date and compiler from the original DataFrame
-            current_version = df_dates[
-                (df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])
-            ][f'{compiler}_version'].values[0]
+            current_version = row["compiler_version"]
 
             # Check if the version has changed
             if current_version != last_version_seen[compiler]:
@@ -131,7 +125,7 @@ for compiler in unique_compilers:
 
     for index, row in compiler_data.iterrows():
         # Get the version for this date and compiler
-        current_version = df_dates[(df_dates["compiler"] == compiler) & (df_dates["date"] == row["date"])][f'{compiler}_version'].values[0]
+        current_version = row["compiler_version"]
         if current_version != last_version_seen[compiler]:
             # Create annotation with textcoords="data" for better alignment
             annotation = ax[1].annotate(
