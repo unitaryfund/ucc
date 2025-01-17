@@ -69,7 +69,8 @@ After 2024-12-10, all data present in this plot should be run on the same comput
 
 ## Benchmarking
 
-You can benchmark the performance of ucc against other compilers using `scripts/run_benchmarks.sh`. This script runs compiler benchmarks in parallel, so you will need to first install `parallel` to support it. 
+You can benchmark the performance of ucc against other compilers using `./ucc/benchmarks/scripts/run_benchmarks.sh`. This script runs compiler benchmarks in parallel, so you will need to first install `parallel` to support it.    
+
 On Mac you can do this with `brew install parallel`. 
 
 ## Contributing
