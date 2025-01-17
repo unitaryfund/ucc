@@ -259,6 +259,8 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         ax.figure.canvas.draw()
         bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
 
+        # Update the plot to show the new position
+        ax.figure.canvas.flush_events()
         # Increment the attempt counter and check for max attempts
         attempts += 1
         if attempts >= max_attempts:
