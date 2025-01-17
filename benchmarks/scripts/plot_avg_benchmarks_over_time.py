@@ -165,7 +165,7 @@ ax[1].set_ylabel("Compile Time (s)")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
 ax[1].legend(title="Compiler", loc="center right")
-adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.5, y_log=True)
+adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.75, y_log=True)
 
 plt.xticks(rotation=45)
 plt.tight_layout()

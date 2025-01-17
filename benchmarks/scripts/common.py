@@ -236,13 +236,13 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
             boxstyle="round,pad=0.2",
             edgecolor=color,
             facecolor="white",
-            alpha=0.8
+            alpha=0.5
         )
     )
 
     # Get the bounding box of the annotation in data coordinates
     renderer = ax.figure.canvas.get_renderer()
-    bbox = annotation.get_window_extent(renderer).transformed(ax.transData.inverted())
+    bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
 
     attempts = 0
     # Adjust position to avoid overlap
@@ -263,8 +263,6 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
     # Needed to plot points in correct order
     ax.figure.canvas.flush_events()
 
-import matplotlib
-import numpy as np
 
 def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False):
     """
