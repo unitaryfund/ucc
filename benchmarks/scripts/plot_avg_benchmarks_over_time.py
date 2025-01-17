@@ -33,13 +33,6 @@ for file in csv_files:
     dataframes.append(df)
 
 df_dates = pd.concat(dataframes, ignore_index=True)
-# df_dates["date"] = pd.to_datetime(df_dates["date"], errors='coerce').dt.date
-# Print unique compiler versions for each compiler
-print("Unique compiler versions for each compiler:", df_dates.groupby("compiler")["compiler_version"].unique(), '\n')
-
-# Print unique versions for each compiler
-for compiler in df_dates["compiler"].unique():
-    print(f"Unique versions for {compiler}: {df_dates[df_dates['compiler'] == compiler]['compiler_version'].unique()}")
 
 # Find the average compiled ratio for each compiler on each date
 avg_compiled_ratio = df_dates.groupby(["compiler", "date", "compiler_version"])["compiled_ratio"].mean().reset_index().sort_values("date")
@@ -84,7 +77,6 @@ for date in avg_compiled_ratio["date"].unique():
     # print('Date data for \n', date, date_data, '\n')
     # Now iterate over each compiler entry and annotate if it's a new version
     for _, row in date_data.iterrows():
-        print(row, '\n')
         # Get the version for this date 
         current_version = row["compiler_version"]
         compiler = row["compiler"]
@@ -105,7 +97,7 @@ for date in avg_compiled_ratio["date"].unique():
                 previous_bboxes=previous_bboxes,
                 offset=(0, 15),  # Initial offset
                 increment=2,  # Vertical adjustment step
-                max_attempts=20,
+                max_attempts=10,
             )
             plt.pause(0.1)
             # Update the last seen version for this compiler
@@ -139,14 +131,13 @@ for compiler in unique_compilers:
         color=color_map[compiler]
     )
 
+# Add annotations for version changes
 for date in avg_compile_time["date"].unique():
     date_data = avg_compile_time[avg_compile_time["date"] == date]
-    # print('Date data for \n', date, date_data, '\n')
-    # Now iterate over each compiler entry and annotate if it's a new version
     # Sort date_data in order of compiled_ratio
     date_data = date_data.sort_values("compile_time")
     for _, row in date_data.iterrows():
-        print(row, '\n')
+        # print(row, '\n')
         # Get the version for this date 
         current_version = row["compiler_version"]
         compiler = row["compiler"]
@@ -165,11 +156,11 @@ for date in avg_compile_time["date"].unique():
                 xy=xy,
                 color=color,
                 previous_bboxes=previous_bboxes,
-                offset=(0, 15),  # Initial offset
+                offset=(0, 25),  # Initial offset
                 increment=2,  # Vertical adjustment step
-                max_attempts=20,
+                max_attempts=10,
             )
-            plt.pause(0.1)
+            # plt.pause(0.1)
             # Update the last seen version for this compiler
             last_version_seen[compiler] = current_version
 

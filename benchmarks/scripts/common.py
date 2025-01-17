@@ -229,14 +229,14 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
             arrowstyle="->",
             color=color,
             lw=0.5,
-            shrinkA=5,  # Shrink arrow length to avoid overlap
+            shrinkA=0,  # Shrink arrow length to avoid overlap
             shrinkB=5
         ),
         bbox=dict(
             boxstyle="round,pad=0.2",
             edgecolor=color,
             facecolor="white",
-            alpha=0.5
+            alpha=0.25
         )
     )
 
