@@ -1,4 +1,4 @@
-Welcome to ucc's documentation!
+Welcome to the docs!
 ===============================
 
 .. include:: ../../README.md
