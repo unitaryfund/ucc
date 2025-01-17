@@ -1,5 +1,9 @@
 Welcome to ucc's documentation!
 ===============================
+.. myst:: 
+
+   ```{include} ../README.md
+
 
 Getting started
 ---------------

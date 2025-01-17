@@ -16,10 +16,16 @@ with open(f"{directory_of_this_file}/../../VERSION.txt", "r") as f:
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc", "myst_parser"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+extensions = [
+    "myst_parser",  # Enable MyST Markdown parser
+    # Add other extensions as needed
+]
+
+source_suffix = [".rst", ".md"]  # Allow Sphinx to process both .rst and .md files
 
 
 # -- Options for HTML output -------------------------------------------------
