@@ -8,7 +8,11 @@ Welcome to ucc's documentation!
 Getting started
 ---------------
 
-To install ``ucc`` run ::
+To install ``ucc`` via PyPI, run ::
+
+    pip install ucc
+
+To install from source, run ::
 
     git clone https://github.com/unitaryfund/ucc.git
     cd ucc
