@@ -52,7 +52,6 @@ all_texts = []
 previous_bboxes = []
 print("Plotting compiled ratio...")
 for compiler in unique_compilers:
-    print('Compiler:', compiler)
     compiler_data = avg_compiled_ratio[avg_compiled_ratio["compiler"] == compiler]
     ax[0].plot(
         compiler_data["date"],
@@ -71,7 +70,7 @@ for compiler in unique_compilers:
 
         # Now iterate over this sorted date data and annotate
         for index, row in date_data.iterrows():
-            print(row, '\n')
+            # print(row, '\n')
             # Get the version for this date and compiler from the original DataFrame
             current_version = row["compiler_version"]
 
@@ -163,6 +162,6 @@ adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.75, y_log=True)
 
 plt.xticks(rotation=45)
 plt.tight_layout()
-filename = os.path.join(directory_of_this_file, "../avg_compiler_benchmarks_over_time_with_versions_and_arrows.png")
+filename = os.path.join(directory_of_this_file, "../avg_compiler_benchmarks_over_time.png")
 print(f"\nSaving plot to {filename}")
 fig.savefig(filename)

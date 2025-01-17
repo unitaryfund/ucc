@@ -240,28 +240,34 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         )
     )
 
-    # Get the bounding box of the annotation in data coordinates
+    # Force a renderer update to ensure bounding box accuracy
+    ax.figure.canvas.draw()
     renderer = ax.figure.canvas.get_renderer()
+
+    # Get the bounding box of the annotation in data coordinates
     bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
 
     attempts = 0
+    current_offset = offset[1]
     # Adjust position to avoid overlap
     while any(bbox.overlaps(prev_bbox) for prev_bbox in previous_bboxes):
         # Increase vertical offset to move annotation upward
-        current_offset = annotation.xyann[1]
-        annotation.set_position((offset[0], current_offset + increment))
-        # Update the bounding box after adjustment
-        bbox = annotation.get_window_extent(renderer).transformed(ax.transData.inverted())
+        current_offset += increment
+        annotation.set_position((offset[0], current_offset))
+        
+        # Force the renderer to update after position adjustment
+        ax.figure.canvas.draw()
+        bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
 
         # Increment the attempt counter and check for max attempts
         attempts += 1
         if attempts >= max_attempts:
             print(f"Warning: Maximum adjustment attempts reached for annotation '{text}'.")
             break
+
     # Add the final bounding box to the list of previous bounding boxes
     previous_bboxes.append(bbox)
-    # Needed to plot points in correct order
-    ax.figure.canvas.flush_events()
+
 
 
 def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False):
