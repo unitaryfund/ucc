@@ -1,7 +1,13 @@
 Welcome to ucc's documentation!
 ===============================
+
 .. include:: ../../README.md
-    :parser: myst_parser.sphinx_
+   :parser: myst_parser.sphinx_
+   :end-before: <!-- start-how-does-ucc-stack-up -->
+
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+   :start-after: <!-- end-how-does-ucc-stack-up -->
 
 .. toctree::
    :maxdepth: 1
