@@ -1,30 +1,14 @@
 Welcome to ucc's documentation!
 ===============================
-.. myst:: 
-
-   ```{include} ../README.md
-
-
-Getting started
----------------
-
-To install ``ucc`` via PyPI, run ::
-
-    pip install ucc
-
-To install from source, run ::
-
-    git clone https://github.com/unitaryfund/ucc.git
-    cd ucc
-    pip install -e . # Editable mode
-
+.. include:: ../../README.md
+    :parser: myst_parser.sphinx_
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-   API-doc <api.rst>
    User Guide <user_guide.rst>
+   API-doc <api.rst>
    Contributing Guide <contributing.rst>
    Developer Documentation <dev.rst>
    Code of Conduct <CODE_OF_CONDUCT.rst>
