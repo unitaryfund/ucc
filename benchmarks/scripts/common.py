@@ -212,7 +212,7 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         increment (int): The vertical adjustment increment in points to resolve overlaps.
         fontsize (int): Font size of the annotation text.
         max_attempts (int): The maximum number of position adjustments to resolve overlaps.
-
+        #TODO: Add margin parameter to adjust the bounding box size. Can be an issue when comparing dates which are strings
     Returns:
         None
     """
@@ -246,11 +246,18 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
 
     # Get the bounding box of the annotation in data coordinates
     bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
+    # print(f"Initial annotation: '{text}' at {xy}, bbox: {bbox}", '\n')
 
     attempts = 0
     current_offset = offset[1]
     # Adjust position to avoid overlap
     while any(bbox.overlaps(prev_bbox) for prev_bbox in previous_bboxes):
+        for prev_bbox in previous_bboxes:
+            if bbox.overlaps(prev_bbox):
+                # print(f"\nOverlapping with previous annotation:\n"
+                #       f"  Previous bbox: {prev_bbox}\n"
+                #       f"  Annotation text: '{annotation.get_text()}'\n")
+                break
         # Increase vertical offset to move annotation upward
         current_offset += increment
         annotation.set_position((offset[0], current_offset))
