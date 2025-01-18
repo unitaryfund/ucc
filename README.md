@@ -13,7 +13,7 @@ UCC interfaces automatically with multiple quantum computing frameworks, includi
 **Want to know more?** 
 - Check out our documentation, which you can build locally after installation by running `make html` in `ucc/docs/source`.
 - For code, repo, or theory questions, especially those requiring more detailed responses, submit a [Discussion](https://github.com/unitaryfund/ucc/discussions).
-- For casual or time sensitive questions, chat with us on [Discord](http://discord.unitary.fund).
+- For casual or time sensitive questions, chat with us on [Discord](http://discord.unitary.foundation).
 
 ## Quickstart
 
