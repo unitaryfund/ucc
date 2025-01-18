@@ -17,6 +17,10 @@ with open(f"{directory_of_this_file}/../../VERSION.txt", "r") as f:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc", "myst_parser"]
+# Suppress warnings related to heading levels
+suppress_warnings = [
+    'myst.header'
+]
 
 # Optionally, enable cross-referencing for `.rst` files as well
 myst_crossref = True
