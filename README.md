@@ -20,6 +20,11 @@ UCC interfaces automatically with multiple quantum computing frameworks, includi
 ### Installation
 
 ```bash
+pip install ucc
+```
+
+or install a dev version!
+```bash
 git clone https://github.com/unitaryfund/ucc.git
 cd ucc
 pip install -e . # Editable mode
