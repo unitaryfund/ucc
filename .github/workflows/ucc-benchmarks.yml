@@ -21,6 +21,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
+          
+      - name: Enable SSH Debugging
+        run: |
+          echo "Debugging SSH Key..."
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
 
       # Build the Docker image
       - name: Build Docker image
