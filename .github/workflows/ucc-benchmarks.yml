@@ -57,7 +57,7 @@ jobs:
       run: |
         git add benchmarks/*
         git status
-        git commit -m "Update benchmark results" || echo "No changes to commit"
+        git commit -m "Update benchmark results [benchmark chore]" || echo "No changes to commit"
         git push origin HEAD
     
     # Create a pull request (PR) to main
