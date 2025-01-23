@@ -108,9 +108,9 @@ adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.05)
 
 ax[0].set_title("Average Compiled Ratio over Time")
 ax[0].set_ylabel("Compiled Ratio")
-# ax[0].legend(title="Compiler", loc='center left')
+ax[0].set_ylim(0.735, 0.96)
 # Expand axes to be slightly larger than data range
-ax[0].legend(title="Compiler", loc="center right")
+ax[0].legend(title="Compiler")
 
 
 #### Plot Compile time
@@ -169,7 +169,7 @@ ax[1].set_title("Average Compile Time over Time")
 ax[1].set_ylabel("Compile Time (s)")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
-ax[1].legend(title="Compiler", loc="center right")
+ax[1].legend(title="Compiler")
 adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.75, y_log=True)
 
 plt.xticks(rotation=45)
