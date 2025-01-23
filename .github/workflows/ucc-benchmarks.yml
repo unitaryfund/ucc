@@ -3,13 +3,13 @@ name: Run Benchmarks
 on:
   push:
     branches:
-      - push-deploy-key
+      - main
   workflow_dispatch:  # Allows the workflow to be triggered manually
     inputs:  # Optional inputs to customize the workflow when triggered manually
       branch:
         description: 'Branch to run benchmarks on'
         required: false
-        default: 'push-deploy-key'
+        default: 'main'
 
 jobs:
   run-benchmarks:
@@ -33,7 +33,9 @@ jobs:
             -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
-              ./benchmarks/scripts/small_test.sh
+              ./benchmarks/scripts/run_benchmarks.sh 8 && \
+              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
+              python ./benchmarks/scripts/plot_latest_benchmarks.py
             "
 
       # Commit and push benchmark results
