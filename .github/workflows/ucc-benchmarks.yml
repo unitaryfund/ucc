@@ -33,7 +33,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ssh-key: ~/.ssh/id_ed25519
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
           
       # Build the Docker image
       - name: Build Docker image
