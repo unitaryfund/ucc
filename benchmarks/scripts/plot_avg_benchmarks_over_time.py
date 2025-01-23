@@ -99,7 +99,7 @@ for date in avg_compiled_ratio["date"].unique():
                 increment=2,  # Vertical adjustment step
                 max_attempts=10,
             )
-            plt.pause(0.1)
+            # plt.pause(0.1)
             # Update the last seen version for this compiler
             last_version_seen[compiler] = current_version
     previous_bboxes = [] # Reset previous bboxes for next date            
@@ -108,7 +108,7 @@ adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.05)
 
 ax[0].set_title("Average Compiled Ratio over Time")
 ax[0].set_ylabel("Compiled Ratio")
-ax[0].set_ylim(0.735, 0.96)
+ax[0].set_ylim(0.745, 0.96)
 # Expand axes to be slightly larger than data range
 ax[0].legend(title="Compiler")
 
