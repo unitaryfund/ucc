@@ -22,11 +22,8 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519 
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          ssh -v -i ~/.ssh/id_ed25519 git@github.com
-
-      
-      - name: Test SSH Key
-        run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
+          # Test SSH connection with a Git command (non-interactive)
+          git ls-remote git@github.com:unitaryfund/ucc.git
 
       - name: Checkout Code
         uses: actions/checkout@v4
