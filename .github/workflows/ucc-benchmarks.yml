@@ -17,16 +17,17 @@ jobs:
 
     steps:
       # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
           
       - name: Enable SSH Debugging
         run: |
           echo "Debugging SSH Key..."
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
-
+      
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          
       # Build the Docker image
       - name: Build Docker image
         run: docker build -t ucc-benchmark .
