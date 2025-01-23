@@ -3,13 +3,13 @@ name: Run Benchmarks
 on:
   push:
     branches:
-      - main
+      - push-deploy-key
   workflow_dispatch:  # Allows the workflow to be triggered manually
     inputs:  # Optional inputs to customize the workflow when triggered manually
       branch:
         description: 'Branch to run benchmarks on'
         required: false
-        default: 'main'
+        default: 'push-deploy-key'
 
 jobs:
   run-benchmarks:
