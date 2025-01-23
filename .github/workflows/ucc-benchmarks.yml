@@ -16,20 +16,6 @@ jobs:
     runs-on: ucc-benchmarks-8-core-U22.04
 
     steps:
-      - name: Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519 
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          # Test SSH connection with a Git command (non-interactive)
-          git ls-remote git@github.com:unitaryfund/ucc.git
-      
-      - name: Add SSH Key to SSH Agent
-        run: |
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_ed25519
-
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
