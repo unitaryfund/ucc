@@ -22,7 +22,9 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519 
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          ssh -v -i ~/.ssh/id_ed25519 git@github.com
 
+      
       - name: Test SSH Key
         run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
 
