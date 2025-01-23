@@ -32,9 +32,7 @@ jobs:
             -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
               source /venv/bin/activate && \
-              ./benchmarks/scripts/run_benchmarks.sh 8 && \
-              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
-              python ./benchmarks/scripts/plot_latest_benchmarks.py
+              ./benchmarks/scripts/small_test.sh
             "
 
       # Commit and push benchmark results
@@ -47,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git switch ${{ github.head_ref || github.ref_name }}
-          git add benchmarks/*
+          git add -f benchmarks/*
           git status
           git commit -m "Update benchmark results" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }} --force
