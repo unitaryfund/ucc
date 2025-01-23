@@ -1,56 +1,68 @@
+import sys
+
 import cirq
 import pytket
 import qiskit
-from cirq.contrib.qasm_import import circuit_from_qasm
 from qiskit import qasm2
 from qiskit.quantum_info import Operator, Statevector
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 import numpy as np
 
-from common import cirq_compile, pytket_compile, qiskit_compile, save_results
+from common import cirq_compile, pytket_compile, qiskit_compile, save_results, get_native_rep
 from ucc import compile as ucc_compile
 
+if len(sys.argv) < 4:
+    print("Usage: python expval_benchmark.py <qasm_filepath> <compiler> <results_folder>")
+    sys.exit(1)
 
-with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
+qasm_path: str = sys.argv[1]
+compiler_alias: str = sys.argv[2]
+results_folder: str = sys.argv[3]  # New argument for results folder
+
+with open(qasm_path) as f:
     qasm_string = f.read()
 
-def generate_compiled_circuits(qasm: str) -> dict[str, qiskit.QuantumCircuit]:
-    """Compiles the circuit represented in a QASM string using different
-    compilers before converting them all to Qiskit circuits.
+def compile_for_simulation(circuit, compiler_alias: str) -> qiskit.QuantumCircuit:
+    """Compiles the circuit and converts it to qiskit so it can be run on the AerSimulator.
 
     Args:
-        qasm: The QASM string representing the quantum circuit to be compiled.
+        circuit: The circuit to be compiled. Can be any of the supported
+            circuit representations (cirq, qiskit, pytket)
+        compiler_alias: The alias of the compiler to be used for compilation.
+            Can be one of "ucc", "qiskit", "cirq", "pytket", or "none".
 
     Returns:
-        A dictionary containing the compiled quantum circuits with keys:
-        uncompiled, ucc, cirq, qiskit, pytket.
+        A compiled circuit having used the compiler affiliated with the
+        compiler_alias.
     """
-    uncompiled_circuit = qasm2.loads(qasm)
-    qiskit_compiled = qiskit_compile(uncompiled_circuit)
-    uncompiled_circuit.save_density_matrix()
-    qiskit_compiled.save_density_matrix()
+    match compiler_alias:
+        case "ucc":
+            ucc_compiled = ucc_compile(circuit, return_format="qiskit")
+            ucc_compiled.save_density_matrix()
+            return ucc_compiled
 
-    ucc_compiled = ucc_compile(qasm, return_format="qiskit")
-    ucc_compiled.save_density_matrix()
+        case "pytket":
+            pytket_compiled = pytket.qasm.circuit_to_qasm_str(
+                pytket_compile(circuit)
+            )
+            pytket_compiled_qiskit = qasm2.loads(pytket_compiled)
+            pytket_compiled_qiskit.save_density_matrix()
+            return pytket_compiled_qiskit
 
-    cirq_compiled = cirq.qasm(cirq_compile(circuit_from_qasm(qasm)))
-    cirq_compiled_qiskit = qasm2.loads(cirq_compiled)
-    cirq_compiled_qiskit.save_density_matrix()
+        case "qiskit":
+            qiskit_compiled = qiskit_compile(circuit)
+            qiskit_compiled.save_density_matrix()
+            return qiskit_compiled
 
-    pytket_compiled = pytket.qasm.circuit_to_qasm_str(
-        pytket_compile(pytket.qasm.circuit_from_qasm_str(qasm_string))
-    )
-    pytket_compiled_qiskit = qasm2.loads(pytket_compiled)
-    pytket_compiled_qiskit.save_density_matrix()
+        case "cirq":
+            cirq_compiled_qasm = cirq.qasm(cirq_compile(circuit))
+            cirq_compiled_qiskit = qasm2.loads(cirq_compiled_qasm)
+            cirq_compiled_qiskit.save_density_matrix()
+            return cirq_compiled_qiskit
 
-    return {
-        "uncompiled": uncompiled_circuit,
-        "ucc": ucc_compiled,
-        "cirq": cirq_compiled_qiskit,
-        "qiskit": qiskit_compiled,
-        "pytket": pytket_compiled_qiskit,
-    }
+        case _:
+            raise ValueError(f"Unknown compiler alias: {compiler_alias}")
 
 
 def simulate_density_matrix(circuit: qiskit.QuantumCircuit) -> np.ndarray:
@@ -64,32 +76,29 @@ def simulate_density_matrix(circuit: qiskit.QuantumCircuit) -> np.ndarray:
     return simulator.run(circuit).result().data()["density_matrix"]
 
 
-density_matrices = {
-    compiler: simulate_density_matrix(circuit)
-    for compiler, circuit in generate_compiled_circuits(qasm_string).items()
-}
+native_circuit = get_native_rep(qasm_string, compiler_alias)
+compiled_circuit = compile_for_simulation(native_circuit, compiler_alias)
+density_matrix = simulate_density_matrix(compiled_circuit)
+
+obs_str = "Z" * compiled_circuit.num_qubits
+observable = Operator.from_label(obs_str)
+
+compiled_ev = np.real(density_matrix.expectation_value(observable))
 
 
-observable = Operator.from_label("ZZZZZZZZZZ")
-
-expectation_values = {
-    compiler: np.real(dm.expectation_value(observable))
-    for compiler, dm in density_matrices.items()
-}
-
-
-ideal_circuit = qasm2.loads(qasm_string)
+ideal_circuit = get_native_rep(qasm_string, "qiskit")
 ideal_state = Statevector.from_instruction(ideal_circuit)
-ideal_expval = np.real(ideal_state.expectation_value(observable))
+ideal_ev = np.real(ideal_state.expectation_value(observable))
 
 results = [{
-    "compiler":compiler,
-    "expval": expval,
-    "absoluate_error": abs(ideal_expval - expval),
-    "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
-    "ideal": ideal_expval,
+    "compiler": compiler_alias,
+    "circuit_name": qasm_path.split('/')[-1].split('_N')[0],
+    "observable": obs_str,
+    "expval": compiled_ev,
+    "absoluate_error": abs(ideal_ev - compiled_ev),
+    "relative_error": abs(ideal_ev - compiled_ev) / abs(ideal_ev),
+    "ideal_expval": ideal_ev,
     }
-    for compiler, expval in expectation_values.items()
 ]
 
-save_results(results, "expval")
+save_results(results, benchmark_name="expval", folder=results_folder, append=True)
