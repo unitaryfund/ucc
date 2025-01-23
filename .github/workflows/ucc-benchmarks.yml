@@ -1,5 +1,5 @@
 name: Run Benchmarks
- 
+
 on:
   push:
     branches:
