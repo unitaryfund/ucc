@@ -24,6 +24,11 @@ jobs:
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
           # Test SSH connection with a Git command (non-interactive)
           git ls-remote git@github.com:unitaryfund/ucc.git
+      
+      - name: Add SSH Key to SSH Agent
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
 
       - name: Checkout Code
         uses: actions/checkout@v4
