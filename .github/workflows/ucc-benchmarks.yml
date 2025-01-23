@@ -20,7 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ensure the full history is fetched
           ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       # Build the Docker image
