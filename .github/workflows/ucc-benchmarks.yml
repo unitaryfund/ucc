@@ -3,17 +3,18 @@ name: Run Benchmarks
 on:
   push:
     branches:
-      - main
+      - PR-auto-merge-GH-Action
   workflow_dispatch:
     inputs:
       branch:
         description: 'Branch to run benchmarks on'
         required: false
-        default: 'main'
+        default: 'PR-auto-merge-GH-Action'
 
 jobs:
   run-benchmarks:
     runs-on: ucc-benchmarks-8-core-U22.04
+    if: ! contains(github.event.head_commit.message, '[benchmark chore')
 
     steps:
      # Checkout the latest main branch
@@ -40,9 +41,7 @@ jobs:
           -v "${{ github.workspace }}:/ucc" \
           ucc-benchmark bash -c "
               source /venv/bin/activate && \
-              ./benchmarks/scripts/run_benchmarks.sh 8 && \
-              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
-              python ./benchmarks/scripts/plot_latest_benchmarks.py
+              ./benchmarks/scripts/small_test.sh
             "
 
     # Commit and push benchmark results
