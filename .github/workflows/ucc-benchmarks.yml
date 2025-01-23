@@ -16,17 +16,20 @@ jobs:
     runs-on: ucc-benchmarks-8-core-U22.04
 
     steps:
-      # Checkout the repository
-          
-      - name: Enable SSH Debugging
+      - name: Setup SSH Key
         run: |
-          echo "Debugging SSH Key..."
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
-      
-      - name: Checkout code
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+      - name: Test SSH Key
+        run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no git@github.com
+
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          ssh-key: ~/.ssh/id_ed25519
           
       # Build the Docker image
       - name: Build Docker image
