@@ -5,6 +5,22 @@ from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile
 from .transpilers.ucc_defaults import UCCDefault1
 
+
+import sys
+import warnings
+
+# Specify the supported Python version range
+REQUIRED_MAJOR = 3
+MINOR_VERSION_MIN = 12
+MINOR_VERSION_MAX = 13
+
+current_major = sys.version_info.major
+current_minor = sys.version_info.minor
+
+if current_major != REQUIRED_MAJOR or not (MINOR_VERSION_MIN <= current_minor <= MINOR_VERSION_MAX):
+    warnings.warn(
+        f"Warning: This package is designed for Python {REQUIRED_MAJOR}.{MINOR_VERSION_MIN}-{REQUIRED_MAJOR}.{MINOR_VERSION_MAX}. "
+        f"You are using Python) {current_major}.{current_minor}.")
 supported_circuit_formats = ConversionGraph().nodes()
 
 
