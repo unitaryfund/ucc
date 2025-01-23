@@ -2,3 +2,4 @@
 compiler,circuit_name,raw_multiq_gates,compile_time,compiled_multiq_gates
 ucc,qcnn,388,0.10066056251525879,388
 ucc,qcnn,388,0.10038375854492188,388
+ucc,qcnn,388,0.10008430480957031,388
