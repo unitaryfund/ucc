@@ -97,13 +97,14 @@ for date in avg_compiled_ratio["date"].unique():
                 previous_bboxes=previous_bboxes,
                 offset=(0, 15),  # Initial offset
                 increment=2,  # Vertical adjustment step
-                max_attempts=15,
+                max_attempts=20,
+                rotation=30
             )
-            # plt.pause(0.1)
+            plt.pause(0.1)
             # Update the last seen version for this compiler
             last_version_seen[compiler] = current_version
-    # previous_bboxes = [] # Reset previous bboxes for next date            
-adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.05)
+               
+adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.075)
 # Set y axis range to be slightly larger than data range
 
 ax[0].set_title("Average Compiled Ratio over Time")
@@ -157,9 +158,10 @@ for date in avg_compile_time["date"].unique():
                 xy=xy,
                 color=color,
                 previous_bboxes=previous_bboxes,
-                offset=(0, 25),  # Initial offset
+                offset=(0, 15),  # Initial offset
                 increment=2,  # Vertical adjustment step
                 max_attempts=10,
+                rotation=15
             )
             # plt.pause(0.1)
             # Update the last seen version for this compiler

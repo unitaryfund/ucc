@@ -198,7 +198,7 @@ def get_qasm_files():
     return sys.argv[1:]
 
 
-def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20):
+def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20, rotation=15):
     """
     Annotates the plot while dynamically adjusting the position to avoid overlaps. In-place operation.
 
@@ -225,7 +225,7 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         ha='center',
         fontsize=fontsize,
         color=color,
-        rotation=15,
+        rotation=rotation,
         arrowprops=dict(
             arrowstyle="->",
             color=color,
@@ -247,7 +247,7 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
 
     # Get the bounding box of the annotation in data coordinates
     bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
-    # print(f"Initial annotation: '{text}' at {xy}, bbox: {bbox}", '\n')
+    print(f"Initial annotation: '{text}' at {xy}, bbox: {bbox}", '\n')
 
     attempts = 0
     current_offset = offset[1]
@@ -255,9 +255,9 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
     while any(bbox.overlaps(prev_bbox) for prev_bbox in previous_bboxes):
         for prev_bbox in previous_bboxes:
             if bbox.overlaps(prev_bbox):
-                # print(f"\nOverlapping with previous annotation:\n"
-                #       f"  Previous bbox: {prev_bbox}\n"
-                #       f"  Annotation text: '{annotation.get_text()}'\n")
+                print(f"\nOverlapping with previous annotation:\n"
+                      f"  Previous bbox: {prev_bbox}\n"
+                      f"  Annotation text: '{annotation.get_text()}'\n")
                 break
         # Increase vertical offset to move annotation upward
         current_offset += increment
