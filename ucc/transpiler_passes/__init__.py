@@ -9,5 +9,5 @@ from .collect_1q_runs import Collect1qRuns
 from .optimize_1q_decomposition import Optimize1qGatesDecomposition
 from .spectral_mapping import SpectralMapping
 from .sabre_layout import SabreLayout
-# from .layout.mapomatic_layout import MapomaticLayout
 from .layout.vf2_post_layout import VF2PostLayout
+from .layout.vf2_layout import VF2Layout

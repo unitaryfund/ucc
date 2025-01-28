@@ -15,13 +15,12 @@ from qiskit.transpiler.passes import (
     HLSConfig,
     SabreLayout,
     SabreSwap,
-    VF2Layout,
 )
 from qiskit.transpiler.passes.synthesis.unitary_synthesis import DefaultUnitarySynthesis
 # from ucc.transpiler_passes.sabre_swap import SabreSwap
 
 
-from ..transpiler_passes import CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, SpectralMapping, VF2PostLayout
+from ..transpiler_passes import CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, VF2Layout, VF2PostLayout
 from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation, ElidePermutations
 
 
@@ -53,7 +52,7 @@ class UCCDefault1:
         return 
         
     def add_local_passes(self, local_iterations):
-        for _ in range(local_iterations):            
+        for _ in range(local_iterations):
             self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))            
             self.pass_manager.append(Optimize1qGatesDecomposition())
             self.pass_manager.append(CommutativeCancellation(standard_gates=self.target_basis, special_commutations=self.special_commutations))
