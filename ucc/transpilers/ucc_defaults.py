@@ -62,6 +62,7 @@ class UCCDefault1:
             # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
             self.pass_manager.append(HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"])))
+            self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
 
             #Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
@@ -76,7 +77,7 @@ class UCCDefault1:
             self.pass_manager.append(
                 SabreLayout(
                     coupling_map,
-                    seed=1,
+                    seed=10,
                     max_iterations=4,
                     swap_trials=_get_trial_count(20),
                     layout_trials=_get_trial_count(20),
@@ -97,13 +98,13 @@ class UCCDefault1:
             self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
             self.pass_manager.append(ApplyLayout())
             self.add_local_passes(1)
-            self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
-            self.pass_manager.append(ApplyLayout())
+            # self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
+            # self.pass_manager.append(ApplyLayout())
 
 
     def run(self, circuits, coupling_list=None):
         self.add_map_passes(coupling_list)
-        self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
+        # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis)) 
         out_circuits = self.pass_manager.run(circuits)
         return out_circuits
 

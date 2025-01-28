@@ -107,11 +107,11 @@ class VF2PostLayout(AnalysisPass):
         target=None,
         coupling_map=None,
         properties=None,
-        seed=None,
-        call_limit=None,
+        seed=1,
+        call_limit=int(3e7),
         time_limit=None,
         strict_direction=True,
-        max_trials=0,
+        max_trials=250000,
     ):
         """Initialize a ``VF2PostLayout`` pass instance
 
