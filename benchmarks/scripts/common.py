@@ -102,7 +102,7 @@ def qiskit_compile(qiskit_circuit):
 
 # Cirq compilation
 def cirq_compile(cirq_circuit):
-    return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
+    return optimize_for_target_gateset(cirq_circuit, )
 
 
 # Multi-qubit gate count for PyTkets
