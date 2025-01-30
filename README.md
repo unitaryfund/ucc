@@ -20,7 +20,7 @@ UCC interfaces automatically with multiple quantum computing frameworks, includi
 
 ### Installation
 
-**Note**: UCC requires Python version >= 3.12.
+**Note**: UCC requires Python version ≥ 3.12.
 
 ```bash
 pip install ucc

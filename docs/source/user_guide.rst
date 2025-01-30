@@ -16,7 +16,7 @@ To install ``ucc`` run:
    pip install -e . # Editable mode
 
 
-UCC requires Python version :math:`\ge` 3.12. 
+UCC requires Python version ≥ 3.12. 
 
 Basic usage
 ***********
