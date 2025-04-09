@@ -8,7 +8,6 @@ from qiskit.transpiler import Target
 from qiskit.transpiler.passes import (
     ApplyLayout,
     BasisTranslator,
-    ConsolidateBlocks,
     CollectCliffords,
     HighLevelSynthesis,
     HLSConfig,
@@ -22,6 +21,7 @@ from qiskit.transpiler.passes import (
     VF2PostLayout,
 )
 from typing import Optional
+from ucc.transpiler_passes.consolidate_blocks import ConsolidateBlocks
 
 
 CONFIG = user_config.get_config()
