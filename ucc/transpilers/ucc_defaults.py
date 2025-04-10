@@ -18,6 +18,7 @@ from qiskit.transpiler.passes import (
     Collect2qBlocks,
     UnitarySynthesis,
     Optimize1qGatesDecomposition,
+    Optimize1qGatesSimpleCommutation,
     VF2PostLayout,
 )
 from typing import Optional
@@ -77,12 +78,18 @@ class UCCDefault1:
             # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
             self.pass_manager.append(
-                HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"]))
+                HighLevelSynthesis(
+                    hls_config=HLSConfig(clifford=["greedy"]),
+                    basis_gates=self.target_basis,
+                )
             )
-
             # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
-            # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
-            # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))
+            self.pass_manager.append(
+                Optimize1qGatesSimpleCommutation(basis=self._1q_basis)
+            )
+            self.pass_manager.append(
+                BasisTranslator(sel, target_basis=self.target_basis)
+            )
 
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
