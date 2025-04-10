@@ -16,13 +16,14 @@ from qiskit.transpiler.passes import (
     VF2Layout,
     CommutativeCancellation,
     Collect2qBlocks,
+    ConsolidateBlocks,
     UnitarySynthesis,
     Optimize1qGatesDecomposition,
     Optimize1qGatesSimpleCommutation,
     VF2PostLayout,
 )
 from typing import Optional
-from ucc.transpiler_passes.consolidate_blocks import ConsolidateBlocks
+# from ucc.transpiler_passes.consolidate_blocks import ConsolidateBlocks
 
 
 CONFIG = user_config.get_config()
@@ -80,7 +81,6 @@ class UCCDefault1:
             self.pass_manager.append(
                 HighLevelSynthesis(
                     hls_config=HLSConfig(clifford=["greedy"]),
-                    basis_gates=self.target_basis,
                 )
             )
             # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
