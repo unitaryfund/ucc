@@ -82,12 +82,8 @@ class UCCDefault1:
                     hls_config=HLSConfig(clifford=["greedy"]),
                 )
             )
-            # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             self.pass_manager.append(
                 Optimize1qGatesSimpleCommutation(basis=self._1q_basis)
-            )
-            self.pass_manager.append(
-                BasisTranslator(sel, target_basis=self.target_basis)
             )
 
     def _add_map_passes(self, target_device: Optional[Target] = None):
