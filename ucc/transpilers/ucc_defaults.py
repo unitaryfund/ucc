@@ -23,7 +23,6 @@ from qiskit.transpiler.passes import (
     VF2PostLayout,
 )
 from typing import Optional
-# from ucc.transpiler_passes.consolidate_blocks import ConsolidateBlocks
 
 
 CONFIG = user_config.get_config()
