@@ -30,7 +30,7 @@ pytest = ">=6.0"
 pytest-cov = ">=2.10"
 qiskit-aer = ">=0.15.1"
 seaborn = "*"
-ruff = "^0.9.4"
+ruff = "^0.11.7"
 pre-commit = "^4.1.0"
 
 [tool.poetry.group.doc.dependencies]
