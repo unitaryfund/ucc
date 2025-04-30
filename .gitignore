@@ -16,3 +16,7 @@ dist/
 build/
 jupyter_execute/
 benchmarks/results/test_data
+# SMT files
+*.output
+*.smt2
+.local/

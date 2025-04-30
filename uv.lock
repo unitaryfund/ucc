@@ -347,6 +347,31 @@ wheels = [
 ]
 
 [[package]]
+name = "juliacall"
+version = "0.9.24"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "juliapkg" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cb/4b/63965b6ebc97c861b5b565bdfc5fbe942aaf6ac99b1b17427e1369fb4bec/juliacall-0.9.24.tar.gz", hash = "sha256:31bed223489b535e4e8db46bfff4596350c24f757b9c2d17296c07397f75948b", size = 470319, upload_time = "2025-01-22T10:39:49.438Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/88/bc544390a0bbf1eb425540b2ba2abe0d478c31d3002a703fdb640f4abc2a/juliacall-0.9.24-py3-none-any.whl", hash = "sha256:f1d7b718228c477aeba770290647f3b2d0052f683da891b4e9f88c1e1da0a394", size = 11950, upload_time = "2025-01-22T10:39:47.389Z" },
+]
+
+[[package]]
+name = "juliapkg"
+version = "0.1.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "filelock" },
+    { name = "semver" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/23/9b/e1f13314e95864c861234bfb5a2b82466f0e68a4ce2a45c15d405fdb7b36/juliapkg-0.1.16.tar.gz", hash = "sha256:f26cc314f2a3194428bf7492270b1c371194ce288806ffbac5baa0eb9468a120", size = 16753, upload_time = "2025-02-18T14:31:43.667Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/65/302c3fc0a669660730d091ccc268c9988864c387ab2aaf5b8a70e6bed822/juliapkg-0.1.16-py3-none-any.whl", hash = "sha256:def06f89ec1f27e290b6b4ad856290a8fdcfe257f002fbe1becdf3ba0ad4579c", size = 16404, upload_time = "2025-02-18T14:31:41.982Z" },
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.8"
 source = { registry = "https://pypi.org/simple" }
@@ -1139,6 +1164,15 @@ wheels = [
 ]
 
 [[package]]
+name = "semver"
+version = "3.0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/72/d1/d3159231aec234a59dd7d601e9dd9fe96f3afff15efd33c1070019b26132/semver-3.0.4.tar.gz", hash = "sha256:afc7d8c584a5ed0a11033af086e8af226a9c0b206f313e0301f8dd7b6b589602", size = 269730, upload_time = "2025-01-24T13:19:27.617Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a6/24/4d91e05817e92e3a61c8a21e08fd0f390f5301f1c448b137c57c4bc6e543/semver-3.0.4-py3-none-any.whl", hash = "sha256:9c824d87ba7f7ab4a1890799cec8596f15c1241cb473404ea1cb0c55e4b04746", size = 17912, upload_time = "2025-01-24T13:19:24.949Z" },
+]
+
+[[package]]
 name = "setuptools"
 version = "79.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1360,6 +1394,12 @@ dependencies = [
     { name = "qiskit-qasm3-import" },
 ]
 
+[package.optional-dependencies]
+ft = [
+    { name = "juliacall" },
+    { name = "juliapkg" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "pre-commit" },
@@ -1375,12 +1415,15 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "cirq-core", specifier = ">=1.4.1,<2.0.0" },
+    { name = "juliacall", marker = "extra == 'ft'", specifier = ">=0.9.24" },
+    { name = "juliapkg", marker = "extra == 'ft'", specifier = ">=0.1.16" },
     { name = "ply", specifier = ">=3.11,<4.0.0" },
     { name = "pytket", specifier = ">=1.40.0,<3.0.0" },
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
     { name = "qiskit", specifier = ">=1.4.2,<3.0.0" },
     { name = "qiskit-qasm3-import", specifier = ">=0.5.1,<1.0.0" },
 ]
+provides-extras = ["ft"]
 
 [package.metadata.requires-dev]
 dev = [

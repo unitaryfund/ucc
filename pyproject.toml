@@ -38,6 +38,12 @@ docs = [
 [project.scripts]
 ucc = "ucc.__main__:main"
 
+[project.optional-dependencies]
+ft = [
+    "juliacall>=0.9.24",
+    "juliapkg>=0.1.16",
+]
+
 [tool.ruff]
 line-length = 79
 

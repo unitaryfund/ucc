@@ -1,0 +1,27 @@
+name = "QuantumSE"
+uuid = "f27a11fe-df42-48ab-baf7-2c7df1fe28fa"
+authors = ["njuwfang <njuwfang@gmail.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+InvertedIndices = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SimpleGF2 = "26dc7fb7-0d88-57af-8ff4-0a7e14249ddd"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Z3 = "06b161dc-0161-11ea-0f74-41f836f4024b"
+z3_jll = "1bc4e1ec-7839-5212-8f2f-0d16b7bd09bc"
+
+[compat]
+julia = "1.9"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
