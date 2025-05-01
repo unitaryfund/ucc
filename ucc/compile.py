@@ -1,9 +1,8 @@
 from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
-from qbraid.transpiler import transpile
-from qiskit.transpiler.passes import BasisTranslator
+from qbraid.transpiler import transpile as translate
 from .transpilers.ucc_defaults import UCCDefault1
-
+from qiskit import transpile as qiskit_transpile
 
 import sys
 import warnings
@@ -54,7 +53,7 @@ def compile(
         return_format = get_program_type_alias(circuit)
 
     # Translate to Qiskit Circuit object
-    qiskit_circuit = transpile(circuit, "qiskit")
+    qiskit_circuit = translate(circuit, "qiskit")
     ucc_default1 = UCCDefault1(target_device=target_device)
     if custom_passes is not None:
         ucc_default1.pass_manager.append(custom_passes)
@@ -63,19 +62,23 @@ def compile(
     )
 
     if return_gateset is not None:
-        # Check if the compiled circuit contains the specified gateset
-        ucc_default1.pass_manager.append(
-            BasisTranslator(target_basis=return_gateset)
+        # Translate into user-defined gateset; no optimization
+        compiled_circuit = qiskit_transpile(
+            compiled_circuit, basis_gates=return_gateset, optimization_level=0
         )
     else:
         try:
+            # Use target_device gateset if available
             return_gateset = target_device.operation_names
-            ucc_default1.pass_manager.append(
-                BasisTranslator(target_basis=return_gateset)
+            # Translate into the target device gateset; no optimization
+            compiled_circuit = qiskit_transpile(
+                compiled_circuit,
+                basis_gates=return_gateset,
+                optimization_level=0,
             )
         except AttributeError:
-            pass  # Use default gateset
+            pass  # Use UCC default gateset
 
     # Translate the compiled circuit to the desired format
-    final_result = transpile(compiled_circuit, return_format)
+    final_result = translate(compiled_circuit, return_format)
     return final_result
