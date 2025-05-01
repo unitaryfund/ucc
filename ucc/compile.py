@@ -1,6 +1,7 @@
 from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile
+from qiskit.transpiler.passes import BasisTranslator
 from .transpilers.ucc_defaults import UCCDefault1
 
 
@@ -26,7 +27,11 @@ supported_circuit_formats = ConversionGraph().nodes()
 
 
 def compile(
-    circuit, return_format="original", target_device=None, custom_passes=None
+    circuit,
+    return_format="original",
+    return_gateset=None,
+    target_device=None,
+    custom_passes=None,
 ):
     """Compiles the provided quantum `circuit` by translating it to a Qiskit
     circuit, transpiling it, and returning the optimized circuit in the
@@ -54,6 +59,20 @@ def compile(
     compiled_circuit = ucc_default1.run(
         qiskit_circuit,
     )
+
+    if return_gateset is not None:
+        # Check if the compiled circuit contains the specified gateset
+        ucc_default1.pass_manager.append(
+            BasisTranslator(target_basis=return_gateset)
+        )
+    else:
+        try:
+            return_gateset = target_device.operation_names
+            ucc_default1.pass_manager.append(
+                BasisTranslator(target_basis=return_gateset)
+            )
+        except AttributeError:
+            pass
 
     # Translate the compiled circuit to the desired format
     final_result = transpile(compiled_circuit, return_format)
