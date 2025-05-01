@@ -11,6 +11,7 @@ from qiskit.transpiler.passes.utils import CheckMap
 from qiskit.transpiler import Target
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.circuit.library import CXGate, HGate, XGate
+from .mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
 import numpy as np
@@ -94,8 +95,7 @@ def test_compile_with_target_device():
     circuit.cx(0, 2)
 
     # Create a simple target that does not have direct CX between 0 and 2
-    t = Target(description="Fake device", num_qubits=3)
-    t.add_instruction(CXGate(), {(0, 1): None, (1, 2): None})
+    t = Mybackend().target
     result_circuit = compile(
         circuit, return_format="original", target_device=t
     )
@@ -129,6 +129,28 @@ def test_custom_pass():
 
     post_compiler_circuit = compile(cirq_circuit, custom_passes=[HtoX()])
     assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
+
+
+def test_return_gateset():
+    """Test that the gateset is returned correctly"""
+    circuit = QiskitCircuit(2)
+    circuit.cx(0, 1)
+    circuit.h(0)
+
+    # Create a simple target that does not have direct CX between 0 and 2
+    t = Target(description="Fake device", num_qubits=3)
+    t.add_instruction(CXGate(), {(0, 1): None, (1, 2): None})
+    result_circuit = compile(
+        circuit, return_format="original", return_gateset={"cx", "h"}
+    )
+
+    # Check compilation respected the target device topology
+    dag = circuit_to_dag(result_circuit)
+    analysis_pass = CheckMap(
+        t.build_coupling_map(), property_set_field="check_map"
+    )
+    analysis_pass.run(dag)
+    assert analysis_pass.property_set["check_map"]
 
 
 @pytest.mark.parametrize(
