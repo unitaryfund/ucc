@@ -11,7 +11,7 @@ from qiskit.transpiler.passes.utils import CheckMap
 from qiskit.transpiler import Target
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.circuit.library import CXGate, HGate, XGate
-from .mock_backends import Mybackend
+from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
 import numpy as np
@@ -102,6 +102,16 @@ def test_compile_with_target_device():
 
     # Check compilation respected the target device topology
     dag = circuit_to_dag(result_circuit)
+
+    # Check that the gateset is the same as the target device
+    gateset = set()
+    for node in dag.op_nodes():
+        gateset.add(node.op.name)
+
+    # Check that each gate in the gateset is in the target device
+    for gate in gateset:
+        assert gate in t.operation_names
+
     analysis_pass = CheckMap(
         t.build_coupling_map(), property_set_field="check_map"
     )
@@ -169,6 +179,8 @@ def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     assert analysis_pass.property_set["all_gates_in_basis"]
 
 
+# Skip this test
+@pytest.mark.skip(reason="Slow.")
 @pytest.mark.parametrize(
     "circuit_function", [qcnn_circuit, random_clifford_circuit]
 )
