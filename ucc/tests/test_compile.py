@@ -8,9 +8,8 @@ from qiskit.converters import circuit_to_dag
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler.passes import GatesInBasis
 from qiskit.transpiler.passes.utils import CheckMap
-from qiskit.transpiler import Target
 from qiskit.transpiler.basepasses import TransformationPass
-from qiskit.circuit.library import CXGate, HGate, XGate
+from qiskit.circuit.library import HGate, XGate
 from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
@@ -89,36 +88,6 @@ def test_tket_compile():
     assert isinstance(result_circuit, TketCircuit)
 
 
-def test_compile_with_target_device():
-    circuit = QiskitCircuit(3)
-    circuit.cx(0, 1)
-    circuit.cx(0, 2)
-
-    # Create a simple target that does not have direct CX between 0 and 2
-    t = Mybackend().target
-    result_circuit = compile(
-        circuit, return_format="original", target_device=t
-    )
-
-    # Check compilation respected the target device topology
-    dag = circuit_to_dag(result_circuit)
-
-    # Check that the gateset is the same as the target device
-    gateset = set()
-    for node in dag.op_nodes():
-        gateset.add(node.op.name)
-
-    # Check that each gate in the gateset is in the target device
-    for gate in gateset:
-        assert gate in t.operation_names
-
-    analysis_pass = CheckMap(
-        t.build_coupling_map(), property_set_field="check_map"
-    )
-    analysis_pass.run(dag)
-    assert analysis_pass.property_set["check_map"]
-
-
 def test_custom_pass():
     """Verify that a custom pass works with a non-qiskit input circuit"""
 
@@ -141,26 +110,71 @@ def test_custom_pass():
     assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
 
 
-def test_return_gateset():
-    """Test that the gateset is returned correctly"""
-    circuit = QiskitCircuit(2)
+def test_compile_with_target_device():
+    circuit = QiskitCircuit(3)
     circuit.cx(0, 1)
-    circuit.h(0)
+    circuit.cx(0, 2)
 
     # Create a simple target that does not have direct CX between 0 and 2
-    t = Target(description="Fake device", num_qubits=3)
-    t.add_instruction(CXGate(), {(0, 1): None, (1, 2): None})
+    t = Mybackend().target
     result_circuit = compile(
-        circuit, return_format="original", return_gateset={"cx", "h"}
+        circuit, return_format="original", target_device=t
     )
 
-    # Check compilation respected the target device topology
     dag = circuit_to_dag(result_circuit)
+
+    # Check that the gateset is the same as the target device
+    gateset = set()
+    for node in dag.op_nodes():
+        gateset.add(node.op.name)
+
+    # Check that each gate in the compiled gateset is available in the target device
+    for gate in gateset:
+        assert gate in t.operation_names
+
+    # Check that the coupling map of the compiled circuit is the same as the target device
     analysis_pass = CheckMap(
         t.build_coupling_map(), property_set_field="check_map"
     )
     analysis_pass.run(dag)
     assert analysis_pass.property_set["check_map"]
+
+
+def test_return_gateset():
+    """Test that the final circuit respects the user-defined gateset, no target device"""
+    circuit = QiskitCircuit(2)
+    circuit.cx(0, 1)
+    circuit.h(0)
+
+    return_gateset = {
+        "ry",
+        "rx",
+        "cz",
+    }
+    result_circuit = compile(
+        circuit,
+        return_gateset=return_gateset,
+    )
+
+    # Check compilation respected the user's gateset
+    dag = circuit_to_dag(result_circuit)
+    gateset = set()
+    for node in dag.op_nodes():
+        gateset.add(node.op.name)
+
+    # Check that each gate in the compiled gateset is available in the target device
+    for gate in gateset:
+        assert gate in return_gateset
+
+
+# TODO: Write a test to check that the user-defined gateset is available in the target device (funcitonality not yet enforced in ucc.compile)
+# coupling_map = t.build_coupling_map()
+# dag = circuit_to_dag(result_circuit)
+# analysis_pass = CheckMap(
+#     coupling_map, property_set_field="check_map"
+# )
+# analysis_pass.run(dag)
+# assert analysis_pass.property_set["check_map"]
 
 
 @pytest.mark.parametrize(

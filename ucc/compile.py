@@ -63,6 +63,7 @@ def compile(
 
     if return_gateset is not None:
         # Translate into user-defined gateset; no optimization
+        # TODO: Check if the gateset is valid for the target device
         compiled_circuit = qiskit_transpile(
             compiled_circuit, basis_gates=return_gateset, optimization_level=0
         )
