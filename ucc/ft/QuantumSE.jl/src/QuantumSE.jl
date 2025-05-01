@@ -22,6 +22,9 @@ export AbstractGroup, AbstraLinearGroup, L2, PL2, pgl2, psl2, jacobi4squares
 include("Sampler.jl")
 export Sampler, parse_stim
 
+include("PythonTranslate.jl")
+export from_stabilizer_py, make_cstate, check_FT_py
+
 using PrecompileTools
 using Z3
 

@@ -1303,6 +1303,21 @@ wheels = [
 ]
 
 [[package]]
+name = "stim"
+version = "1.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fa/5b/c61d6fe29a2f3a57d50b61fabcb82e572390a6340a04567751d469344b74/stim-1.14.0.tar.gz", hash = "sha256:a0bbac90e81a50084ec104a04f6075956a266083370dd9e73210aabf770b469d", size = 813999, upload_time = "2024-09-24T08:40:22.868Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/1b/9cc8cf338235a7585a11aae5d6c237bea2bbd6191063d08790bf402e5c33/stim-1.14.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:383464d27a7f2a692fe4877607e9f894f6edaf3e7b5ed2d55d3872794e0cfd0b", size = 1879441, upload_time = "2024-09-24T08:39:35.17Z" },
+    { url = "https://files.pythonhosted.org/packages/02/2f/15d0ccba620aefdeb1c064f97eca04d57525611d7bc06e7934e96f02e8ec/stim-1.14.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:5a86f9ccf0be4e4cab6ba246c320aec5ade9aab5c586d8afa353440b7e6372b8", size = 1753495, upload_time = "2024-09-24T08:39:36.633Z" },
+    { url = "https://files.pythonhosted.org/packages/19/71/de7c2a9e6cfe0ea078cdea34cb9d39a6898964880212254f47834e629779/stim-1.14.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ff7f6fee2bd6e1bc718b4e57205d6d3fc6d3c292c3eafd22fdb7a8d7b010a1b", size = 4735501, upload_time = "2024-09-24T08:39:38.569Z" },
+    { url = "https://files.pythonhosted.org/packages/06/54/aa1269cab0e342de31f3122dd0c8e06be4624c1ca65bfdd09ee2ac4efb16/stim-1.14.0-cp312-cp312-win_amd64.whl", hash = "sha256:39425614ad476b0f8ddf75413a0710de00d1970c2a5b90ec417e221a1412d42c", size = 2506858, upload_time = "2024-09-24T08:39:41.321Z" },
+]
+
+[[package]]
 name = "symengine"
 version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1398,6 +1413,7 @@ dependencies = [
 ft = [
     { name = "juliacall" },
     { name = "juliapkg" },
+    { name = "stim" },
 ]
 
 [package.dev-dependencies]
@@ -1422,6 +1438,7 @@ requires-dist = [
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
     { name = "qiskit", specifier = ">=1.4.2,<3.0.0" },
     { name = "qiskit-qasm3-import", specifier = ">=0.5.1,<1.0.0" },
+    { name = "stim", marker = "extra == 'ft'", specifier = ">=1.14.0" },
 ]
 provides-extras = ["ft"]
 
