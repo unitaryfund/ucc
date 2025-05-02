@@ -1,5 +1,9 @@
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-import ucc
+from qiskit import (
+    QuantumCircuit,
+    QuantumRegister,
+    ClassicalRegister,
+    transpile,
+)
 
 # This is a simple example of a quantum error correction circuit implementing a 3 qubit repetition code using Qiskit. The circuit encodes a single qubit into three qubits, measures the syndrome, and applies corrections if necessary.
 # Adapted from https://learning.quantum.ibm.com/tutorial/build-repetition-codes
@@ -114,7 +118,8 @@ def main():
     # circuit = qasm_code
 
     # Compile with ucc
-    compiled_circuit = ucc.compile(circuit)
+    # compiled_circuit = ucc.compile(circuit)
+    compiled_circuit = transpile(circuit, optimization_level=3)
     # Print the circuit
     print(compiled_circuit)
 
