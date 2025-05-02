@@ -302,7 +302,12 @@ function QuantSymEx(cfg::SymConfig)
             for j in 1:n_qprog
                 cfg.S.args = [qprogs[j]]
                 cfg = QuantSymEx(cfg)[1]
-                temp[j] = cfg.σ[:__res__]
+                # UCC edit -- Handle if we got a UInt instead of an Int
+                # For source QASM, qubit registers are sized from compile time unit constants
+                # That size is used in some looping constructs/comprehensions (like here)
+                # and Z3/Julia need it to be an Int
+                ttmp = cfg.σ[:__res__]
+                temp[j] = ttmp isa UInt ? Int(ttmp) : ttmp
             end
             cfg.S.args = S.args[2:end]
             CAssign(cfg.σ, inst.args[1], temp)

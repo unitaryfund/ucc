@@ -59,32 +59,30 @@ def test_check_ft_cat_state_with_different_faults(max_faults, expected_result):
     include "stdgates.inc";
 
     const uint size = __NUM_QUBITS__;
-    qubit[size] cat_qubits;
-    qubit verify_qubit;
 
-    bool success = false;
+    def cat_prep(qubit[size] state, qubit ancilla) {
 
-    while( !success ) {
+        bit res = 1;
+        while(res != 0) {
+            reset state[0];
+            res = 0;
+            h state[0];
 
-    reset qubits;
-    bit res = 0;
+            // QASM ranges are inclusive for both start and end
+            for int i in [1:(size-1)] {
+                reset state[i];
+                cx state[0], state[i];
+            }
 
-    h cat_qubits[1];
-    for int i in [1:size] {
-        cx cat_qubits[1], cat_qubits[i];
-    }
-
-    // verify
-    for int i in [1:size] {
-        reset verify_qubit;
-        cx cat_qubits[i-1], verify_qubit;
-        cx cat_qubits[i], verify_qubit;
-        bit tmp = measure verify_qubit;
-        res = res | tmp;
-    }
-
-    sucess = res == 0;
-
+            // Parity check
+            for int i in [1:(size-1)] {
+                reset ancilla;
+                cx state[i-1], ancilla;
+                cx state[i], ancilla;
+                bit tmp = measure ancilla;
+                res = res | tmp;
+            }
+        }
     }
     """.replace("__NUM_QUBITS__", str(num_qubits))
 
