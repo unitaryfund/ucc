@@ -12,12 +12,10 @@ except ImportError:
 
 
 from qiskit.transpiler import PassManager
-from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
 from qiskit import user_config
 from qiskit.transpiler import Target
 from qiskit.transpiler.passes import (
     ApplyLayout,
-    BasisTranslator,
     ConsolidateBlocks,
     CollectCliffords,
     HighLevelSynthesis,
@@ -52,6 +50,7 @@ class UCCDefault1:
         self._1q_basis = ["rz", "rx", "ry", "h"]
         self._2q_basis = ["cx"]
         self.target_basis = self._1q_basis + self._2q_basis
+
         self.special_commutations = {
             ("rx", "cx"): {
                 (0,): False,
@@ -64,9 +63,9 @@ class UCCDefault1:
         }
         self._add_local_passes(local_iterations)
         self._add_map_passes(target_device)
-        self.pass_manager.append(
-            BasisTranslator(sel, target_basis=self.target_basis)
-        )
+        # self.pass_manager.append(
+        #     BasisTranslator(sel, target_basis=self.target_basis)
+        # )
 
     @property
     def default_passes(self):
@@ -74,9 +73,9 @@ class UCCDefault1:
 
     def _add_local_passes(self, local_iterations):
         for _ in range(local_iterations):
-            self.pass_manager.append(
-                BasisTranslator(sel, target_basis=self.target_basis)
-            )
+            # self.pass_manager.append(
+            #     BasisTranslator(sel, target_basis=self.target_basis)
+            # )
             self.pass_manager.append(Optimize1qGatesDecomposition())
             self.pass_manager.append(CommutativeCancellation())
             self.pass_manager.append(Collect2qBlocks())
