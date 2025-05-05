@@ -2,8 +2,10 @@ from qiskit import (
     QuantumCircuit,
     QuantumRegister,
     ClassicalRegister,
-    transpile,
 )
+import ucc
+from qbraid import transpile as translate
+import pyqasm
 
 # This is a simple example of a quantum error correction circuit implementing a 3 qubit repetition code using Qiskit. The circuit encodes a single qubit into three qubits, measures the syndrome, and applies corrections if necessary.
 # Adapted from https://learning.quantum.ibm.com/tutorial/build-repetition-codes
@@ -110,16 +112,16 @@ def main():
     # Convert the circuit to OpenQASM
     # If you try to submit the qiskit code with if-else statements, the qbraid transpiler will throw an error when ucc calls it
     # TODO: add the OpenQASM export
-    # qasm_code = # define here
+    qasm_code = translate(circuit, target="qasm3")
 
     # TODO: Unroll loops with pyqasm
-    # module = pyqasm.loads(qasm_code)
-    # module.unroll()
+    module = pyqasm.loads(qasm_code)
+    module.unroll()
     # circuit = qasm_code
 
     # Compile with ucc
-    # compiled_circuit = ucc.compile(circuit)
-    compiled_circuit = transpile(circuit, optimization_level=3)
+    compiled_circuit = ucc.compile(circuit)
+    # compiled_circuit = transpile(circuit, optimization_level=3)
     # Print the circuit
     print(compiled_circuit)
 
