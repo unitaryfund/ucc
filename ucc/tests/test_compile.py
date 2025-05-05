@@ -96,9 +96,8 @@ def test_custom_pass():
 
         def run(self, dag):
             for node in dag.op_nodes():
-                if not isinstance(node.op, HGate):
-                    continue
-                dag.substitute_node(node, XGate())
+                if isinstance(node.op, HGate):
+                    dag.substitute_node(node, XGate())
             return dag
 
     # Example usage with a cirq circuit, stil showcasing the cross-frontend compatibility
