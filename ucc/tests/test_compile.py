@@ -120,21 +120,15 @@ def test_compile_with_target_device():
         circuit, return_format="original", target_device=t
     )
 
-    dag = circuit_to_dag(result_circuit)
-
     # Check that the gateset is the same as the target device
-    gateset = set()
-    for node in dag.op_nodes():
-        gateset.add(node.op.name)
-
-    # Check that each gate in the compiled gateset is available in the target device
-    for gate in gateset:
-        assert gate in t.operation_names
+    assert set(op.name for op in result_circuit).issubset(t.operation_names)
 
     # Check that the coupling map of the compiled circuit is the same as the target device
     analysis_pass = CheckMap(
         t.build_coupling_map(), property_set_field="check_map"
     )
+
+    dag = circuit_to_dag(result_circuit)
     analysis_pass.run(dag)
     assert analysis_pass.property_set["check_map"]
 
@@ -155,15 +149,7 @@ def test_compile_with_return_gateset():
         return_gateset=return_gateset,
     )
 
-    # Check compilation respected the user's gateset
-    dag = circuit_to_dag(result_circuit)
-    gateset = set()
-    for node in dag.op_nodes():
-        gateset.add(node.op.name)
-
-    # Check that each gate in the compiled gateset is available in the target device
-    for gate in gateset:
-        assert gate in return_gateset
+    assert set(op.name for op in result_circuit).issubset(return_gateset)
 
 
 # TODO: Write a test to check that the user-defined gateset is available in the target device (funcitonality not yet enforced in ucc.compile)
