@@ -140,7 +140,7 @@ def test_compile_with_target_device():
     assert analysis_pass.property_set["check_map"]
 
 
-def test_return_gateset():
+def test_compile_with_return_gateset():
     """Test that the final circuit respects the user-defined gateset, no target device"""
     circuit = QiskitCircuit(2)
     circuit.cx(0, 1)
