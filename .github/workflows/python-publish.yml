@@ -15,16 +15,22 @@ jobs:
     steps:
       - name: Configure Git to use 'main' as default branch
         run: git config --global init.defaultBranch main
-  
+
       - uses: actions/checkout@v4
 
-      - uses: abatilo/actions-poetry@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
 
-      - name: Install dependencies
-        run: poetry install --no-root
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
 
       - name: Build release distributions
-        run: poetry build
+        run: uv build
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
@@ -56,10 +62,10 @@ jobs:
 
       - name: Clean up distributions
         run: rm -rf dist/
-  
+
   pypi-publish:
     runs-on: ubuntu-latest
-    needs: testpypi-publish # If statement guarantees we are on main and either in a release or manual dispatch event. 
+    needs: testpypi-publish # If statement guarantees we are on main and either in a release or manual dispatch event.
     if: (github.event.release.target_commitish == 'main' && github.event_name == 'release') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     permissions:
       id-token: write
