@@ -41,7 +41,7 @@ def compile(
         return_format (str): The format in which your circuit will be returned.
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats()``.
             Defaults to the format of the input circuit.
-        return_gateset (set): (optional) The gateset to compile the circuit to.
+        return_gateset (set[str]): (optional) The gateset to compile the circuit to.
             e.g. {"cx", "rx",...}. Defaults to the gateset of the target device, or if none is provided, {"cx", "rz", "rx", "ry", "h"}.
         target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
         custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default set
