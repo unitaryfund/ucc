@@ -32,7 +32,7 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --all-groups
 
-      - name: Set Up Bitwuzla
+      - name: Set Up Bitwuzla and sed
         uses: ./.github/workflows/setup-bitwuzla
         with:
           version: 0.7.0

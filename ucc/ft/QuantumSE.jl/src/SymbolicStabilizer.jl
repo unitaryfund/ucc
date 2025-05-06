@@ -1015,12 +1015,22 @@ function smt_solve_external(slv::Solver, command::Cmd, postfix::String)
         println(io, "(exit)")
     end
 
-    #replace signed with unsigned
-    run(pipeline(`sed -i '' 's/bvsle/bvule/g' $(smt2_file_name*".smt2")`))
-    run(pipeline(`sed -i '' 's/bvslt/bvult/g' $(smt2_file_name*".smt2")`))
-    run(pipeline(`sed -i '' 's/bvsge/bvuge/g' $(smt2_file_name*".smt2")`))
-    run(pipeline(`sed -i '' 's/bvsgt/bvugt/g' $(smt2_file_name*".smt2")`))
+    # Construct the file name
+    file_name = smt2_file_name * ".smt2"
 
+    # Read the contents of the file
+    content = read(file_name, String)
+
+    # Perform replacements (signed -> unsigned)
+    content = replace(content,
+        "bvsle" => "bvule",
+        "bvslt" => "bvult",
+        "bvsge" => "bvuge",
+        "bvsgt" => "bvugt"
+    )
+
+    # Write the modified content back to the file
+    write(file_name, content)
 
     res_string = read(pipeline(`$(command) $(smt2_file_name*".smt2")`), String)
 
