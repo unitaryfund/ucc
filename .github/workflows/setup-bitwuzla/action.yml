@@ -1,0 +1,38 @@
+# Helper action to install Bitwuzla for use in other Github actions
+# Taken from https://github.com/cucapra/patronus/blob/7f7c555617a12e8e32d7cfeded1a7002842ce7ca/.github/workflows/setup-bitwuzla/action.yml
+
+name: Setup Bitwuzla
+description: Setup Bitwuzla for use in GitHub Actions
+
+inputs:
+  version:
+    description: version to install
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Bitwuzla
+      id: cache-bitwuzla
+      uses: actions/cache@v3
+      with:
+        key: bitwuzla-${{ runner.os }}-${{ inputs.version }}
+        path: /tmp/bitwuzla
+    - name: Install Meson for Bitwuzla
+      shell: sh
+      run: sudo apt-get install -y meson
+    - name: Download and Compile Bitwuzla
+      if: ${{ steps.cache-bitwuzla.outputs.cache-hit != 'true'  }}
+      shell: sh
+      run: |
+        mkdir /tmp/bitwuzla
+        cd /tmp/bitwuzla
+        wget -q https://github.com/bitwuzla/bitwuzla/archive/refs/tags/${{ inputs.version }}.zip -O bitwuzla.zip
+        unzip -q bitwuzla.zip
+        mv bitwuzla-*/* .
+        ./configure.py
+        cd build
+        ninja
+    - name: Install Bitwuzla
+      shell: sh
+      run: cd /tmp/bitwuzla/build && sudo ninja install
