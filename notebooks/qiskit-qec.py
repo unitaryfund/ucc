@@ -5,7 +5,6 @@ from qiskit import (
 )
 import ucc
 from qbraid import transpile as translate
-import pyqasm
 
 # This is a simple example of a quantum error correction circuit implementing a 3 qubit repetition code using Qiskit. The circuit encodes a single qubit into three qubits, measures the syndrome, and applies corrections if necessary.
 # Adapted from https://learning.quantum.ibm.com/tutorial/build-repetition-codes
@@ -115,9 +114,10 @@ def main():
     qasm_code = translate(circuit, target="qasm3")
 
     # TODO: Unroll loops with pyqasm
-    module = pyqasm.loads(qasm_code)
-    module.unroll()
-    # circuit = qasm_code
+    # module = pyqasm.loads(qasm_code)
+    # module.unroll()
+
+    circuit = qasm_code
 
     # Compile with ucc
     compiled_circuit = ucc.compile(circuit)
