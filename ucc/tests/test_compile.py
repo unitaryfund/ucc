@@ -109,7 +109,8 @@ def test_custom_pass():
     assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
 
 
-def test_compile_with_target_device():
+@pytest.mark.parametrize("check", ["opset", "coupling_map"])
+def test_compile_with_target_device(check):
     circuit = QiskitCircuit(3)
     circuit.cx(0, 1)
     circuit.cx(0, 2)
@@ -119,18 +120,20 @@ def test_compile_with_target_device():
     result_circuit = compile(
         circuit, return_format="original", target_device=t
     )
+    if check == "opset":
+        # Check that the gates in the final circuit are all the supported on the target device
+        assert set(op.name for op in result_circuit).issubset(
+            t.operation_names
+        )
+    elif check == "coupling_map":
+        # Check that the compiled circuit respects the coupling map of the target device
+        analysis_pass = CheckMap(
+            t.build_coupling_map(), property_set_field="check_map"
+        )
 
-    # Check that the gates in the final circuit are all the supported on the target device
-    assert set(op.name for op in result_circuit).issubset(t.operation_names)
-
-    # Check that the coupling map of the compiled circuit is the same as the target device
-    analysis_pass = CheckMap(
-        t.build_coupling_map(), property_set_field="check_map"
-    )
-
-    dag = circuit_to_dag(result_circuit)
-    analysis_pass.run(dag)
-    assert analysis_pass.property_set["check_map"]
+        dag = circuit_to_dag(result_circuit)
+        analysis_pass.run(dag)
+        assert analysis_pass.property_set["check_map"]
 
 
 def test_compile_with_target_gateset():
