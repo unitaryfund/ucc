@@ -113,6 +113,9 @@ def main():
     # Translate to OpenQASM
     qasm_code = translate(circuit, target="qasm3")
 
+    # Save the QASM code to a file
+    with open("qec_circuit.qasm", "w") as qasm_file:
+        qasm_file.write(qasm_code)
     # Unroll loops with pyqasm
     # module = pyqasm.loads(qasm_code)
     # module.unroll()
