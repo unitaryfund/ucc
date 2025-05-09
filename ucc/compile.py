@@ -28,7 +28,7 @@ supported_circuit_formats = ConversionGraph().nodes()
 def compile(
     circuit,
     return_format="original",
-    return_gateset=None,
+    target_gateset=None,
     target_device=None,
     custom_passes=None,
 ):
@@ -41,7 +41,7 @@ def compile(
         return_format (str): The format in which your circuit will be returned.
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats()``.
             Defaults to the format of the input circuit.
-        return_gateset (set[str]): (optional) The gateset to compile the circuit to.
+        target_gateset (set[str]): (optional) The gateset to compile the circuit to.
             e.g. {"cx", "rx",...}. Defaults to the gateset of the target device, or if none is provided, {"cx", "rz", "rx", "ry", "h"}.
         target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
         custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default set
@@ -61,20 +61,19 @@ def compile(
         qiskit_circuit,
     )
 
-    if return_gateset is not None:
+    if target_gateset is not None:
         # Translate into user-defined gateset; no optimization
-        # TODO: Check if the gateset is valid for the target device
         compiled_circuit = qiskit_transpile(
-            compiled_circuit, basis_gates=return_gateset, optimization_level=0
+            compiled_circuit, basis_gates=target_gateset, optimization_level=0
         )
     else:
         try:
             # Use target_device gateset if available
-            return_gateset = target_device.operation_names
+            target_gateset = target_device.operation_names
             # Translate into the target device gateset; no optimization
             compiled_circuit = qiskit_transpile(
                 compiled_circuit,
-                basis_gates=return_gateset,
+                basis_gates=target_gateset,
                 optimization_level=0,
             )
         except AttributeError:

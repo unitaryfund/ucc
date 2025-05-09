@@ -120,7 +120,7 @@ def test_compile_with_target_device():
         circuit, return_format="original", target_device=t
     )
 
-    # Check that the gateset is the same as the target device
+    # Check that the gates in the final circuit are all the supported on the target device
     assert set(op.name for op in result_circuit).issubset(t.operation_names)
 
     # Check that the coupling map of the compiled circuit is the same as the target device
@@ -133,33 +133,23 @@ def test_compile_with_target_device():
     assert analysis_pass.property_set["check_map"]
 
 
-def test_compile_with_return_gateset():
+def test_compile_with_target_gateset():
     """Test that the final circuit respects the user-defined gateset, no target device"""
     circuit = QiskitCircuit(2)
     circuit.cx(0, 1)
     circuit.h(0)
 
-    return_gateset = {
+    target_gateset = {
         "ry",
         "rx",
         "cz",
     }
     result_circuit = compile(
         circuit,
-        return_gateset=return_gateset,
+        target_gateset=target_gateset,
     )
 
-    assert set(op.name for op in result_circuit).issubset(return_gateset)
-
-
-# TODO: Write a test to check that the user-defined gateset is available in the target device (funcitonality not yet enforced in ucc.compile)
-# coupling_map = t.build_coupling_map()
-# dag = circuit_to_dag(result_circuit)
-# analysis_pass = CheckMap(
-#     coupling_map, property_set_field="check_map"
-# )
-# analysis_pass.run(dag)
-# assert analysis_pass.property_set["check_map"]
+    assert set(op.name for op in result_circuit).issubset(target_gateset)
 
 
 @pytest.mark.parametrize(
@@ -178,8 +168,6 @@ def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     assert analysis_pass.property_set["all_gates_in_basis"]
 
 
-# Skip this test
-@pytest.mark.skip(reason="Slow.")
 @pytest.mark.parametrize(
     "circuit_function", [qcnn_circuit, random_clifford_circuit]
 )
