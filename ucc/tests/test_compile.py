@@ -146,6 +146,29 @@ def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     assert analysis_pass.property_set["all_gates_in_basis"]
 
 
+# Test compilation accepts QASM circuits containing IF-ELSE
+def test_compile_if_else():
+    qasm = """
+    OPENQASM 3;
+    include "stdgates.inc";
+    bit[3] data;
+    bit[2] syndrome;
+    qubit[3] q0;
+    qubit[2] q1;
+
+    syndrome[0] = measure q0[0];
+    syndrome[1] = measure q1[1];
+    if (syndrome[0]) {
+        x q1[0];
+    }
+    if (syndrome[1]) {
+        x q1[0];
+    }
+    """
+    transpiled = compile(qasm, return_format="qiskit")
+    assert isinstance(transpiled, QiskitCircuit)
+
+
 @pytest.mark.parametrize(
     "circuit_function", [qcnn_circuit, random_clifford_circuit]
 )
