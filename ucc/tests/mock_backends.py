@@ -7,7 +7,19 @@ from qiskit.circuit.library import PhaseGate, SXGate, UGate, CXGate, IGate
 
 
 class Mybackend(Backend):
-    """A mock Qiskit backend for testing purposes."""
+    """A mock Qiskit backend for testing purposes.
+    Supported operations:
+    - PhaseGate
+    - SXGate
+    - UGate
+    - CXGate
+    - Measure
+    - IGate
+    ['p', 'sx', 'u', 'cx', 'measure', 'id']
+
+    Coupling map:
+    - 0 -- 1 -- 2 -- 3 -- 4
+    """
 
     def __init__(self):
         super().__init__()
