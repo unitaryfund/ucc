@@ -66,18 +66,16 @@ def compile(
         compiled_circuit = qiskit_transpile(
             compiled_circuit, basis_gates=target_gateset, optimization_level=0
         )
-    else:
-        try:
-            # Use target_device gateset if available
-            target_gateset = target_device.operation_names
-            # Translate into the target device gateset; no optimization
-            compiled_circuit = qiskit_transpile(
-                compiled_circuit,
-                basis_gates=target_gateset,
-                optimization_level=0,
-            )
-        except AttributeError:
-            pass  # Use UCC default gateset
+    elif hasattr(target_device, "operation_names"):
+        # Use target_device gateset if available
+        target_gateset = target_device.operation_names
+
+        # Translate into the target device gateset; no optimization
+        compiled_circuit = qiskit_transpile(
+            compiled_circuit,
+            basis_gates=target_gateset,
+            optimization_level=0,
+        )
 
     # Translate the compiled circuit to the desired format
     final_result = translate(compiled_circuit, return_format)
