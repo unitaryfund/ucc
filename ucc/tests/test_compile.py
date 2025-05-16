@@ -108,24 +108,31 @@ def test_custom_pass():
     post_compiler_circuit = compile(cirq_circuit, custom_passes=[HtoX()])
     assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
 
+    def test_compile_target_device_opset():
+        circuit = QiskitCircuit(3)
+        circuit.cx(0, 1)
+        circuit.cx(0, 2)
 
-@pytest.mark.parametrize("check", ["opset", "coupling_map"])
-def test_compile_with_target_device(check):
-    circuit = QiskitCircuit(3)
-    circuit.cx(0, 1)
-    circuit.cx(0, 2)
-
-    # Create a simple target that does not have direct CX between 0 and 2
-    t = Mybackend().target
-    result_circuit = compile(
-        circuit, return_format="original", target_device=t
-    )
-    if check == "opset":
-        # Check that the gates in the final circuit are all the supported on the target device
+        # Create a simple target that does not have direct CX between 0 and 2
+        t = Mybackend().target
+        result_circuit = compile(
+            circuit, return_format="original", target_device=t
+        )
+        # Check that the gates in the final circuit are all supported on the target device
         assert set(op.name for op in result_circuit).issubset(
             t.operation_names
         )
-    elif check == "coupling_map":
+
+    def test_compile_target_device_coupling_map():
+        circuit = QiskitCircuit(3)
+        circuit.cx(0, 1)
+        circuit.cx(0, 2)
+
+        # Create a simple target that does not have direct CX between 0 and 2
+        t = Mybackend().target
+        result_circuit = compile(
+            circuit, return_format="original", target_device=t
+        )
         # Check that the compiled circuit respects the coupling map of the target device
         analysis_pass = CheckMap(
             t.build_coupling_map(), property_set_field="check_map"
