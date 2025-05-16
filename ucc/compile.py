@@ -67,6 +67,10 @@ def compile(
             compiled_circuit, basis_gates=target_gateset, optimization_level=0
         )
     elif hasattr(target_device, "operation_names"):
+        if target_gateset not in target_device.operation_names:
+            warnings.warn(
+                f"Warning: The target gateset {target_gateset} is not supported by the target device. "
+            )
         # Use target_device gateset if available
         target_gateset = target_device.operation_names
 
