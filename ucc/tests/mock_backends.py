@@ -70,11 +70,4 @@ class Mybackend(Backend):
                     UserWarning,
                     stacklevel=2,
                 )
-        # options = {
-        #     "shots": kwargs.get("shots", self.options.shots),
-        #     "memory": kwargs.get("memory", self.options.shots),
-        # }
-        # job_json = convert_to_wire_format(circuit, options)
-        # job_handle = submit_to_backend(job_jsonb)
-        # return MyJob(self.job_handle, job_json, circuit)
         return None  # Currently not implemented
