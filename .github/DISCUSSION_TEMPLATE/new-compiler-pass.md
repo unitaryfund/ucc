@@ -6,7 +6,7 @@ In UCC (Unitary Compiler Collection), we consider any technique which takes a "r
 #### <------Starting filling in the template here------>
 
 ### Propose your new pass
-We're very excited you want to implement a new compiler pass in UCC! To get started, please provide us the following:  
+We're very excited you want to implement a new compilation technique in UCC! To get started, please provide us the following:  
 1. How the technique works:  
     a. In a written abstract without too much jargon, citing the source of the technique (e.g. arXiv paper or Github repo)  
     b. (Optional, recommended): In a diagram showing an example circuit and how it would be affected by this pass 
