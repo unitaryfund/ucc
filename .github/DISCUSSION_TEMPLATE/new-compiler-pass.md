@@ -1,6 +1,6 @@
 
 ### _What's a compiler pass?_
-In UCC (Unitary Compiler Collection), we consider any technique which takes a "raw" uncompiled quantum circuit and returns a circuit which performs better on our benchmarks (see below) to be a good compiler pass. You can work at any layer of the quantum computing stack, from low-level hardware control to high-level algorithmic optimization.
+In UCC (Unitary Compiler Collection), we consider any technique which takes a "raw" uncompiled quantum circuit and returns a circuit which performs better on our [benchmarks](https://github.com/unitaryfoundation/ucc-bench?tab=readme-ov-file#latest-results) (see below) to be a good compiler pass. You can work at any layer of the quantum computing stack, from low-level hardware control to high-level algorithmic optimization.
 
 ## Steps to add a new compiler pass to UCC
 #### <------Starting filling in the template here------>
