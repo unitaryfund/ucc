@@ -1,0 +1,56 @@
+
+### _What's a compiler pass?_
+In UCC (Unitary Compiler Collection), we consider any technique which takes a "raw" uncompiled quantum circuit and returns a circuit which performs better on our benchmarks (see below) to be a good compiler pass. You can work at any layer of the quantum computing stack, from low-level hardware control to high-level algorithmic optimization.
+
+## Steps to add a new compiler pass to UCC
+### Propose your new pass
+We're very excited you want to implement a new compiler pass in UCC! To get started, please provide us the following:  
+1. How the technique works:  
+    a. In a written abstract without too much jargon, citing the source of the technique (e.g. arXiv paper or Github repo)  
+    b. (Optional, recommended): In a diagram showing an example circuit and how it would be affected by this pass 
+
+2. Performance expectations:  
+    a. Which types of circuits do we expect this technique to improve/not improve? (e.g. ones with a lot of structure, dynamic circuits, quantum error correction, etc.)  
+    b. Which [UCC benchmark](https://ucc.readthedocs.io/en/latest/benchmarking.html) will it improve? (e.g. gate counts, relative errors on in expectation value, etc.)
+
+**Important:** Once you've filled out your answers to 1-2, click Create Discussion.  
+One of the UCC maintainers will respond promptly with either a "go ahead" if your proposed pass looks like a good direction, or we may provide feedback/suggestions if the technique isn't quite aligned with our development roadmap.
+
+### <------Stop here and wait for us to approve your proposal------>
+
+We recommend coming back to this discussion and editing as you move along through the development process. 
+### Develop your compiler pass
+Once the maintainers have given you the go-ahead...
+
+3. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches#about-branches) of UCC to develop in: [link new branch here]  
+4. Implement and Validate a Prototype of the Pass:  
+    A Jupyter notebook or a small script is sufficient for the prototype: [link prototype script/notebook here].  
+    **Important:** make sure your compiler pass works as you expect on the circuits you defined in step 2a.
+
+5. Implement the New Pass in the UCC Codebase:  
+Documentation to guide you through this process is available in the [user guide](https://ucc.readthedocs.io/en/latest/user_guide.html). For more detailed information and examples, refer to the [Qiskit documentation](https://docs.quantum.ibm.com/guides/custom-transpiler-pass).
+
+
+### Benchmark performance
+UCC benchmarks live in the separate [ucc-bench repo](https://github.com/unitaryfoundation/ucc-bench). We have a [suite of quantum circuits](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) that we regularly benchmark UCC and other popular quantum compilers on. When you are ready to run benchmarks, open a PR from the development branch you created in step 3 (mark it as a Draft unless you are ready for final review), ping a UCC maintainer, and we will trigger the benchmarking suite to run. 
+
+Several of the key metrics we track are:
+
+(Pure compilation)
+- 2-qubit gate count after circuit compilation (lower is better)
+- Total runtime of compilation (lower is better)
+
+(Simulation)
+- Relative errors in simulated expectation values for a defined set of observables (lower is better)
+
+Your new pass should reduce one or more of these metrics on our existing benchmark suite.  
+**Note:** If you are introducing a technique whose effect on performance is not currently measurable by our [benchmark suite](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) (e.g. a new qubit mapping pass that performs very well on sparsely connected qubit layouts), let us know and we can work with you to add the metric into [ucc-bench](github.com/unitaryfoundation/ucc-bench).
+
+---
+
+### Useful documentation
+[Contributing Guide](https://ucc.readthedocs.io/en/latest/contributing.html)  
+[Setting up your Developer Environment](https://ucc.readthedocs.io/en/latest/contributing.html#setting-up-your-development-environment)  
+[Writing a Custom Transpiler Pass](https://ucc.readthedocs.io/en/latest/user_guide.html#writing-a-custom-pass) 
+We use "transpiler pass" to refer to transformations that act only on the Directed Acyclic Graph (DAG) representation of the quantum circuit. Higher or lower-level optimizations (e.g. algorithm-level or pulse-level, respectively), we call "compiler passes." 
+
