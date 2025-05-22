@@ -22,7 +22,7 @@ We recommend coming back to this discussion and editing as you move along throug
 ### Develop your compiler pass
 Once the maintainers have given you the go-ahead...
 
-3. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches#about-branches) of UCC to develop in: [link new branch here]  
+3. Create a [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) of UCC to develop in: [link your fork here]  
 4. Implement and Validate a Prototype of the Pass:  
     A Jupyter notebook or a small script is sufficient for the prototype: [link prototype script/notebook here].  
     **Important:** make sure your compiler pass works as you expect on the circuits you defined in step 2a.
@@ -32,7 +32,7 @@ Documentation to guide you through this process is available in the [user guide]
 
 
 ### Benchmark performance
-UCC benchmarks live in the separate [ucc-bench repo](https://github.com/unitaryfoundation/ucc-bench). We have a [suite of quantum circuits](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) that we regularly benchmark UCC and other popular quantum compilers on. When you are ready to run benchmarks, open a PR from the development branch you created in step 3 (mark it as a Draft unless you are ready for final review), ping a UCC maintainer, and we will trigger the benchmarking suite to run. 
+UCC benchmarks live in the separate [ucc-bench repo](https://github.com/unitaryfoundation/ucc-bench). We have a [suite of quantum circuits](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) that we regularly benchmark UCC and other popular quantum compilers on. When you are ready to run benchmarks, open a PR from the development fork you created in step 3 (mark it as a Draft unless you are ready for final review), ping a UCC maintainer, and we will trigger the benchmarking suite to run. 
 
 Several of the key metrics we track are:
 
