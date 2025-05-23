@@ -5,18 +5,19 @@ In UCC (Unitary Compiler Collection), we consider any technique which takes a "r
 ## Steps to add a new compiler pass to UCC
 #### <------Starting filling in the template here------>
 
-### Propose your new pass
+### Propose your compiler pass
 We're very excited you want to implement a new compilation technique in UCC! To get started, please provide us the following:  
 1. How the technique works:  
     a. In a written abstract without too much jargon, citing the source of the technique (e.g. arXiv paper or Github repo)  
     b. (Optional, recommended): In a diagram showing an example circuit and how it would be affected by this pass 
 
 2. Performance expectations:  
-    a. Which types of circuits do we expect this technique to improve/not improve? (e.g. ones with a lot of structure, dynamic circuits, quantum error correction, etc.)  
-    b. Which [UCC benchmark](https://ucc.readthedocs.io/en/latest/benchmarking.html) will it improve? (e.g. gate counts, relative errors on in expectation value, etc.)
+    a. Which types of circuits do we expect this technique to improve/not improve? (e.g. dynamic circuits, quantum error correction, etc.)  
+    b. Which [UCC benchmark](https://ucc.readthedocs.io/en/latest/benchmarking.html) will it improve? (e.g. gate counts, relative errors, etc.)
 
-**Important:** Once you've filled out your answers to 1-2, click the green Start Discussion button.  
-One of the UCC maintainers will respond promptly with either a "go ahead" if your proposed pass looks like a good direction, or we may provide feedback/suggestions if the technique isn't quite aligned with our development roadmap.
+> **Important:**  
+> Once you've filled out your answers to 1-2, click the green Start Discussion button. **Leave the rest of this template intact!**  
+One of the UCC maintainers will respond promptly with either a "go ahead" if your proposed pass looks good, or we may provide feedback/suggestions if the technique isn't quite aligned with our development roadmap.
 
 #### <------Stop here and wait for us to approve your proposal------>
 
