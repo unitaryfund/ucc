@@ -1,0 +1,104 @@
+title: "[NEW PASS] "
+labels: ["compiler-pass"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### _What's a compiler pass?_
+        In UCC (Unitary Compiler Collection), we consider any technique which takes a "raw" uncompiled quantum circuit and returns a circuit which performs better on our [benchmarks](https://github.com/unitaryfoundation/ucc-bench?tab=readme-ov-file#latest-results) to be a good compiler pass. You can work at any layer of the quantum computing stack, from low-level hardware control to high-level algorithmic optimization.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Steps to add a new compiler pass to UCC
+        #### <------ Start filling in the template here ------>
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Propose your compiler pass
+        We're very excited you want to implement a new compilation technique in UCC! To get started, please provide us the following:
+
+  - type: textarea
+    id: technique_work
+    attributes:
+      label: "1. How the technique works"
+      description: |
+        a. Provide a written abstract without too much jargon (cite arXiv paper/GitHub repo if applicable)  
+        b. *(Optional)* Include a diagram showing an example circuit transformation
+      placeholder: |
+        Example response:
+        "This pass optimizes 2-qubit gate sequences using techniques from [Paper XYZ]. Here's how it transforms a CX gate sequence..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_expectations
+    attributes:
+      label: "2. Performance expectations"
+      description: |
+        a. What circuit types will this improve? (e.g., dynamic circuits, error correction)  
+        b. Which [UCC metrics](https://ucc.readthedocs.io/en/latest/benchmarking.html) will it impact? (gate counts, errors, etc.)
+      placeholder: |
+        Example response:
+        "This should reduce 2-qubit gates by ~30% for circuits with >50 CX gates..."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        > **Important**  
+        > After completing sections 1-2, click "Start discussion". **Keep the template structure intact!**  
+        > Maintainers will respond within 2 business days with next steps.
+
+  # ... previous sections ...
+
+  - type: markdown
+    attributes:
+      value: |
+        #### <------ Stop here and wait for proposal approval ------>
+
+  - type: markdown
+    attributes:
+      value: |
+        **Development Section** - *You can edit these parts after maintainer approval*
+        <!--- This header will remain visible but the following sections can be modified later -->
+
+  - type: textarea
+    id: development_steps
+    attributes:
+      label: "Development Progress"
+      description: "Update this section as you work on your implementation"
+      placeholder: |
+        [Click Edit above to update these sections after approval]
+        
+        3. Fork created: [your fork link]
+        4. Prototype: [notebook/prototype link]
+        5. UCC integration: [brief status update]
+      value: |
+        ### Development Guide
+        3. **Create a fork**: [link your fork]  
+        4. **Prototype implementation**: [link notebook/script]  
+        5. **Integrate into UCC**: [status update]
+    validations:
+      required: false
+
+  - type: textarea 
+    id: benchmarking_info
+    attributes:
+      label: "Benchmarking Updates"
+      placeholder: "Add benchmark results or progress here after approval"
+      value: |
+        ### Benchmarking
+        - **PR link**: [your benchmark PR]
+        - **Local results**: [summary]
+        - **Metric changes**: [observed improvements]
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Resources
+        [These will always appear at bottom]
