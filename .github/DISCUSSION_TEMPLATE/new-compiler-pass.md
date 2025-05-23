@@ -25,7 +25,7 @@ We recommend coming back to this discussion and editing as you move along throug
 Once the maintainers have given you the go-ahead...
 
 3. Create a [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) of UCC to develop in: [link your fork here]  
-    Hint: We recommending [syncing your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) with the main branch of UCC to stay up to date with changes. 
+    **Hint:** We recommending [syncing your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) with the main branch of UCC to stay up to date with changes. 
 5. Implement and Validate a Prototype of the Pass:  
     A Jupyter notebook or a small script is sufficient for the prototype: [link prototype script/notebook here].  
     **Important:** Make sure your compiler pass works as you expect on the circuits you defined in step 2a.
@@ -35,20 +35,20 @@ Documentation to guide you through this process is available in the [user guide]
 
 
 ### Benchmark performance
-UCC benchmarks live in the separate repo called [ucc-bench](https://github.com/unitaryfoundation/ucc-bench). We have a [suite of quantum circuits](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) that we regularly benchmark UCC and other popular quantum compilers on. When you are ready to run benchmarks...  
-6. Open a [pull request (PR) to merge your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) of UCC in main (mark it as a Draft unless you are ready for final review), ping a UCC maintainer, and we will trigger the benchmarking suite to run. 
+UCC benchmarks live in the separate repo called [ucc-bench](https://github.com/unitaryfoundation/ucc-bench). We have a [suite of quantum circuits](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) that we regularly benchmark UCC and other popular quantum compilers on. Several of the key metrics we track are:
 
-Several of the key metrics we track are:
+- Pure compilation:
+    - 2-qubit gate count after circuit compilation (lower is better)
+    - Total runtime of compilation (lower is better)
+- Simulation
+    - Relative errors in simulated expectation values for a defined set of observables (lower is better)
 
-(Pure compilation)
-- 2-qubit gate count after circuit compilation (lower is better)
-- Total runtime of compilation (lower is better)
-
-(Simulation)
-- Relative errors in simulated expectation values for a defined set of observables (lower is better)
-
-Your new pass should reduce one or more of these metrics on our existing benchmark suite.  
+Your new pass should improve one or more of these metrics on our existing benchmark suite.  
 **Note:** If you are introducing a technique whose effect on performance is not currently measurable by our [benchmark suite](https://github.com/unitaryfoundation/ucc-bench/tree/main/benchmarks) (e.g. a new qubit mapping pass that performs very well on sparsely connected qubit layouts), let us know and we can work with you to add the metric into [ucc-bench](github.com/unitaryfoundation/ucc-bench).
+
+#### When you are ready to run benchmarks...  
+
+6. Open a [pull request (PR) to merge your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) of UCC in main (mark it as a Draft unless you are ready for final review), ping a UCC maintainer, and we will trigger the benchmarking suite to run. Alternately, you can also run the benchmarks locally by comparing your UCC version to main, as explained in the [ucc-bench README](https://github.com/unitaryfoundation/ucc-bench#). 
 
 ---
 
@@ -56,5 +56,5 @@ Your new pass should reduce one or more of these metrics on our existing benchma
 [Contributing Guide](https://ucc.readthedocs.io/en/latest/contributing.html)  
 [Setting up your Developer Environment](https://ucc.readthedocs.io/en/latest/contributing.html#setting-up-your-development-environment)  
 [Writing a Custom Transpiler Pass](https://ucc.readthedocs.io/en/latest/user_guide.html#writing-a-custom-pass) 
-We use "transpiler pass" to refer to transformations that act only on the Directed Acyclic Graph (DAG) representation of the quantum circuit. Higher or lower-level optimizations (e.g. algorithm-level or pulse-level, respectively), we call "compiler passes." 
+-We use "transpiler pass" to refer to transformations that act only on the Directed Acyclic Graph (DAG) representation of the quantum circuit. Higher or lower-level optimizations (e.g. algorithm-level or pulse-level, respectively), we call "compiler passes." 
 
