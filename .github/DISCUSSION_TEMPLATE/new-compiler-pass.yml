@@ -47,6 +47,7 @@ body:
     attributes:
       value: |
         ## 🛑 Stop here and wait for maintainer approval :) 🛑
+        You're welcome to preview the rest of the development cycle in the meantime.
 
   - type: textarea
     id: development
