@@ -17,6 +17,7 @@ import os
 import multiprocessing
 import random
 import argparse
+import warnings
 
 from ucc.ssr.genetic_swap_depth_opt_yq_ver import (
     genetic_opt,
@@ -24,6 +25,8 @@ from ucc.ssr.genetic_swap_depth_opt_yq_ver import (
 )
 
 import sys
+
+warnings.filterwarnings("ignore")
 
 # sys.path.append('../')
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
