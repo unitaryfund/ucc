@@ -6,6 +6,8 @@ from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.transpiler import TranspilerError
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.circuit.library import SwapGate
+from torch.cuda.amp import autocast
+from qiskit.transpiler import Layout
 
 # Assume these classes will be created in other files
 # from ucc.noise_aware import CircuitFormer
@@ -17,12 +19,17 @@ class MLFidelityRouter(TransformationPass):
     of different routing decisions, guided by just-in-time calibration data.
     """
 
-    def __init__(self, target, model, noise_profile, config=None):
+    def __init__(
+        self, target, model, noise_profile, max_seq_len: int, config=None
+    ):
         super().__init__()
         self.target = target
         self.model = model
         self.noise_profile = noise_profile
         self.coupling_map = target.build_coupling_map()
+        # NOTE: Use shortest_undirected_path as it's the correct method name
+        # self.dist_matrix is a numpy array, the method is on coupling_map
+        # We will use coupling_map directly later.
         self.dist_matrix = self.coupling_map.distance_matrix
 
         self.config = config or {}
@@ -34,19 +41,18 @@ class MLFidelityRouter(TransformationPass):
 
         # --- Configuration for the Feature Extractor ---
         self.GATE_VOCAB = ["cx", "sx", "rz", "x", "id", "measure", "other"]
-        self.NUM_PARAMS = 1  # We will encode one gate parameter (for RZ)
-        self.NUM_QUBIT_FEATURES = 3  # T1, T2, Readout Error
-        self.NUM_GATE_CAL_FEATURES = 2  # Gate Error, Gate Duration
-
+        self.NUM_PARAMS = 1
+        self.NUM_QUBIT_FEATURES = 3
+        self.NUM_GATE_CAL_FEATURES = 2
         self.FEATURE_DIM = (
             len(self.GATE_VOCAB)
             + self.NUM_PARAMS
-            + self.NUM_QUBIT_FEATURES * 2  # For two potential qubits
+            + self.NUM_QUBIT_FEATURES * 2
             + self.NUM_GATE_CAL_FEATURES
         )  # Total should be 16
 
         # Maximum circuit length (in gates) to consider
-        self.MAX_LEN = self.config.get("max_len", 512)
+        self.MAX_LEN = max_seq_len
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         if (
@@ -54,142 +60,195 @@ class MLFidelityRouter(TransformationPass):
             or self.property_set["layout"] is None
         ):
             raise TranspilerError(
-                "MLFidelityRouter requires a layout to be set in the property_set."
+                "MLFidelityRouter requires a layout to be set."
             )
 
         layout = self.property_set["layout"]
 
-        while True:
-            gates_to_route = []
-            for node in dag.two_qubit_ops():
-                q0, q1 = node.qargs
-                p0, p1 = layout[q0], layout[q1]
-                if self.dist_matrix[p0, p1] > 1:
-                    gates_to_route.append(node)
+        while dag.op_nodes():
+            self._apply_runnable_gates(dag, layout)
+
+            gates_to_route = self._get_unroutable_front_layer(dag, layout)
 
             if not gates_to_route:
                 break
 
-            candidate_moves = self._generate_candidates(gates_to_route, layout)
-
-            if not candidate_moves:
-                raise TranspilerError(
-                    "Could not find any candidate SWAPs to resolve the circuit."
-                )
-
-            predicted_fidelities = self._evaluate_candidates_with_ai(
-                dag, layout, candidate_moves
+            # --- Step 1: Generate a few good CANDIDATE SEQUENCES ---
+            candidate_sequences = self._generate_candidate_swap_sequences(
+                gates_to_route, layout, num_candidates=self.candidate_top_k
             )
 
-            if not predicted_fidelities:
-                # Fallback in case the model fails or all candidates are invalid
-                best_move = candidate_moves[0]
-            else:
-                best_move = max(
-                    predicted_fidelities, key=predicted_fidelities.get
+            if not candidate_sequences:
+                raise TranspilerError(
+                    "Heuristic could not find any SWAP sequences to resolve the circuit."
                 )
 
-            move_type, qubits = best_move
-            if move_type == "swap":
-                p_q1, p_q2 = qubits
-                v_q1, v_q2 = layout.inverse[p_q1], layout.inverse[p_q2]
-                dag.apply_operation_back(SwapGate(), qargs=[v_q1, v_q2])
-                layout.swap(p_q1, p_q2)
-            # Add logic for BRIDGE gates here if needed
+            # --- Step 2: Use the AI to evaluate each candidate sequence ---
+            best_sequence = None
+            best_fidelity = -1.0
+
+            for seq in candidate_sequences:
+                # Create a temporary state to simulate the outcome of applying the sequence
+                temp_dag = dag.copy_empty_like()
+                temp_dag.compose(dag)
+                temp_layout = layout.copy()
+
+                # Apply the entire sequence to the temporary state
+                for swap in seq:
+                    self._apply_swap(temp_dag, temp_layout, swap)
+
+                # Convert the potential final state into a feature tensor
+                feature_tensor = self._dag_to_feature_tensor(
+                    temp_dag, temp_layout
+                )
+
+                # Get the AI's prediction for this sequence
+                predicted_fidelity = self._evaluate_single_state_with_ai(
+                    feature_tensor
+                )
+
+                # --- Step 3: Keep track of the best one found so far ---
+                if predicted_fidelity > best_fidelity:
+                    best_fidelity = predicted_fidelity
+                    best_sequence = seq
+
+            # --- Step 4: Apply ONLY the winning sequence to the real DAG ---
+            if best_sequence:
+                for swap in best_sequence:
+                    self._apply_swap(dag, layout, swap)
+            else:
+                # Fallback in case of a bug or no valid sequences
+                raise TranspilerError(
+                    "AI evaluation failed to select a best SWAP sequence."
+                )
 
         self.property_set["layout"] = layout
         return dag
 
-    def _generate_candidates(self, gates_to_route, layout):
+    def _is_physically_connected(self, p_q0: int, p_q1: int) -> bool:
         """
-        Generates a small list of promising SWAP candidates.
-        This is our "Heuristic Candidate Generator".
+        A robust, custom method to check if two physical qubits are connected.
+        It checks for the edge in both directions.
         """
-        occupied_physicals = set(layout.get_physical_bits().values())
+        return (p_q0, p_q1) in self.coupling_map.get_edges() or (
+            p_q1,
+            p_q0,
+        ) in self.coupling_map.get_edges()
 
-        # Consider all SWAPs on edges connecting occupied qubits
-        possible_swaps = [
-            edge
-            for edge in self.coupling_map.get_edges()
-            if edge[0] in occupied_physicals and edge[1] in occupied_physicals
-        ]
-
-        scored_swaps = []
-        for swap in possible_swaps:
-            p1, p2 = swap
-
-            # Calculate total distance *before* the swap
-            dist_before = sum(
-                self.dist_matrix[layout[g.qargs[0]], layout[g.qargs[1]]]
-                for g in gates_to_route
-            )
-
-            # Calculate total distance *after* the swap
-            temp_layout = layout.copy()
-            temp_layout.swap(p1, p2)
-            dist_after = sum(
-                self.dist_matrix[
-                    temp_layout[g.qargs[0]], temp_layout[g.qargs[1]]
-                ]
-                for g in gates_to_route
-            )
-
-            score = dist_before - dist_after  # We want to maximize this score
-            scored_swaps.append((score, swap))
-
-        # Sort by the score in descending order (best improvement first)
-        scored_swaps.sort(key=lambda x: x[0], reverse=True)
-
-        # Return the top k candidates, formatted as our move tuple
-        top_k_swaps = [
-            ("swap", swap)
-            for score, swap in scored_swaps[: self.candidate_top_k]
-        ]
-
-        return top_k_swaps
-
-    def _evaluate_candidates_with_ai(
-        self, current_dag, current_layout, candidate_moves
+    def _generate_candidate_swap_sequences(
+        self, gates_to_route, layout, num_candidates=3
     ):
         """
-        Uses the AI model to predict the final circuit fidelity for each candidate move.
+        For the unroutable gates, generate a few distinct, plausible SWAP sequences.
         """
-        predictions = {}
-        batch_input = []
-        # Prepare the input for each candidate move
-        for move in candidate_moves:
-            temp_dag = current_dag.copy_empty_like()
-            temp_dag.compose(current_dag)
-            temp_layout = current_layout.copy()
+        candidate_sequences = []
 
-            move_type, qubits = move
-            if move_type == "swap":
-                p_q1, p_q2 = qubits
-                v_q1, v_q2 = (
-                    temp_layout.inverse[p_q1],
-                    temp_layout.inverse[p_q2],
-                )
-                temp_dag.apply_operation_back(SwapGate(), qargs=[v_q1, v_q2])
-                temp_layout.swap(p_q1, p_q2)
+        # We will generate one sequence for each of the first few unroutable gates
+        for gate_node in gates_to_route[:num_candidates]:
+            p_q0, p_q1 = layout[gate_node.qargs[0]], layout[gate_node.qargs[1]]
 
-            # Generate the feature tensor for this potential new state
-            feature_tensor = self._dag_to_feature_tensor(temp_dag, temp_layout)
-            batch_input.append(feature_tensor)
+            # Find the shortest path of physical qubits
+            path = self.coupling_map.shortest_undirected_path(p_q0, p_q1)
 
-        # The model evaluates all candidates at once for efficiency
-        if batch_input:
-            # Stack individual tensors into a single batch tensor
-            batch_tensor = torch.stack(batch_input)
+            # Convert the path into a sequence of SWAP operations
+            # A simple path is just a sequence of swaps along the chain
+            swap_sequence = []
+            # The path includes the start and end, so we iterate up to len-1
+            for i in range(len(path) - 1):
+                # The swap is between the current node and the next node in the path
+                swap_qubits = tuple(sorted((path[i], path[i + 1])))
+                swap_sequence.append(swap_qubits)
 
-            with torch.no_grad():
-                # Get the batch of predictions from the model
-                fidelity_predictions = self.model(batch_tensor)
+            if swap_sequence:
+                candidate_sequences.append(swap_sequence)
 
-            # Map predictions back to their corresponding moves
-            for i, move in enumerate(candidate_moves):
-                predictions[move] = fidelity_predictions[i].item()
+        # Return a list of lists of swaps
+        return candidate_sequences
 
-        return predictions
+    def _apply_runnable_gates(self, dag: DAGCircuit, layout: Layout):
+        """
+        Iteratively finds and removes any gates in the front layer that are
+        executable with the current layout, simplifying the DAG.
+        """
+        while True:
+            # Find all gates in the current front layer
+            front_layer_nodes = list(dag.front_layer())
+
+            # If the front layer is empty, we're done
+            if not front_layer_nodes:
+                break
+
+            made_progress = False
+            for node in front_layer_nodes:
+                # 1-qubit gates are always runnable
+                if node.op.num_qubits == 1:
+                    dag.remove_op_node(node)
+                    made_progress = True
+                    continue
+
+                # For 2-qubit gates, check connectivity
+                if node.op.num_qubits == 2:
+                    v_q0, v_q1 = node.qargs
+                    p_q0, p_q1 = layout[v_q0], layout[v_q1]
+
+                    # If the physical qubits are connected, the gate is runnable
+                    if self._is_physically_connected(p_q0, p_q1):
+                        dag.remove_op_node(node)
+                        made_progress = True
+
+            # If we went through the whole front layer and couldn't run any gates,
+            # it means the remaining gates are all unroutable. We stop.
+            if not made_progress:
+                break
+
+    def _apply_swap(self, dag, layout, swap_qubits):
+        """Helper to apply a single SWAP to both DAG and layout."""
+        p_q1, p_q2 = swap_qubits
+        v_q1 = layout._p2v.get(p_q1)
+        v_q2 = layout._p2v.get(p_q2)
+        if v_q1 is not None and v_q2 is not None:
+            dag.apply_operation_back(SwapGate(), qargs=(v_q1, v_q2))
+        layout.swap(p_q1, p_q2)
+
+    def _get_unroutable_front_layer(self, dag, layout):
+        """Finds all gates in the current front layer that can't be run."""
+        unroutable = []
+        for node in dag.front_layer():
+            if node.op.num_qubits == 2:
+                p0, p1 = layout[node.qargs[0]], layout[node.qargs[1]]
+
+                if self._is_physically_connected(p0, p1):
+                    unroutable.append(node)
+        return unroutable
+
+    def _find_best_heuristic_swap_sequence(self, gate_to_route, layout):
+        """Uses a simple heuristic to find a sequence of SWAPs to resolve a gate."""
+        p_q0, p_q1 = (
+            layout[gate_to_route.qargs[0]],
+            layout[gate_to_route.qargs[1]],
+        )
+
+        # Find the shortest path of physical qubits
+        path = self.coupling_map.shortest_undirected_path(p_q0, p_q1)
+
+        # Convert the path into a sequence of SWAP operations
+        swap_sequence = []
+        for i in range(len(path) - 2):
+            swap_sequence.append(tuple(sorted((path[i], path[i + 1]))))
+
+        return swap_sequence
+
+    def _evaluate_single_state_with_ai(self, feature_tensor):
+        """Uses the AI model to predict the fidelity of a single circuit state."""
+        model_device = next(self.model.parameters()).device
+
+        # Add a batch dimension of 1
+        input_tensor = feature_tensor.unsqueeze(0).to(model_device)
+
+        with torch.no_grad(), autocast():
+            prediction = self.model(input_tensor)
+
+        return prediction.item()
 
     def _dag_to_feature_tensor(
         self, dag: DAGCircuit, v2p_mapping: dict
@@ -240,7 +299,7 @@ class MLFidelityRouter(TransformationPass):
             if p_qubits:
                 pq1 = p_qubits[0]
                 # Get features for the first physical qubit
-                t1, t2 = self.noise_profile.get_t1_t2(pq1._index)
+                t1, t2 = self.noise_profile.get_t1_t2(pq1)
                 readout_err = self.noise_profile.get_readout_error(pq1)
                 phys_q1_features = [t1, t2, readout_err]
 
@@ -276,11 +335,14 @@ class MLFidelityRouter(TransformationPass):
 
         # --- 5. Padding and Truncation ---
         # Truncate if longer than MAX_LEN
-        padded_sequence = gate_feature_sequence[: self.MAX_LEN]
+        truncated_sequence = gate_feature_sequence[: self.MAX_LEN]
 
-        # Pad with zeros if shorter
+        # 2. Pad the sequence with zero vectors if it's too short
+        padded_sequence = truncated_sequence
         padding_needed = self.MAX_LEN - len(padded_sequence)
+
         if padding_needed > 0:
+            # self.FEATURE_DIM is correctly accessed as a class attribute
             zero_vector = [0.0] * self.FEATURE_DIM
             padded_sequence.extend([zero_vector] * padding_needed)
 

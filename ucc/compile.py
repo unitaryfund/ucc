@@ -2,11 +2,15 @@ from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile as translate
 from .transpilers.ucc_defaults import UCCDefault1
-from .noise_aware.backend_utils import get_target
-from .noise_aware import DeviceNoiseProfile
-from qiskit.transpiler.passes import SabreLayout
 from qiskit import transpile as qiskit_transpile
+from qiskit.circuit.equivalence_library import StandardEquivalenceLibrary
 from qiskit.transpiler import PassManager, CouplingMap
+from qiskit.transpiler.passes import SabreLayout, BasisTranslator
+from ucc.noise_aware import DeviceNoiseProfile, MLFidelityRouter, CircuitFormer
+import torch
+
+from .noise_aware.backend_utils import get_target
+
 
 import sys
 import warnings
@@ -76,19 +80,47 @@ def compile(
         target = get_target(
             target_device
         )  # Use the helper to get a Target object
-        DeviceNoiseProfile(target)
-
-        # --- THE FIX IS HERE ---
-        # We build the correct two-stage pre-processing PassManager
+        noise_profile = DeviceNoiseProfile(target)
 
         # 1. Get the hardware coupling map for the layout pass
         coupling_map = CouplingMap(target.build_coupling_map())
+
+        # Define the model architecture EXACTLY as you did in the training script
+        # This is crucial for the weights to load correctly.
+        model_params = {
+            "feature_dim": 16,
+            "model_dim": 64,
+            "n_heads": 4,
+            "n_layers": 4,
+            "dropout": 0.1,
+            "max_seq_len": 256,
+        }
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        # Instantiate the model architecture
+        trained_model = CircuitFormer(**model_params).to(device)
+
+        # Load the saved weights from your best model
+        model_path = "C:/Users/junli/ucc/ucc/noise_aware/ml_model/trained_models_final/best_model.pth"
+        trained_model.load_state_dict(
+            torch.load(model_path, map_location=device)
+        )
+        trained_model.eval()  # Set the model to evaluation mode
 
         # 2. Construct the list of passes for our pre-compilation
         pre_pass_list = [
             # Stage 1: Find a good initial layout.
             SabreLayout(coupling_map, skip_routing=True),
             # Stage 2: Our custom, noise-aware routing pass.
+            MLFidelityRouter(
+                target=target,
+                model=trained_model,
+                noise_profile=noise_profile,
+                max_seq_len=256,
+            ),
+            BasisTranslator(
+                StandardEquivalenceLibrary, list(target.operation_names)
+            ),
         ]
 
         pm_pre = PassManager(pre_pass_list)

@@ -116,7 +116,7 @@ if __name__ == "__main__":
         # Stage 2: Routing - Choose your desired routing pass.
         # Let's use our best heuristic pass for this definitive test.
         # Or, once the model is trained:
-        MLFidelityRouter(target, model_type="hybrid"),
+        MLFidelityRouter(target),
         # Stage 3: Optimization - Clean up the circuit after routing.
         ConsolidateBlocks(),
         # Stage 4: Final Translation - Use the correct, explicit arguments.

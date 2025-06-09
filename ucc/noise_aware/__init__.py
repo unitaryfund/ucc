@@ -9,8 +9,13 @@ This module provides tools and transpiler passes for noise-aware
 compilation, aiming to improve circuit fidelity on real quantum hardware.
 """
 
-# from .noise_aware_pass import (
-#     ResourcePruningPass,
-# )
-# from .ml_model import CircuitFormer
-# from .ml_router import MLFidelityRouter
+from .noise_aware_pass import ResourcePruningPass, DeviceNoiseProfile
+from .ml_model.train_model import CircuitFormer
+from .ml_router import MLFidelityRouter
+
+__all__ = [
+    "ResourcePruningPass",
+    "DeviceNoiseProfile",
+    "CircuitFormer",
+    "MLFidelityRouter",
+]

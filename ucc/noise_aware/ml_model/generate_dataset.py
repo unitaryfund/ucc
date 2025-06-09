@@ -102,13 +102,14 @@ def process_circuit(
     feature_tensor = router_instance._dag_to_feature_tensor(
         dag, final_v2p_mapping
     )
+
     qasm_string = str(dumps(transpiled_circuit))
 
     return {
         "fidelity_label": fidelity,
         "feature_tensor": feature_tensor.tolist(),
         "final_qasm": qasm_string,
-        "circuit_type": circuit.name,  # Keep track of where the circuit came from
+        "circuit_type": circuit.name,
     }
 
 
@@ -137,6 +138,12 @@ if __name__ == "__main__":
         help="Minimum number of qubits for generated circuits.",
     )
     parser.add_argument(
+        "--max-seq-len",
+        type=str,
+        default=512,
+        help="same size with model_seq_len",
+    )
+    parser.add_argument(
         "--output-file",
         type=str,
         default="diverse_fidelity_dataset.json",
@@ -152,7 +159,10 @@ if __name__ == "__main__":
     )
 
     router_for_feature_extraction = MLFidelityRouter(
-        backend.target, model=None, noise_profile=noise_profile
+        backend.target,
+        model=None,
+        noise_profile=noise_profile,
+        max_seq_len=args.max_seq_len,
     )
     print(
         f"Feature vector dimension is set to: {router_for_feature_extraction.FEATURE_DIM}"
