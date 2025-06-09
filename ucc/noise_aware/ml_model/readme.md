@@ -49,12 +49,27 @@ model-dim * n-heads must be the same as embed_dim
 ```
 python ucc/noise_aware/ml_model/train_model.py ^
     --dataset-path C:/Users/junli/ucc/ucc/noise_aware/ml_model/diverse_fidelity_dataset.json ^
-    --output-dir C:/Users/junli/ucc/ucc/noise_aware/ml_model/ ^
-    --epochs 20 ^
-    --batch-size 32 ^
-    --learning-rate 0.00001 ^
-    --model-dim 128 ^
+    --output-dir C:/Users/junli/ucc/ucc/noise_aware/ml_model/trained_models_medium_reliable/ ^
+    --epochs 30 ^
+    --batch-size 128 ^
+    --learning-rate 0.0001 ^
+    --patience 5 ^
+    --min-delta 0.00001 ^
+    --model-dim 256 ^
     --n-heads 8 ^
-    --n-layers 8 ^
+    --n-layers 6 ^
     --max-seq-len 512
 ```
+
+python ucc/noise_aware/ml_model/train_model.py ^
+    --dataset-path C:/Users/junli/ucc/ucc/noise_aware/ml_model/diverse_fidelity_dataset.json ^
+    --output-dir C:/Users/junli/ucc/ucc/noise_aware/ml_model/trained_models_medium_reliable/ ^
+    --epochs 30 ^
+    --batch-size 128 ^
+    --learning-rate 0.0001 ^
+    --patience 5 ^
+    --min-delta 0.00001 ^
+    --model-dim 256 ^
+    --n-heads 8 ^
+    --n-layers 6 ^
+    --max-seq-len 512

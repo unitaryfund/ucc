@@ -158,31 +158,98 @@ class FidelityDataset(Dataset):
 # ==============================================================================
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="trainer for CircuitFormer.")
-    # (All your argparse arguments are the same)
-    parser.add_argument("--dataset-path", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, default="trained_models")
-    parser.add_argument("--epochs", type=int, default=20)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--learning-rate", type=float, default=0.0001)
-    parser.add_argument("--feature-dim", type=int, default=16)
-    parser.add_argument("--model-dim", type=int, default=64)
-    parser.add_argument("--n-heads", type=int, default=4)
-    parser.add_argument("--n-layers", type=int, default=4)
+    parser = argparse.ArgumentParser(
+        description="Trainer for CircuitFormer with Early Stopping."
+    )
+
+    # --- Arguments for Data and Saving ---
     parser.add_argument(
-        "--max-seq-len", type=int, default=256
-    )  # This should now be the only source of truth
+        "--dataset-path",
+        type=str,
+        required=True,
+        help="Path to the JSON dataset file.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="trained_models",
+        help="Directory to save the trained model.",
+    )
+
+    # --- Arguments for Training Hyperparameters ---
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=50,
+        help="Maximum number of training epochs.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=64,
+        help="Batch size for training and validation.",
+    )
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=1e-4,
+        help="Learning rate for the AdamW optimizer.",
+    )
+
+    # --- Arguments for Early Stopping ---
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=5,
+        help="Epochs to wait for improvement before stopping.",
+    )
+    parser.add_argument(
+        "--min-delta",
+        type=float,
+        default=1e-5,
+        help="Minimum change in validation loss to be considered an improvement.",
+    )
+
+    # --- Arguments for Model Architecture ---
+    parser.add_argument(
+        "--feature-dim",
+        type=int,
+        default=16,
+        help="Dimension of the gate feature vector.",
+    )
+    parser.add_argument(
+        "--model-dim",
+        type=int,
+        default=128,
+        help="Internal dimension of the Transformer.",
+    )
+    parser.add_argument(
+        "--n-heads", type=int, default=8, help="Number of attention heads."
+    )
+    parser.add_argument(
+        "--n-layers",
+        type=int,
+        default=6,
+        help="Number of Transformer encoder layers.",
+    )
+    parser.add_argument(
+        "--max-seq-len",
+        type=int,
+        default=512,
+        help="Max sequence length for model and data.",
+    )
 
     args = parser.parse_args()
 
+    # --- Setup ---
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"--- Using device: {device} ---")
 
+    # --- Load Data ---
     print(f"Loading dataset from: {args.dataset_path}")
     with open(args.dataset_path, "r") as f:
         raw_data = json.load(f)
-    print(f"Loaded {len(raw_data)} samples.")
 
     full_dataset = FidelityDataset(
         raw_data, max_seq_len=args.max_seq_len, feature_dim=args.feature_dim
@@ -194,17 +261,20 @@ if __name__ == "__main__":
     )
 
     train_loader = DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=0
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True,
     )
     val_loader = DataLoader(
-        val_dataset, batch_size=args.batch_size, num_workers=0
+        val_dataset, batch_size=args.batch_size, num_workers=4, pin_memory=True
     )
-
     print(
-        f"Training set size: {len(train_dataset)}, Validation set size: {len(val_dataset)}"
+        f"Loaded {len(raw_data)} samples. Training on {len(train_dataset)}, validating on {len(val_dataset)}."
     )
 
-    # Initialize model using keyword arguments for safety
+    # --- Initialize Model and Optimizer ---
     model = CircuitFormer(
         feature_dim=args.feature_dim,
         model_dim=args.model_dim,
@@ -216,60 +286,99 @@ if __name__ == "__main__":
 
     criterion = nn.MSELoss()
     optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
-    # Add the scheduler after the optimizer
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=args.epochs * len(train_loader)
-    )
+    scaler = torch.cuda.amp.GradScaler(
+        enabled=(device.type == "cuda")
+    )  # Mixed precision scaler
 
     print("\n--- Starting Model Training ---")
     best_val_loss = float("inf")
-
-    # Mixed precision training setup
-    scaler = torch.amp.GradScaler()
+    epochs_no_improve = 0
+    training_log = []
 
     for epoch in range(args.epochs):
+        # --- Training Phase ---
         model.train()
+        total_train_loss = 0.0
         train_pbar = tqdm(
-            train_loader, desc=f"Epoch {epoch + 1}/{args.epochs} [Training]"
+            train_loader,
+            desc=f"Epoch {epoch + 1}/{args.epochs} [Training]",
+            leave=False,
         )
-        for features, labels in train_pbar:
-            features, labels = features.to(device), labels.to(device)
 
-            # Using mixed precision
-            with torch.cuda.amp.autocast():
+        for features, labels in train_pbar:
+            features, labels = (
+                features.to(device, non_blocking=True),
+                labels.to(device, non_blocking=True),
+            )
+
+            with torch.amp.autocast(
+                device_type=device.type,
+                dtype=torch.float16,
+                enabled=(device.type == "cuda"),
+            ):
                 outputs = model(features)
                 loss = criterion(outputs, labels)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
-            scheduler.step()
 
-            train_pbar.set_postfix(loss=f"{loss.item():.5f}")
+            total_train_loss += loss.item()
+            train_pbar.set_postfix(loss=f"{loss.item():.6f}")
 
-        # -- Validation Phase --
+        avg_train_loss = total_train_loss / len(train_loader)
+
+        # --- Validation Phase ---
         model.eval()
         total_val_loss = 0.0
         with torch.no_grad():
             for features, labels in val_loader:
-                features, labels = features.to(device), labels.to(device)
-                with torch.cuda.amp.autocast():
+                features, labels = (
+                    features.to(device, non_blocking=True),
+                    labels.to(device, non_blocking=True),
+                )
+                with torch.amp.autocast(
+                    device_type=device.type,
+                    dtype=torch.float16,
+                    enabled=(device.type == "cuda"),
+                ):
                     outputs = model(features)
                     loss = criterion(outputs, labels)
                 total_val_loss += loss.item()
 
         avg_val_loss = total_val_loss / len(val_loader)
+
         print(
-            f"Epoch {epoch + 1}/{args.epochs} | Val Loss: {avg_val_loss:.5f}"
+            f"Epoch {epoch + 1:02d}/{args.epochs} | Train Loss: {avg_train_loss:.6f} | Val Loss: {avg_val_loss:.6f}"
         )
 
-        if avg_val_loss < best_val_loss:
+        # --- Checkpointing & Early Stopping Logic ---
+        if best_val_loss - avg_val_loss > args.min_delta:
+            # Improvement found
+            print(
+                f"  -> Val loss improved from {best_val_loss:.6f} to {avg_val_loss:.6f}. Saving model..."
+            )
             best_val_loss = avg_val_loss
+            epochs_no_improve = 0
+            # Save the new best model
             torch.save(
                 model.state_dict(),
                 os.path.join(args.output_dir, "best_model.pth"),
             )
-            print("  -> New best model saved.")
+        else:
+            # No improvement
+            epochs_no_improve += 1
+
+        if epochs_no_improve >= args.patience:
+            print("\n--- Early Stopping Triggered ---")
+            print(
+                f"Validation loss has not improved for {args.patience} consecutive epochs."
+            )
+            break
 
     print("\n--- Training Complete ---")
+    print(f"Best validation loss achieved: {best_val_loss:.6f}")
+    print(
+        f"Best model saved to: {os.path.join(args.output_dir, 'best_model.pth')}"
+    )
