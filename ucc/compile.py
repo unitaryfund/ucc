@@ -2,7 +2,11 @@ from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile as translate
 from .transpilers.ucc_defaults import UCCDefault1
+from .noise_aware.backend_utils import get_target
+from .noise_aware import DeviceNoiseProfile
+from qiskit.transpiler.passes import SabreLayout
 from qiskit import transpile as qiskit_transpile
+from qiskit.transpiler import PassManager, CouplingMap
 
 import sys
 import warnings
@@ -31,6 +35,7 @@ def compile(
     target_gateset=None,
     target_device=None,
     custom_passes=None,
+    noise_aware_routing=False,
 ):
     """Compiles the provided quantum `circuit` by translating it to a Qiskit
     circuit, transpiling it, and returning the optimized circuit in the
@@ -46,7 +51,10 @@ def compile(
             available. If no `target_gateset` or ` target_device` is provided, the
             basis gates of the input circuit are not changed.
         target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
-        custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default set
+        custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default s
+        noise_aware_routing (bool): (optional) If True, enables a noise-aware
+            layout and routing pass. Requires `target_device` to be set.
+            Defaults to False.
 
     Returns:
         object: The compiled circuit in the specified format.
@@ -56,33 +64,61 @@ def compile(
 
     # Translate to Qiskit Circuit object
     qiskit_circuit = translate(circuit, "qiskit")
-    ucc_default1 = UCCDefault1(target_device=target_device)
+
+    property_set = None
+
+    if noise_aware_routing:
+        if target_device is None:
+            raise ValueError(
+                "Noise-aware routing requires a `target_device` to be provided."
+            )
+
+        target = get_target(
+            target_device
+        )  # Use the helper to get a Target object
+        DeviceNoiseProfile(target)
+
+        # --- THE FIX IS HERE ---
+        # We build the correct two-stage pre-processing PassManager
+
+        # 1. Get the hardware coupling map for the layout pass
+        coupling_map = CouplingMap(target.build_coupling_map())
+
+        # 2. Construct the list of passes for our pre-compilation
+        pre_pass_list = [
+            # Stage 1: Find a good initial layout.
+            SabreLayout(coupling_map, skip_routing=True),
+            # Stage 2: Our custom, noise-aware routing pass.
+        ]
+
+        pm_pre = PassManager(pre_pass_list)
+        qiskit_circuit = pm_pre.run(qiskit_circuit)
+        # Our pass manager has now modified the circuit and the property_set
+        property_set = pm_pre.property_set
+
+    run_default_mapping = not noise_aware_routing
+    ucc_default1 = UCCDefault1(
+        target_device=target_device, add_mapping_passes=run_default_mapping
+    )
     if custom_passes is not None:
         ucc_default1.pass_manager.append(custom_passes)
     compiled_circuit = ucc_default1.run(
-        qiskit_circuit,
+        qiskit_circuit, property_set=property_set
     )
-
+    final_basis = None
     if target_gateset is not None:
-        # Translate into user-defined gateset; no optimization
-        compiled_circuit = qiskit_transpile(
-            compiled_circuit, basis_gates=target_gateset, optimization_level=0
-        )
-    elif hasattr(target_device, "operation_names"):
-        if target_gateset not in target_device.operation_names:
-            warnings.warn(
-                f"Warning: The target gateset {target_gateset} is not supported by the target device. "
-            )
-        # Use target_device gateset if available
-        target_gateset = target_device.operation_names
+        final_basis = target_gateset
+    elif target_device is not None:
+        # This ensures we always have a valid basis if a device is present
+        final_basis = get_target(target_device).operation_names
 
+    if final_basis is not None:
         # Translate into the target device gateset; no optimization
         compiled_circuit = qiskit_transpile(
             compiled_circuit,
-            basis_gates=target_gateset,
+            basis_gates=final_basis,
             optimization_level=0,
         )
-
     # Translate the compiled circuit to the desired format
     final_result = translate(compiled_circuit, return_format)
     return final_result

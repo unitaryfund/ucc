@@ -30,14 +30,17 @@ from qiskit.transpiler.passes import (
     VF2PostLayout,
 )
 from typing import Optional
-
+from ..noise_aware.backend_utils import get_target
 
 CONFIG = user_config.get_config()
 
 
 class UCCDefault1:
     def __init__(
-        self, local_iterations: int = 1, target_device: Optional[Target] = None
+        self,
+        local_iterations: int = 1,
+        target_device: Optional[Target] = None,
+        add_mapping_passes: bool = True,
     ):
         """
         Create a new instance of UCCDefault1 compiler
@@ -62,7 +65,8 @@ class UCCDefault1:
             },
         }
         self._add_local_passes(local_iterations)
-        self._add_map_passes(target_device)
+        if add_mapping_passes:
+            self._add_map_passes(target_device)
 
     @property
     def default_passes(self):
@@ -89,6 +93,7 @@ class UCCDefault1:
 
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
+            target_device = get_target(target_device)
             coupling_map = target_device.build_coupling_map()
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
@@ -120,8 +125,8 @@ class UCCDefault1:
             self.pass_manager.append(VF2PostLayout(target=target_device))
             self.pass_manager.append(ApplyLayout())
 
-    def run(self, circuits):
-        return self.pass_manager.run(circuits)
+    def run(self, circuits, property_set=None):
+        return self.pass_manager.run(circuits, property_set=property_set)
 
 
 def _get_trial_count(default_trials=5):

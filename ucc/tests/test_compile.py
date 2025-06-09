@@ -135,7 +135,7 @@ def test_custom_pass():
         )
         # Check that the compiled circuit respects the coupling map of the target device
         analysis_pass = CheckMap(
-            t.build_coupling_map(), property_set_field="check_map"
+            t.coupling_map(), property_set_field="check_map"
         )
 
         dag = circuit_to_dag(result_circuit)
