@@ -533,6 +533,7 @@ class MLFidelityRouter(TransformationPass):
 # --- HELPER FUNCTIONS ---
 
 # --- CIRCUIT GENERATOR PORTFOLIO ---
+## generate_data.py
 
 
 def create_random_circuit(num_qubits: int, num_gates: int) -> QuantumCircuit:
@@ -782,6 +783,10 @@ def process_circuit(
     except TranspilerError:
         return None
 
+    # Check the length BEFORE you try to extract features
+    if len(transpiled_circuit.data) > int(router_instance.MAX_LEN):
+        return None  # Discard sample if it's too long
+
     if (
         not hasattr(transpiled_circuit, "layout")
         or transpiled_circuit.layout is None
@@ -833,7 +838,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--max-seq-len",
-        type=str,
+        type=int,
         default=512,
         help="same size with model_seq_len",
     )
