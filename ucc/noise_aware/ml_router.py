@@ -1,5 +1,4 @@
-# In your file, e.g., ucc/noise_aware/ml_router.py
-
+#!/usr/bin/env python
 import torch
 import math
 from qiskit.transpiler.basepasses import TransformationPass

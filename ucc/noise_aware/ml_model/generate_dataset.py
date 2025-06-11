@@ -9,6 +9,9 @@ from qiskit.qasm2 import dumps
 from qiskit.transpiler import TranspilerError
 from qiskit.converters import circuit_to_dag
 from qiskit_ibm_runtime.fake_provider import FakeWashingtonV2
+from qiskit.circuit import Parameter
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.synthesis import QDrift
 
 # Import structured circuit generators
 from qiskit.circuit.library import QFT, EfficientSU2, QuantumVolume
@@ -56,6 +59,187 @@ def create_quantum_volume_circuit(num_qubits: int) -> QuantumCircuit:
     """Creates a Quantum Volume circuit, designed to stress compilers with all-to-all mixing."""
     # Quantum Volume is defined for depth=qubits
     return QuantumVolume(num_qubits, depth=num_qubits, seed=42).decompose()
+
+
+def create_heisenberg_circuit(
+    rows: int, cols: int, trotter_steps: int = 1
+) -> QuantumCircuit:
+    """
+    Creates a circuit for simulating the Heisenberg spin model on a 2D square lattice.
+
+    The Heisenberg Hamiltonian is H = J * Σ (X_i X_j + Y_i Y_j + Z_i Z_j) over all
+    neighboring <i,j> pairs. This function sets the coupling strength J=1 and simulation time t=1.
+
+    Args:
+        rows: The number of rows in the square lattice.
+        cols: The number of columns in the square lattice.
+        trotter_steps: The number of Trotter steps for the time evolution simulation.
+                       Higher steps mean a more accurate but deeper circuit.
+
+    Returns:
+        A QuantumCircuit object representing the time evolution, decomposed into
+        basis gates (CNOTs and single-qubit rotations).
+    """
+    num_qubits = rows * cols
+    if num_qubits <= 1:
+        # Return an empty circuit if the lattice is too small for interactions
+        return QuantumCircuit(num_qubits)
+
+    # 1. Define the interactions (Hamiltonian terms) using Pauli strings
+    pauli_list = []
+
+    # Helper function to map (row, col) coordinates to a single qubit index
+    def get_qubit_idx(r, c):
+        return r * cols + c
+
+    # Iterate over all qubits in the grid to define neighbor interactions
+    for r in range(rows):
+        for c in range(cols):
+            # Interaction with the neighbor to the right (Horizontal)
+            if c < cols - 1:
+                idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r, c + 1)
+                # Ensure idx1 > idx2 for consistent Pauli string generation
+                if idx1 < idx2:
+                    idx1, idx2 = idx2, idx1
+
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}X{'I' * (idx1 - idx2 - 1)}X{'I' * idx2}",
+                        1.0,
+                    )
+                )
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}Y{'I' * (idx1 - idx2 - 1)}Y{'I' * idx2}",
+                        1.0,
+                    )
+                )
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}Z{'I' * (idx1 - idx2 - 1)}Z{'I' * idx2}",
+                        1.0,
+                    )
+                )
+
+            # Interaction with the neighbor below (Vertical)
+            if r < rows - 1:
+                idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r + 1, c)
+                if idx1 < idx2:
+                    idx1, idx2 = idx2, idx1
+
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}X{'I' * (idx1 - idx2 - 1)}X{'I' * idx2}",
+                        1.0,
+                    )
+                )
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}Y{'I' * (idx1 - idx2 - 1)}Y{'I' * idx2}",
+                        1.0,
+                    )
+                )
+                pauli_list.append(
+                    (
+                        f"{'I' * (num_qubits - idx1 - 1)}Z{'I' * (idx1 - idx2 - 1)}Z{'I' * idx2}",
+                        1.0,
+                    )
+                )
+
+    if not pauli_list:
+        return QuantumCircuit(num_qubits)
+
+    # 2. Create the Hamiltonian operator from the list of Pauli strings
+    hamiltonian = SparsePauliOp.from_list(pauli_list)
+
+    # 3. Use a Trotterization method to create the evolution circuit.
+    # We use QDrift, a simple first-order method. The `reps` argument
+    # corresponds to the number of Trotter steps.
+    qdrift = QDrift(reps=trotter_steps)
+
+    # Synthesize the operator into a gate representing e^(-iHt) where t=1
+    evolution_gate = qdrift.synthesize(hamiltonian)
+
+    # 4. Wrap the synthesized evolution into a QuantumCircuit
+    qc = QuantumCircuit(num_qubits, name=f"heisenberg_{rows}x{cols}")
+    qc.append(evolution_gate, range(num_qubits))
+
+    # Decompose the high-level evolution gate into CNOTs and single-qubit gates
+    return qc.decompose()
+
+
+def create_qcnn_circuit(num_qubits: int) -> QuantumCircuit:
+    """
+    Creates a Quantum Convolutional Neural Network (QCNN) circuit.
+
+    This implements a common QCNN architecture with alternating convolutional
+    and pooling layers, reducing the number of active qubits by half at each
+    pooling step. The circuit is fully parameterized.
+
+    Args:
+        num_qubits: The number of input qubits. Must be a power of 2.
+
+    Returns:
+        A QuantumCircuit object representing the QCNN.
+
+    Raises:
+        ValueError: If the number of qubits is not a power of 2.
+    """
+    if not (num_qubits > 0 and (num_qubits & (num_qubits - 1) == 0)):
+        raise ValueError("Number of qubits for QCNN must be a power of 2.")
+
+    qc = QuantumCircuit(num_qubits, name=f"qcnn_{num_qubits}q")
+
+    # --- Helper function for a two-qubit convolutional unit ---
+    def conv_unit(params: list) -> QuantumCircuit:
+        """A single parameterized 2-qubit convolutional filter."""
+        # This is a standard, entangling two-qubit unitary.
+        # It requires 5 parameters.
+        target = QuantumCircuit(2)
+        target.rz(params[0], 0)
+        target.rz(params[1], 1)
+        target.crx(
+            params[2], 0, 1
+        )  # Controlled-RX is a good entangling choice
+        target.ry(params[3], 0)
+        target.ry(params[4], 1)
+        return target
+
+    active_qubits = list(range(num_qubits))
+    param_idx = 0
+
+    # The hierarchical structure continues until only one qubit remains "active"
+    while len(active_qubits) > 1:
+        # --- 1. Convolutional Layer ---
+        # Apply convolutional units to adjacent pairs of active qubits
+        for i in range(0, len(active_qubits), 2):
+            q1, q2 = active_qubits[i], active_qubits[i + 1]
+
+            # Create 5 new parameters for this specific unit
+            conv_params = [Parameter(f"p_{param_idx + j}") for j in range(5)]
+            param_idx += 5
+
+            conv_gate = conv_unit(conv_params).to_gate(label="Conv")
+            qc.append(conv_gate, [q1, q2])
+
+        qc.barrier()
+
+        # --- 2. Pooling Layer ---
+        # Apply a CNOT and effectively discard the target qubit for the next layer
+        next_active_qubits = []
+        for i in range(0, len(active_qubits), 2):
+            q_control = active_qubits[i]
+            q_target = active_qubits[i + 1]
+            qc.cx(q_control, q_target)
+
+            # The control qubit moves on to the next layer
+            next_active_qubits.append(q_control)
+
+        active_qubits = next_active_qubits
+        if len(active_qubits) > 1:
+            qc.barrier()
+
+    return qc
 
 
 # --- DATA PROCESSING LOGIC (Unchanged from before) ---
@@ -172,10 +356,12 @@ if __name__ == "__main__":
     # We define a portfolio of generators and the probability of choosing each one.
     # This ensures a diverse mix of circuit types.
     circuit_generators = {
-        "random": (create_random_circuit, 0.25),  # 25% chance
-        "qft": (create_qft_circuit, 0.40),  # 25% chance
+        "random": (create_random_circuit, 0.10),  # 10% chance
+        "qft": (create_qft_circuit, 0.30),  # 30% chance
         "ansatz": (create_ansatz_circuit, 0.25),  # 25% chance
         "qv": (create_quantum_volume_circuit, 0.1),  # 10% chance
+        "qcnn": (create_qcnn_circuit, 0.20),  # 20% chance
+        "heisenberg": (create_heisenberg_circuit, 0.15),  # 15% chance
     }
     generator_names, generator_params = zip(*circuit_generators.items())
     generator_funcs, generator_weights = zip(*generator_params)
@@ -193,20 +379,42 @@ if __name__ == "__main__":
         )
         generator_func = circuit_generators[generator_name][0]
 
-        if generator_name == "qv":
-            num_qubits = master_rng.integers(args.min_qubits, 10)
+        if generator_name == "heisenberg":
+            # Generate a random square-ish lattice
+            rows = master_rng.integers(2, 6)
+            cols = master_rng.integers(2, 6)
+            num_qubits = rows * cols
+            if num_qubits > args.max_qubits:
+                continue  # Skip if too large
+            trotter_steps = master_rng.integers(1, 4)
+            raw_circuit = generator_func(rows, cols, trotter_steps)
+            raw_circuit.name = f"heisenberg_{rows}x{cols}_{trotter_steps}steps"
+
+        elif generator_name == "qcnn":
+            # QCNNs need a number of qubits that is a power of 2
+            possible_qubit_counts = [4, 8, 16, 32, 64]
+            valid_qubit_counts = [
+                q
+                for q in possible_qubit_counts
+                if args.min_qubits <= q <= args.max_qubits
+            ]
+            if not valid_qubit_counts:
+                continue  # Skip if no valid sizes
+            num_qubits = master_rng.choice(valid_qubit_counts)
+            raw_circuit = generator_func(num_qubits)
+            raw_circuit.name = f"qcnn_{num_qubits}q"
+
         else:
             num_qubits = master_rng.integers(
                 args.min_qubits, args.max_qubits + 1
             )
-
-        if generator_name == "random":
-            num_gates = master_rng.integers(num_qubits, num_qubits * 5)
-            raw_circuit = generator_func(num_qubits, num_gates)
-            raw_circuit.name = f"random_{num_qubits}q_{num_gates}g"
-        else:
-            raw_circuit = generator_func(num_qubits)
-            raw_circuit.name = f"{generator_name}_{num_qubits}q"
+            if generator_name == "random":
+                num_gates = master_rng.integers(num_qubits, num_qubits * 5)
+                raw_circuit = generator_func(num_qubits, num_gates)
+                raw_circuit.name = f"random_{num_qubits}q_{num_gates}g"
+            else:
+                raw_circuit = generator_func(num_qubits)
+                raw_circuit.name = f"{generator_name}_{num_qubits}q"
 
         if raw_circuit.num_parameters > 0:
             # This circuit is a template. We need to fill in concrete values.

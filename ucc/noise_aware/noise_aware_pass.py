@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import Target, CouplingMap
