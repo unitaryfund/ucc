@@ -870,8 +870,8 @@ if __name__ == "__main__":
         "qft": (create_qft_circuit, 0.30),  # 30% chance
         "ansatz": (create_ansatz_circuit, 0.25),  # 25% chance
         "qv": (create_quantum_volume_circuit, 0.1),  # 10% chance
-        "qcnn": (create_qcnn_circuit, 0.20),  # 20% chance
-        "heisenberg": (create_heisenberg_circuit, 0.15),  # 15% chance
+        "qcnn": (create_qcnn_circuit, 0.15),  # 20% chance
+        "heisenberg": (create_heisenberg_circuit, 0.10),  # 15% chance
     }
     generator_names, generator_params = zip(*circuit_generators.items())
     generator_funcs, generator_weights = zip(*generator_params)
