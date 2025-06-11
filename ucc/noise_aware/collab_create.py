@@ -875,10 +875,10 @@ if __name__ == "__main__":
     # This ensures a diverse mix of circuit types.
     circuit_generators = {
         "random": (create_random_circuit, 0.10),  # 10% chance
-        "qft": (create_qft_circuit, 0.30),  # 30% chance
+        "qft": (create_qft_circuit, 0.40),  # 40% chance
         "ansatz": (create_ansatz_circuit, 0.25),  # 25% chance
         "qv": (create_quantum_volume_circuit, 0.1),  # 10% chance
-        "qcnn": (create_qcnn_circuit, 0.15),  # 20% chance
+        "qcnn": (create_qcnn_circuit, 0.25),  # 35% chance
         # "heisenberg": (create_heisenberg_circuit, 0.10),  # 15% chance
     }
     generator_names, generator_params = zip(*circuit_generators.items())
