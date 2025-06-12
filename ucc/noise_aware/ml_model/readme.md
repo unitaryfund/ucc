@@ -105,7 +105,7 @@ each epochs are roughly 1 minute, and just 3 epochs its trained to its best 1th 
 
 which are enough to train this monster,
 
-you can see how good the model calibrate to 10k random cicuit,
+you can see how good the model calibrate to 10k quantum circuit,
 
 I hope we have a open-source pre-generate dataset of these circuit information, to make these trian more robust
 ```
