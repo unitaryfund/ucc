@@ -39,7 +39,7 @@ def compile(
     target_gateset=None,
     target_device=None,
     custom_passes=None,
-    noise_aware_routing=False,
+    noise_aware_routing=True,
 ):
     """Compiles the provided quantum `circuit` by translating it to a Qiskit
     circuit, transpiling it, and returning the optimized circuit in the
@@ -89,11 +89,11 @@ def compile(
         # This is crucial for the weights to load correctly.
         model_params = {
             "feature_dim": 16,
-            "model_dim": 64,
-            "n_heads": 4,
-            "n_layers": 4,
+            "model_dim": 256,
+            "n_heads": 8,
+            "n_layers": 8,
             "dropout": 0.1,
-            "max_seq_len": 256,
+            "max_seq_len": 1024,
         }
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -101,7 +101,7 @@ def compile(
         trained_model = CircuitFormer(**model_params).to(device)
 
         # Load the saved weights from your best model
-        model_path = "C:/Users/junli/ucc/ucc/noise_aware/ml_model/trained_models_final/best_model.pth"
+        model_path = "C:/Users/junli/ucc/ucc/noise_aware/ml_model/trained_models_medium_reliable/best_model.pth"
         trained_model.load_state_dict(
             torch.load(model_path, map_location=device)
         )

@@ -22,6 +22,9 @@ from qiskit.transpiler import TranspilerError
 from qiskit.circuit.library import SwapGate
 from torch.cuda.amp import autocast
 from qiskit.transpiler import Layout
+from qiskit.circuit.library import PauliEvolutionGate
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.synthesis.evolution import QDrift
 
 
 class DeviceNoiseProfile:
@@ -570,116 +573,109 @@ def create_quantum_volume_circuit(num_qubits: int) -> QuantumCircuit:
     return QuantumVolume(num_qubits, depth=num_qubits, seed=42).decompose()
 
 
-# Qiskit bug appear in its main library
-# r"qiskit\synthesis\evolution\qdrift.py", line 95, in expand
-#     operators = evolution.operator
-#                 ^^^^^^^^^^^^^^^^^^
-# AttributeError: 'SparsePauliOp' object has no attribute 'operator'. Did you mean: 'to_operator'?
-# def create_heisenberg_circuit(
-#     rows: int, cols: int, trotter_steps: int = 1
-# ) -> QuantumCircuit:
-#     """
-#     Creates a circuit for simulating the Heisenberg spin model on a 2D square lattice.
-#
-#     The Heisenberg Hamiltonian is H = J * Σ (X_i X_j + Y_i Y_j + Z_i Z_j) over all
-#     neighboring <i,j> pairs. This function sets the coupling strength J=1 and simulation time t=1.
-#
-#     Args:
-#         rows: The number of rows in the square lattice.
-#         cols: The number of columns in the square lattice.
-#         trotter_steps: The number of Trotter steps for the time evolution simulation.
-#                        Higher steps mean a more accurate but deeper circuit.
-#
-#     Returns:
-#         A QuantumCircuit object representing the time evolution, decomposed into
-#         basis gates (CNOTs and single-qubit rotations).
-#     """
-#     num_qubits = rows * cols
-#     if num_qubits <= 1:
-#         # Return an empty circuit if the lattice is too small for interactions
-#         return QuantumCircuit(num_qubits)
-#
-#     # 1. Define the interactions (Hamiltonian terms) using Pauli strings
-#     pauli_list = []
-#
-#     # Helper function to map (row, col) coordinates to a single qubit index
-#     def get_qubit_idx(r, c):
-#         return r * cols + c
-#
-#     # Iterate over all qubits in the grid to define neighbor interactions
-#     for r in range(rows):
-#         for c in range(cols):
-#             # Interaction with the neighbor to the right (Horizontal)
-#             if c < cols - 1:
-#                 idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r, c + 1)
-#                 # Ensure idx1 > idx2 for consistent Pauli string generation
-#                 if idx1 < idx2:
-#                     idx1, idx2 = idx2, idx1
-#
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}X{'I' * (idx1 - idx2 - 1)}X{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}Y{'I' * (idx1 - idx2 - 1)}Y{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}Z{'I' * (idx1 - idx2 - 1)}Z{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#
-#             # Interaction with the neighbor below (Vertical)
-#             if r < rows - 1:
-#                 idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r + 1, c)
-#                 if idx1 < idx2:
-#                     idx1, idx2 = idx2, idx1
-#
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}X{'I' * (idx1 - idx2 - 1)}X{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}Y{'I' * (idx1 - idx2 - 1)}Y{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#                 pauli_list.append(
-#                     (
-#                         f"{'I' * (num_qubits - idx1 - 1)}Z{'I' * (idx1 - idx2 - 1)}Z{'I' * idx2}",
-#                         1.0,
-#                     )
-#                 )
-#
-#     if not pauli_list:
-#         return QuantumCircuit(num_qubits)
-#
-#     # 2. Create the Hamiltonian operator from the list of Pauli strings
-#     hamiltonian = SparsePauliOp.from_list(pauli_list)
-#
-#     # 3. Use a Trotterization method to create the evolution circuit.
-#     # We use QDrift, a simple first-order method. The `reps` argument
-#     # corresponds to the number of Trotter steps.
-#     qdrift = QDrift(reps=trotter_steps)
-#
-#     # Synthesize the operator into a gate representing e^(-iHt) where t=1
-#     evolution_gate = qdrift.synthesize(hamiltonian)
-#
-#     # 4. Wrap the synthesized evolution into a QuantumCircuit
-#     qc = QuantumCircuit(num_qubits, name=f"heisenberg_{rows}x{cols}")
-#     qc.append(evolution_gate, range(num_qubits))
-#
-#     # Decompose the high-level evolution gate into CNOTs and single-qubit gates
-#     return qc.decompose()
+def create_heisenberg_circuit(
+    rows: int, cols: int, trotter_steps: int = 1
+) -> QuantumCircuit:
+    """
+    Creates a circuit for simulating the Heisenberg spin model on a 2D square lattice
+    using the modern Qiskit Primitives-based approach.
+
+    This function sets the coupling strength J=1 and simulation time t=1.
+
+    Args:
+        rows: The number of rows in the square lattice.
+        cols: The number of columns in the square lattice.
+        trotter_steps: The number of Trotter steps for the time evolution simulation.
+
+    Returns:
+        A QuantumCircuit object representing the time evolution, decomposed into
+        basis gates.
+    """
+    num_qubits = rows * cols
+    if num_qubits <= 1:
+        return QuantumCircuit(num_qubits)
+
+    # 1. Define the Hamiltonian terms as a list of Pauli strings
+    # (Your existing logic for creating pauli_list is correct and can be kept here)
+    pauli_list = []
+
+    def get_qubit_idx(r, c):
+        return r * cols + c
+
+    # ... (code to populate pauli_list as before) ...
+    # Iterate over all qubits in the grid to define neighbor interactions
+    for r in range(rows):
+        for c in range(cols):
+            # Horizontal interaction
+            if c < cols - 1:
+                idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r, c + 1)
+                pauli_list.append(
+                    "I" * idx1
+                    + "X"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "X"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+                pauli_list.append(
+                    "I" * idx1
+                    + "Y"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "Y"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+                pauli_list.append(
+                    "I" * idx1
+                    + "Z"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "Z"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+
+            # Vertical interaction
+            if r < rows - 1:
+                idx1, idx2 = get_qubit_idx(r, c), get_qubit_idx(r + 1, c)
+                pauli_list.append(
+                    "I" * idx1
+                    + "X"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "X"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+                pauli_list.append(
+                    "I" * idx1
+                    + "Y"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "Y"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+                pauli_list.append(
+                    "I" * idx1
+                    + "Z"
+                    + "I" * (idx2 - idx1 - 1)
+                    + "Z"
+                    + "I" * (num_qubits - idx2 - 1)
+                )
+
+    if not pauli_list:
+        return QuantumCircuit(num_qubits)
+
+    # 2. Create the Hamiltonian operator using SparsePauliOp
+    hamiltonian = SparsePauliOp(pauli_list, coeffs=[1.0] * len(pauli_list))
+
+    # 3. Create the high-level PauliEvolutionGate that represents e^(-iHt)
+    # We set the simulation time t=1.0 here.
+    time = 1.0
+    evolution_gate = PauliEvolutionGate(hamiltonian, time=time)
+
+    # 4. Instantiate the synthesizer (QDrift in this case)
+    qdrift = QDrift(reps=trotter_steps)
+
+    # 5. Use the synthesizer to decompose the PauliEvolutionGate into a circuit
+    # The .synthesize() method now receives the correct object type.
+    synthesized_circuit = qdrift.synthesize(evolution_gate)
+    synthesized_circuit.name = f"heisenberg_{rows}x{cols}"
+
+    return synthesized_circuit
 
 
 def create_qcnn_circuit(num_qubits: int) -> QuantumCircuit:
@@ -897,18 +893,18 @@ if __name__ == "__main__":
         )
         generator_func = circuit_generators[generator_name][0]
 
-        # if generator_name == "heisenberg":
-        #     # Generate a random square-ish lattice
-        #     rows = master_rng.integers(2, 6)
-        #     cols = master_rng.integers(2, 6)
-        #     num_qubits = rows * cols
-        #     if num_qubits > args.max_qubits:
-        #         continue  # Skip if too large
-        #     trotter_steps = master_rng.integers(1, 4)
-        #     raw_circuit = generator_func(rows, cols, trotter_steps)
-        #     raw_circuit.name = f"heisenberg_{rows}x{cols}_{trotter_steps}steps"
+        if generator_name == "heisenberg":
+            # Generate a random square-ish lattice
+            rows = master_rng.integers(2, 6)
+            cols = master_rng.integers(2, 6)
+            num_qubits = rows * cols
+            if num_qubits > args.max_qubits:
+                continue  # Skip if too large
+            trotter_steps = master_rng.integers(1, 4)
+            raw_circuit = generator_func(rows, cols, trotter_steps)
+            raw_circuit.name = f"heisenberg_{rows}x{cols}_{trotter_steps}steps"
 
-        if generator_name == "qcnn":
+        elif generator_name == "qcnn":
             # QCNNs need a number of qubits that is a power of 2
             possible_qubit_counts = [4, 8, 16, 32, 64]
             valid_qubit_counts = [
