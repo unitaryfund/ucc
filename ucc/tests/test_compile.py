@@ -4,6 +4,7 @@ from cirq import CNOT, H, X, LineQubit, NamedQubit
 from cirq.testing import assert_same_circuits
 from pytket import Circuit as TketCircuit
 from qiskit import QuantumCircuit as QiskitCircuit
+from qiskit import transpile as qiskit_transpile
 from qiskit.converters import circuit_to_dag
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler.passes import GatesInBasis
@@ -13,7 +14,28 @@ from qiskit.circuit.library import HGate, XGate
 from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
+from ucc.transpilers.aqc import MPSPass
 import numpy as np
+
+
+def random_area_law_circuit(N, seed=12345):
+    """A circuit to generate a random area-law statevector.
+
+    Parameters:
+        N (int): Number of qubits
+
+    Returns:
+        QiskitCircuit: Output circuit
+    """
+    np.random.seed(seed)
+
+    state = np.random.rand(2**N) + 1j * np.random.rand(2**N)
+    state /= np.linalg.norm(state)
+
+    circuit = QiskitCircuit(N)
+    circuit.initialize(state, range(N))
+
+    return circuit
 
 
 def qcnn_circuit(N, seed=12345):
@@ -141,6 +163,311 @@ def test_custom_pass():
         dag = circuit_to_dag(result_circuit)
         analysis_pass.run(dag)
         assert analysis_pass.property_set["check_map"]
+
+
+@pytest.mark.parametrize("N", [5, 8, 10, 11])
+def test_compile_with_mps_pass(N):
+    """Test that the circuit compiled by `MPSPass` works as expected."""
+    circuit = random_area_law_circuit(N)
+    circuit = qiskit_transpile(circuit, basis_gates=["u3", "cx"])
+
+    compiled_circuit = compile(
+        circuit, target_gateset=["u3", "cx"], custom_passes=[MPSPass()]
+    )
+
+    # Check that the fidelity is above 0.9
+    fidelity = np.vdot(
+        Statevector(circuit).data, Statevector(compiled_circuit).data
+    )
+
+    assert np.abs(fidelity) > 0.9
+
+    # Assert circuit depth and number of cx gates is lower
+    assert circuit.depth() > compiled_circuit.depth()
+    assert circuit.count_ops().get("cx", 0) > compiled_circuit.count_ops().get(
+        "cx", 0
+    )
+
+
+def test_compile_trivial_state_with_mps_pass():
+    """Test that `MPSPass` does not use CX gates when state has no entanglement."""
+    qasm = """
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[10];
+        ry(pi/2) q[9];
+        rx(pi) q[9];
+        rz(pi/4) q[9];
+        cx q[9],q[8];
+        rz(-pi/4) q[8];
+        cx q[9],q[8];
+        rz(pi/4) q[8];
+        ry(pi/2) q[8];
+        rx(pi) q[8];
+        rz(pi/4) q[8];
+        rz(pi/8) q[9];
+        cx q[9],q[7];
+        rz(-pi/8) q[7];
+        cx q[9],q[7];
+        rz(pi/8) q[7];
+        cx q[8],q[7];
+        rz(-pi/4) q[7];
+        cx q[8],q[7];
+        rz(pi/4) q[7];
+        ry(pi/2) q[7];
+        rx(pi) q[7];
+        rz(pi/4) q[7];
+        rz(pi/8) q[8];
+        rz(pi/16) q[9];
+        cx q[9],q[6];
+        rz(-pi/16) q[6];
+        cx q[9],q[6];
+        rz(pi/16) q[6];
+        cx q[8],q[6];
+        rz(-pi/8) q[6];
+        cx q[8],q[6];
+        rz(pi/8) q[6];
+        cx q[7],q[6];
+        rz(-pi/4) q[6];
+        cx q[7],q[6];
+        rz(pi/4) q[6];
+        ry(pi/2) q[6];
+        rx(pi) q[6];
+        rz(pi/4) q[6];
+        rz(pi/8) q[7];
+        rz(pi/16) q[8];
+        rz(pi/32) q[9];
+        cx q[9],q[5];
+        rz(-pi/32) q[5];
+        cx q[9],q[5];
+        rz(pi/32) q[5];
+        cx q[8],q[5];
+        rz(-pi/16) q[5];
+        cx q[8],q[5];
+        rz(pi/16) q[5];
+        cx q[7],q[5];
+        rz(-pi/8) q[5];
+        cx q[7],q[5];
+        rz(pi/8) q[5];
+        cx q[6],q[5];
+        rz(-pi/4) q[5];
+        cx q[6],q[5];
+        rz(pi/4) q[5];
+        ry(pi/2) q[5];
+        rx(pi) q[5];
+        rz(pi/4) q[5];
+        rz(pi/8) q[6];
+        rz(pi/16) q[7];
+        rz(pi/32) q[8];
+        rz(pi/64) q[9];
+        cx q[9],q[4];
+        rz(-pi/64) q[4];
+        cx q[9],q[4];
+        rz(pi/64) q[4];
+        cx q[8],q[4];
+        rz(-pi/32) q[4];
+        cx q[8],q[4];
+        rz(pi/32) q[4];
+        cx q[7],q[4];
+        rz(-pi/16) q[4];
+        cx q[7],q[4];
+        rz(pi/16) q[4];
+        cx q[6],q[4];
+        rz(-pi/8) q[4];
+        cx q[6],q[4];
+        rz(pi/8) q[4];
+        cx q[5],q[4];
+        rz(-pi/4) q[4];
+        cx q[5],q[4];
+        rz(pi/4) q[4];
+        ry(pi/2) q[4];
+        rx(pi) q[4];
+        rz(pi/4) q[4];
+        rz(pi/8) q[5];
+        rz(pi/16) q[6];
+        rz(pi/32) q[7];
+        rz(pi/64) q[8];
+        rz(pi/128) q[9];
+        cx q[9],q[3];
+        rz(-pi/128) q[3];
+        cx q[9],q[3];
+        rz(pi/128) q[3];
+        cx q[8],q[3];
+        rz(-pi/64) q[3];
+        cx q[8],q[3];
+        rz(pi/64) q[3];
+        cx q[7],q[3];
+        rz(-pi/32) q[3];
+        cx q[7],q[3];
+        rz(pi/32) q[3];
+        cx q[6],q[3];
+        rz(-pi/16) q[3];
+        cx q[6],q[3];
+        rz(pi/16) q[3];
+        cx q[5],q[3];
+        rz(-pi/8) q[3];
+        cx q[5],q[3];
+        rz(pi/8) q[3];
+        cx q[4],q[3];
+        rz(-pi/4) q[3];
+        cx q[4],q[3];
+        rz(pi/4) q[3];
+        ry(pi/2) q[3];
+        rx(pi) q[3];
+        rz(pi/4) q[3];
+        rz(pi/8) q[4];
+        rz(pi/16) q[5];
+        rz(pi/32) q[6];
+        rz(pi/64) q[7];
+        rz(pi/128) q[8];
+        rz(pi/256) q[9];
+        cx q[9],q[2];
+        rz(-pi/256) q[2];
+        cx q[9],q[2];
+        rz(pi/256) q[2];
+        cx q[8],q[2];
+        rz(-pi/128) q[2];
+        cx q[8],q[2];
+        rz(pi/128) q[2];
+        cx q[7],q[2];
+        rz(-pi/64) q[2];
+        cx q[7],q[2];
+        rz(pi/64) q[2];
+        cx q[6],q[2];
+        rz(-pi/32) q[2];
+        cx q[6],q[2];
+        rz(pi/32) q[2];
+        cx q[5],q[2];
+        rz(-pi/16) q[2];
+        cx q[5],q[2];
+        rz(pi/16) q[2];
+        cx q[4],q[2];
+        rz(-pi/8) q[2];
+        cx q[4],q[2];
+        rz(pi/8) q[2];
+        cx q[3],q[2];
+        rz(-pi/4) q[2];
+        cx q[3],q[2];
+        rz(pi/4) q[2];
+        ry(pi/2) q[2];
+        rx(pi) q[2];
+        rz(pi/4) q[2];
+        rz(pi/8) q[3];
+        rz(pi/16) q[4];
+        rz(pi/32) q[5];
+        rz(pi/64) q[6];
+        rz(pi/128) q[7];
+        rz(pi/256) q[8];
+        rz(pi/512) q[9];
+        cx q[9],q[1];
+        rz(-pi/512) q[1];
+        cx q[9],q[1];
+        rz(pi/512) q[1];
+        cx q[8],q[1];
+        rz(-pi/256) q[1];
+        cx q[8],q[1];
+        rz(pi/256) q[1];
+        cx q[7],q[1];
+        rz(-pi/128) q[1];
+        cx q[7],q[1];
+        rz(pi/128) q[1];
+        cx q[6],q[1];
+        rz(-pi/64) q[1];
+        cx q[6],q[1];
+        rz(pi/64) q[1];
+        cx q[5],q[1];
+        rz(-pi/32) q[1];
+        cx q[5],q[1];
+        rz(pi/32) q[1];
+        cx q[4],q[1];
+        rz(-pi/16) q[1];
+        cx q[4],q[1];
+        rz(pi/16) q[1];
+        cx q[3],q[1];
+        rz(-pi/8) q[1];
+        cx q[3],q[1];
+        rz(pi/8) q[1];
+        cx q[2],q[1];
+        rz(-pi/4) q[1];
+        cx q[2],q[1];
+        rz(pi/4) q[1];
+        ry(pi/2) q[1];
+        rx(pi) q[1];
+        rz(pi/4) q[1];
+        rz(pi/8) q[2];
+        rz(pi/16) q[3];
+        rz(pi/32) q[4];
+        rz(pi/64) q[5];
+        rz(pi/128) q[6];
+        rz(pi/256) q[7];
+        rz(pi/512) q[8];
+        rz(pi/1024) q[9];
+        cx q[9],q[0];
+        rz(-pi/1024) q[0];
+        cx q[9],q[0];
+        rz(pi/1024) q[0];
+        cx q[8],q[0];
+        rz(-pi/512) q[0];
+        cx q[8],q[0];
+        rz(pi/512) q[0];
+        cx q[7],q[0];
+        rz(-pi/256) q[0];
+        cx q[7],q[0];
+        rz(pi/256) q[0];
+        cx q[6],q[0];
+        rz(-pi/128) q[0];
+        cx q[6],q[0];
+        rz(pi/128) q[0];
+        cx q[5],q[0];
+        rz(-pi/64) q[0];
+        cx q[5],q[0];
+        rz(pi/64) q[0];
+        cx q[4],q[0];
+        rz(-pi/32) q[0];
+        cx q[4],q[0];
+        rz(pi/32) q[0];
+        cx q[3],q[0];
+        rz(-pi/16) q[0];
+        cx q[3],q[0];
+        rz(pi/16) q[0];
+        cx q[2],q[0];
+        rz(-pi/8) q[0];
+        cx q[2],q[0];
+        rz(pi/8) q[0];
+        cx q[1],q[0];
+        rz(-pi/4) q[0];
+        cx q[1],q[0];
+        rz(pi/4) q[0];
+        ry(pi/2) q[0];
+        rx(pi) q[0];
+        cx q[0],q[9];
+        cx q[1],q[8];
+        cx q[2],q[7];
+        cx q[3],q[6];
+        cx q[4],q[5];
+        cx q[5],q[4];
+        cx q[4],q[5];
+        cx q[6],q[3];
+        cx q[3],q[6];
+        cx q[7],q[2];
+        cx q[2],q[7];
+        cx q[8],q[1];
+        cx q[1],q[8];
+        cx q[9],q[0];
+        cx q[0],q[9];
+    """
+    circuit = QiskitCircuit.from_qasm_str(qasm)
+
+    compiled_circuit = compile(
+        circuit, target_gateset=["u3", "cx"], custom_passes=[MPSPass()]
+    )
+
+    fidelity = np.vdot(
+        Statevector(circuit).data, Statevector(compiled_circuit).data
+    )
+
+    assert compiled_circuit.count_ops().get("cx", 0) == 0
+    assert np.abs(np.round(fidelity, decimals=10)) == 1.0
 
 
 def test_compile_with_target_gateset():

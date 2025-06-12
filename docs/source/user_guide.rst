@@ -155,6 +155,46 @@ Alternatively, we can add our custom pass, as shown in the following example.
       circuit_to_compile, custom_passes=[MyCustomPass()]
    )
 
+An example of a custom pass: Approximate Quantum Compilation via MPS encoding
+=============================================================================
+The ``MPSEncoder`` is a custom pass provided in ``ucc.aqc``. Users can opt for `qmprs <https://github.com/Qualition/qmprs>`_ for a more advanced implementation of the same pass.
+You can install it with ``pip install git+https://github.com/Qualition/qmprs.git``.
+
+This pass leverages Matrix Product State (MPS) representation of a state to approximately compile the state to a quantum circuit using multiple layers of one and two qubit gates in O(N) depth.
+The automatic parameter definition takes the entanglement structure of the input state into account, and tries to come up with the optimal parameters to maximize fidelity and minimize circuit depth. Users can also override ``optimal_params`` static method to define their own rule for generating the optimal parameters.
+
+Most quantum circuit libraries are written assuming the initial state is all zeros in the computational basis. This pass's optimization may rely on that assumption. If you intend to run your post-compiled circuit on other input states, or in sequence with other circuits, be aware that this pass might not be equivalent in those cases.
+
+Here is an example of how to use the ``MPSEncoder``:
+
+..
+   This testsetup is associated with subsequent blocks that also have the mps group.
+   This setup is run, followed by all the blocks with this group in order and
+   ensures the "circuit_to_compile" variable is defined.
+.. testsetup:: mps
+
+   from qiskit import QuantumCircuit as QiskitCircuit
+   from ucc import compile
+   qasm = """
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[3];
+        h q[0];
+        crx(1.5707963267948966) q[1], q[0];
+        x q[1];
+        cry(0.7853981633974483) q[2], q[0];
+        crz(1.5707963267948966) q[2], q[1];
+        y q[2];
+        swap q[0], q[2];
+        """
+   circuit_to_compile = QiskitCircuit.from_qasm_str(qasm)
+
+.. testcode:: mps
+
+   from ucc.transpilers.aqc import MPSPass
+   result = compile(circuit_to_compile, custom_passes=[MPSPass()])
+
+The ``MPSEncoder`` is just one example of the extensibility of UCC. If you would like to port a compile pass from another framework, please create a `proposal <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_ and be ready to benchmark its performance relative to ``UCCDefault1``.
 
 A note on terminology
 *********************
