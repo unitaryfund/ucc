@@ -57,6 +57,34 @@ wheels = [
 ]
 
 [[package]]
+name = "bqskit"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "bqskitrs" },
+    { name = "dill" },
+    { name = "lark" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/77/efa6200c3f175733e57551df39a045ee2d6bf654d171410077f54fc3dc31/bqskit-1.2.0.tar.gz", hash = "sha256:5772491f997474bacd1016fed4835b93e5d0901476fdac44518c731815cd0c88", size = 265328, upload-time = "2024-09-13T18:52:51.019Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/0d/0e969c8812bb59abc28675e770257df52eb038477e4ca96662217f228cbf/bqskit-1.2.0-py3-none-any.whl", hash = "sha256:b3a5e820bc319c126c50f0750896801d340841d2b70758a769dd4d2efcd9bc74", size = 421833, upload-time = "2024-09-13T18:52:49.534Z" },
+]
+
+[[package]]
+name = "bqskitrs"
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/41/22/dc1d72f7fa3c795a2b0a4b59e6bbb1ba643d1fd5879749bc6cf213c156fe/bqskitrs-0.4.1-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:12e54f7b1022c7f94223b8587dcdc0b8a4a1f886ebf41fcd2b26a7428880ac06", size = 2064645, upload-time = "2023-11-29T18:05:08.749Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/c2/baf3af2a45243d0bcd3fef3ede3435325277d939b13afda2d6b7605e45da/bqskitrs-0.4.1-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:4412e27f7d0fdd06e73d9cb347f5bd8c4f55f5a8477eded39f24b938d0380e42", size = 1793492, upload-time = "2023-11-29T18:05:11.738Z" },
+    { url = "https://files.pythonhosted.org/packages/39/97/3403af17d09e4b8bb071c3f19986894f734812408a8cb2e821d1acea5b4c/bqskitrs-0.4.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1f8be7289bea26ca862c789210937aa0ef630a5505440e4c3b2799896e7a6aa2", size = 40004511, upload-time = "2023-11-29T18:05:21.65Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/1d/64c6fd3f1b4180dd7c4766cfd7d241a0d7d432a477dca34fbf23386f88bd/bqskitrs-0.4.1-cp38-abi3-win_amd64.whl", hash = "sha256:92f438063ce769a5fdb35220666cd90bb6c20551147cc5c72e77b0996fb4bef4", size = 1944299, upload-time = "2023-11-29T18:05:24.532Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2025.4.26"
 source = { registry = "https://pypi.org/simple" }
@@ -1107,34 +1135,35 @@ wheels = [
 
 [[package]]
 name = "qbraid"
-version = "0.9.5"
+version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "openqasm3", extra = ["parser"] },
     { name = "pydantic" },
+    { name = "pydantic-core" },
     { name = "pyqasm" },
     { name = "qbraid-core" },
     { name = "rustworkx" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/65/78528aa0b1b123173d6541ca0ed11f43c15a2cc96ed33e242e28d87168ed/qbraid-0.9.5.tar.gz", hash = "sha256:9fe0b583a758c9aec41e204f872d73533655983a360a1fad8b8b01584a98d12f", size = 537660, upload-time = "2025-03-26T21:32:36.584Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/b9/6b1c5ff3f7ee5bb50956a16076cd120aa76072455a6a12de316c99a2b348/qbraid-0.9.7.tar.gz", hash = "sha256:ade2be031c235923212e77179c534bbd10a51ab10ea77b46a6771582a7a10221", size = 548403, upload-time = "2025-06-13T22:15:08.893Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/a0/8da2e438ea436e2e84a935d2f606b05798f8e9f7d829e850f60a33d03bc5/qbraid-0.9.5-py3-none-any.whl", hash = "sha256:195988b6b6669023d7ba46b7447b8e212acef82a7a44926920c4de18e0c9e939", size = 286204, upload-time = "2025-03-26T21:32:34.998Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/74/56ff18d131473ed24ad1db13192624f29de9184d90c2025057601f66e950/qbraid-0.9.7-py3-none-any.whl", hash = "sha256:14933680101ffc2e3eec1e3d119188c0f4a1d0bc4eeb8f26b235d7d6cdb38653", size = 289101, upload-time = "2025-06-13T22:15:06.867Z" },
 ]
 
 [[package]]
 name = "qbraid-core"
-version = "0.1.36"
+version = "0.1.41"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/0f/ef1096b1955ddab3a6730b201b7d2ea853dcd2db27478fd47905ba9ae305/qbraid_core-0.1.36.tar.gz", hash = "sha256:0260a4e918971612371171a4cb5e225f4736f47e922b1d61041d2583cd7fb8bc", size = 285037, upload-time = "2025-03-19T16:16:08.558Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/15/6c/c921ae95fa41785b735e3a55f051d7f8577ef8c4e6588c988f53b45a7e9b/qbraid_core-0.1.41.tar.gz", hash = "sha256:c8dac85c9424ecb09e39478622b732eeba1cb6afdd897cead97ce8b1d9d691e5", size = 286268, upload-time = "2025-05-21T19:20:36.696Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/93/e7/a597c8aae514fffaf6578e5d982b42abbeed06f8f532478a54455460b992/qbraid_core-0.1.36-py3-none-any.whl", hash = "sha256:8f35bd2c5e9ae79948dde4fc74603e4bf1eef940ad44f524ba7b4571d3f2afa3", size = 75540, upload-time = "2025-03-19T16:16:07.185Z" },
+    { url = "https://files.pythonhosted.org/packages/42/92/deed91c29da5a965d6317ad535fceb420933d7659af4c6befdb9d8ba16e2/qbraid_core-0.1.41-py3-none-any.whl", hash = "sha256:f13516f5901a58dd2ec55ef14cd85f0c30bc6edd9b6dabe6cbc3c841cc760328", size = 76246, upload-time = "2025-05-21T19:20:34.925Z" },
 ]
 
 [[package]]
@@ -1574,6 +1603,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bqskit" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -1599,6 +1629,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bqskit", specifier = ">=1.2.0,<2.0.0" },
     { name = "pre-commit", specifier = ">=4.1.0" },
     { name = "pytest", specifier = ">=6.0" },
     { name = "pytest-cov", specifier = ">=2.10" },
