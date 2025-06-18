@@ -6,8 +6,8 @@
 In v0.4.7, we are celebrating a triumphant [UnitaryHACK](https://unitaryhack.dev/) 2025, with exciting new contributions from lovely new contributors -- and a whole slew of updates and improvements by the maintainers to support their work!
 
 ### ✨ Key Features
-First external compiler pass port by new contributor @ACE07-Sev 🎯: Integrated a gate-reducing pass from [BQSKit](https://github.com/BQSKit/bqskit) (#421).  
-New approximate compilation module by new contributor @WolfLink 🔮: Added MPS encoding support for circuit optimization (#412).
+First external compiler pass port by new contributor @WolfLink 🔮: Integrated a gate-reducing pass from [BQSKit](https://github.com/BQSKit/bqskit) (#412).  
+New approximate compilation module by new contributor @ACE07-Sev 🎯 : Added MPS encoding support for circuit optimization (#421).
 
 ### 📚 Documentation & Workflow Improvements
 Enhanced compiler customization docs (#391 by @Misty-W)  
