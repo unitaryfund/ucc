@@ -4,6 +4,7 @@ repos:
     hooks:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+        exclude: CHANGELOG\.md
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version (keep in sync with the version in pyproject.toml)
