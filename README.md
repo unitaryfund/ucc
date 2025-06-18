@@ -1,4 +1,5 @@
 ## `ucc`: Unitary Compiler Collection
+<a href="https://github.com/unitaryfoundation/ucc"><img src="https://raw.githubusercontent.com/unitaryfoundation/ucc/main/docs/source/img/UCC-logo.png" alt="UCC logo" width="350"/></a>
 
 [![Repository](https://img.shields.io/badge/GitHub-5C5C5C.svg?logo=github)](https://github.com/unitaryfoundation/ucc)
 [![PyPI version](https://badge.fury.io/py/ucc.svg)](https://badge.fury.io/py/ucc)
