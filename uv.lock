@@ -1207,7 +1207,7 @@ wheels = [
 
 [[package]]
 name = "quimb"
-version = "1.11.0"
+version = "1.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoray" },
@@ -1219,9 +1219,9 @@ dependencies = [
     { name = "scipy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/21/8d/6ae46c545ceb0354270b2ffdede8c2f5d0f74501dc1d207439158dafa0fe/quimb-1.11.0.tar.gz", hash = "sha256:9067827425c4a7e8af2b7bf04c305d5f31cc4408850dc9827513b35bae802179", size = 10089899, upload-time = "2025-05-15T00:07:36.877Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3f/3c/2612a37b0716d825f4ff25968007ae84ddff602fedd5c26f3deb5aacb0a7/quimb-1.11.1.tar.gz", hash = "sha256:8f3ff7630c4a2b50781d068bfe55dfbb58cf694886707ce95c245a21e7126ee8", size = 10084449, upload-time = "2025-06-21T00:09:36.869Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/2f/2baf78e8be55b83fd933f6a593ee53835c4d1757a748ceba808086e54ecc/quimb-1.11.0-py3-none-any.whl", hash = "sha256:64435388ef73367fb104e680a9e2e4b439d715bad56a8cb716a21c34e8d589f0", size = 2029941, upload-time = "2025-05-15T00:07:34.709Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/5f/633e30cbc44ec0a6d1fd4cb24f0cd586af7da8903897f6c26a00e5375d5e/quimb-1.11.1-py3-none-any.whl", hash = "sha256:232f7db08436fc05d86111d863458c4659ace0e5949c63f5e5f9248064c15c9d", size = 2039435, upload-time = "2025-06-21T00:09:34.992Z" },
 ]
 
 [[package]]
@@ -1589,7 +1589,7 @@ wheels = [
 
 [[package]]
 name = "ucc"
-version = "0.4.6"
+version = "0.4.7"
 source = { editable = "." }
 dependencies = [
     { name = "cirq-core" },
@@ -1624,7 +1624,7 @@ requires-dist = [
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
     { name = "qiskit", specifier = ">=1.4.2,<3.0.0" },
     { name = "qiskit-qasm3-import", specifier = ">=0.5.1,<1.0.0" },
-    { name = "quimb", specifier = "==1.11.0" },
+    { name = "quimb", specifier = "==1.11.1" },
 ]
 
 [package.metadata.requires-dev]
