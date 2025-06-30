@@ -28,9 +28,8 @@ To release a new version of ``ucc`` on GitHub, follow the steps below.
 
 4. **Publish the New Release on GitHub:**
     - Navigate back to your Release draft from step 1.
-    - Select the newly created tag.
-    - Fill in the release title and description, and copy the changelog entry for the description.
-    - Publish the release.
+    - Scroll down and check the box labeled "Create a discussion for this release".
+    - Click the Publish the Release.
 
 .. tip::
     Ensure that all changes pass the tests, and the documentation builds correctly before creating a release.
