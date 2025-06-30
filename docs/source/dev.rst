@@ -43,7 +43,7 @@ Publishing a new version of UCC to PyPI (maintainers only)
     a. Create a new Python environment ≥ our latest required version, e.g. ``python3.13 -m venv ~/.venvs/test_ucc``
     b. Activate the new environment with ``source ~/.venvs/test_ucc/bin/activate``.
     c. Run ``pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ucc``
-       to install from the TestPiPY deployment
+       to install from the TestPyPI deployment
     d. Run ``python -c "import ucc; print(ucc.__version__)"``.
        This should run successfully and show the latest version of UCC.
 4. If all went well in the TestPyPI step, you (as a maintainer) can go to the GH Actions and approve the deployment to real PyPI.
