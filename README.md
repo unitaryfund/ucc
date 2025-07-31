@@ -8,6 +8,7 @@
 [![Documentation Status](https://readthedocs.org/projects/ucc/badge/?version=latest)](https://ucc.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/unitaryfoundation/ucc/branch/main/graph/badge.svg)](https://codecov.io/gh/unitaryfoundation/ucc)
 [![Discord Chat](https://img.shields.io/badge/dynamic/json?color=blue&label=Discord&query=approximate_presence_count&suffix=%20online.&url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2FJqVGmpkP96%3Fwith_counts%3Dtrue)](http://discord.unitary.foundation)
+[Merit shield] 
 
 The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnostic, high performance compilation of quantum circuits. UCC's goal is to gather together the best of open source compilation to make quantum programming simpler, faster, and more scalable.
 
