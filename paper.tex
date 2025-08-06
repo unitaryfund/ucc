@@ -1,0 +1,476 @@
+%% bare_conf.tex
+%% V1.4b
+%% 2015/08/26
+%% by Michael Shell
+%% See:
+%% http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.8b or later) with an IEEE
+%% conference paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/pkg/ieeetran
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE!
+%% User assumes all risk.
+%% In no event shall the IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%*************************************************************************
+
+
+% *** Authors should verify (and, if needed, correct) their LaTeX system  ***
+% *** with the testflow diagnostic prior to trusting their LaTeX platform ***
+% *** with production work. The IEEE's font choices and paper sizes can   ***
+% *** trigger bugs that do not appear when using other class files.       ***                          ***
+% The testflow support page is at:
+% http://www.michaelshell.org/tex/testflow/
+
+
+
+\documentclass[conference]{IEEEtran}
+% Some Computer Society conferences also require the compsoc mode option,
+% but others use the standard conference format.
+%
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[conference]{../sty/IEEEtran}
+
+% *** CITATION PACKAGES ***
+%
+\usepackage{cite}
+% cite.sty was written by Donald Arseneau
+% V1.6 and later of IEEEtran pre-defines the format of the cite.sty package
+% \cite{} output to follow that of the IEEE. Loading the cite package will
+% result in citation numbers being automatically sorted and properly
+% "compressed/ranged". e.g., [1], [9], [2], [7], [5], [6] without using
+% cite.sty will become [1], [2], [5]--[7], [9] using cite.sty. cite.sty's
+% \cite will automatically add leading space, if needed. Use cite.sty's
+% noadjust option (cite.sty V3.8 and later) if you want to turn this off
+% such as if a citation ever needs to be enclosed in parenthesis.
+% cite.sty is already installed on most LaTeX systems. Be sure and use
+% version 5.0 (2009-03-20) and later if using hyperref.sty.
+% The latest version can be obtained at:
+% http://www.ctan.org/pkg/cite
+% The documentation is contained in the cite.sty file itself.
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+% graphicx was written by David Carlisle and Sebastian Rahtz. It is
+% required if you want graphics, photos, etc. graphicx.sty is already
+% installed on most LaTeX systems. The latest version and documentation
+% can be obtained at:
+% http://www.ctan.org/pkg/graphicx
+% Another good source of documentation is "Using Imported Graphics in
+% LaTeX2e" by Keith Reckdahl which can be found at:
+% http://www.ctan.org/pkg/epslatex
+%
+% latex, and pdflatex in dvi mode, support graphics in encapsulated
+% postscript (.eps) format. pdflatex in pdf mode supports graphics
+% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
+% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
+% not a bitmapped formats (.jpeg, .png). The IEEE frowns on bitmapped formats
+% which can result in "jaggedy"/blurry rendering of lines and letters as
+% well as large increases in file sizes.
+%
+% You can find documentation about the pdfTeX application at:
+% http://www.tug.org/applications/pdftex
+
+
+
+
+
+% *** MATH PACKAGES ***
+%
+\usepackage{amsmath, amsfonts}
+% A popular package from the American Mathematical Society that provides
+% many useful and powerful commands for dealing with mathematics.
+%
+% Note that the amsmath package sets \interdisplaylinepenalty to 10000
+% thus preventing page breaks from occurring within multiline equations. Use:
+%\interdisplaylinepenalty=2500
+% after loading amsmath to restore such page breaks as IEEEtran.cls normally
+% does. amsmath.sty is already installed on most LaTeX systems. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/pkg/amsmath
+
+
+
+
+% *** SUBFIGURE PACKAGES ***
+%\ifCLASSOPTIONcompsoc
+%  \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+%\else
+%  \usepackage[caption=false,font=footnotesize]{subfig}
+%\fi
+% subfig.sty, written by Steven Douglas Cochran, is the modern replacement
+% for subfigure.sty, the latter of which is no longer maintained and is
+% incompatible with some LaTeX packages including fixltx2e. However,
+% subfig.sty requires and automatically loads Axel Sommerfeldt's caption.sty
+% which will override IEEEtran.cls' handling of captions and this will result
+% in non-IEEE style figure/table captions. To prevent this problem, be sure
+% and invoke subfig.sty's "caption=false" package option (available since
+% subfig.sty version 1.3, 2005/06/28) as this is will preserve IEEEtran.cls
+% handling of captions.
+% Note that the Computer Society format requires a larger sans serif font
+% than the serif footnote size font used in traditional IEEE formatting
+% and thus the need to invoke different subfig.sty package options depending
+% on whether compsoc mode has been enabled.
+%
+% The latest version and documentation of subfig.sty can be obtained at:
+% http://www.ctan.org/pkg/subfig
+
+
+
+
+% *** FLOAT PACKAGES ***
+%
+%\usepackage{fixltx2e}
+% fixltx2e, the successor to the earlier fix2col.sty, was written by
+% Frank Mittelbach and David Carlisle. This package corrects a few problems
+% in the LaTeX2e kernel, the most notable of which is that in current
+% LaTeX2e releases, the ordering of single and double column floats is not
+% guaranteed to be preserved. Thus, an unpatched LaTeX2e can allow a
+% single column figure to be placed prior to an earlier double column
+% figure.
+% Be aware that LaTeX2e kernels dated 2015 and later have fixltx2e.sty's
+% corrections already built into the system in which case a warning will
+% be issued if an attempt is made to load fixltx2e.sty as it is no longer
+% needed.
+% The latest version and documentation can be found at:
+% http://www.ctan.org/pkg/fixltx2e
+
+
+%\usepackage{stfloats}
+% stfloats.sty was written by Sigitas Tolusis. This package gives LaTeX2e
+% the ability to do double column floats at the bottom of the page as well
+% as the top. (e.g., "\begin{figure*}[!b]" is not normally possible in
+% LaTeX2e). It also provides a command:
+%\fnbelowfloat
+% to enable the placement of footnotes below bottom floats (the standard
+% LaTeX2e kernel puts them above bottom floats). This is an invasive package
+% which rewrites many portions of the LaTeX2e float routines. It may not work
+% with other packages that modify the LaTeX2e float routines. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/pkg/stfloats
+% Do not use the stfloats baselinefloat ability as the IEEE does not allow
+% \baselineskip to stretch. Authors submitting work to the IEEE should note
+% that the IEEE rarely uses double column equations and that authors should try
+% to avoid such use. Do not be tempted to use the cuted.sty or midfloat.sty
+% packages (also by Sigitas Tolusis) as the IEEE does not format its papers in
+% such ways.
+% Do not attempt to use stfloats with fixltx2e as they are incompatible.
+% Instead, use Morten Hogholm'a dblfloatfix which combines the features
+% of both fixltx2e and stfloats:
+%
+% \usepackage{dblfloatfix}
+% The latest version can be found at:
+% http://www.ctan.org/pkg/dblfloatfix
+
+
+% *** PDF, URL AND HYPERLINK PACKAGES ***
+%
+%\usepackage{url}
+% url.sty was written by Donald Arseneau. It provides better support for
+% handling and breaking URLs. url.sty is already installed on most LaTeX
+% systems. The latest version and documentation can be obtained at:
+% http://www.ctan.org/pkg/url
+% Basically, \url{my_url_here}.
+\usepackage{hyperref}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{enumitem}   % modern list customisation
+\usepackage{minted} % code
+% *** Do not adjust lengths that control margins, column widths, etc. ***
+% *** Do not use packages that alter fonts (such as pslatex).         ***
+% There should be no need to do such things with IEEEtran.cls V1.6 and later.
+% (Unless specifically asked to do so by the journal or conference you plan
+% to submit to, of course. )
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
+\title{Unitary Compiler Collection: A Community-Driven, Interoperable, Open-Source Quantum Compiler}
+
+\author{\IEEEauthorblockN{Jordan Sullivan\IEEEauthorrefmark{1},
+Brad Chase\IEEEauthorrefmark{2}, Misty Wahl, Nate Steman, Nathan Shammah, Will Zeng\IEEEauthorrefmark{3} }
+\IEEEauthorblockA{Unitary Foundation,
+San Francisco, CA\\
+Email: \IEEEauthorrefmark{1}jordan@unitary.foundation,
+\IEEEauthorrefmark{2}brad@unitary.foundation\\
+Also Affiliated: \IEEEauthorrefmark{3} \textit{Quantonation}, Boston, MA}}
+
+\maketitle
+\makeatletter\def\Hy@Warning#1{}\makeatother
+
+% As a general rule, do not put math, special symbols or citations
+% in the abstract
+\begin{abstract}
+
+We introduce Unitary Compiler Collection (UCC), an open-source Python package for front-end-agnostic, high-performance compilation of quantum circuits. UCC's goal is to gather the best of open-source compilation to make quantum programming simpler, faster, and more scalable. As quantum hardware advances, so does the complexity of programming it: increasing qubit counts, diverse gate operations, and varied architectures all present new challenges for quantum compilation. Two major challenges that we see are (1) compiler improvements are often isolated in separate libraries or unmaintained repositories without integration into existing tools, and (2) there are high switching costs between quantum computing frameworks and hardware platforms for both compiler developers and users. To address these, Unitary Foundation has developed UCC with an architecture and contribution framework to foster collaboration and enable the most performant tools of quantum and classical compilation to work together.
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+\section{Motivation \& Goals}
+In developing the Unitary Compiler Collection (UCC)\footnote{See \href{https://github.com/unitaryfoundation/ucc}{ucc github} for source and documentation}, we have looked to the \textit{GNU} Compiler Collection (GCC).  GCC’s 1987 release broke vendor lock-in by unifying multiple targets behind a modular, free compiler.  Quantum compilation is at a similar crossroads today, where even open-source (OS) compilers are frequently restricted to working only on a restricted quantum hardware modality -- if such compiler are open-source at all. Even with the best intentions to generalize, compilers are often developed with a specific hardware modality in mind. There is correspondingly a distinct lack of agreement on interoperable intermediate representations (IRs) which could translate across different quantum architectures.
+
+We see a gap in the ecosystem for an open-source quantum compiler that is
+
+\begin{enumerate}[label=G\arabic*]
+    \item performant for currently available Noisy Intermediate-Scale Quantum (NISQ) hardware \cite{nisq_2018}
+    \item responsive to the needs of the early Fault Tolerant Quantum Computing (FTQC) era \cite{early_ft_2024},
+    \item compatible with multiple quantum program representations and user-friendly -- both to quantum algorithm developers and compiler engineers,
+    \item genuinely driven by the needs of the quantum hardware and software community as a whole, not limited to a single hardware modality or software stack.
+\end{enumerate}
+%With an eye toward recent demonstrations of quantum error correction in hardware \cite{aws_2025,quera_2024,google_2025} and inspired by \cite{benchpress_2025}, we see the development and maintenance of a library of quantum benchmarks -- especially those which push the edges of what current compilers or IRs can handle, such as repeat-until-success subroutines \cite{repeat_us_2015}, qubit re-use with mid-circuit measurement, and modular architectures \cite{modular_2025} -- as necessary to accurately assess both the current state of development in the field and progress toward quantum utility \cite{utility_2023}. This is why the Unitary Foundation is actively developing the open-source ucc-bench \cite{ucc-bench_2025} and metriq-gym \cite{metriq-gym} libraries, focused on compiler and hardware benchmarks, respectively.
+
+In this submission, we present the Unitary Compiler Collection as an attempt to address (G1)-(G4). In particular, we focus on the design, supporting infrastructure, and community-building aspects of UCC, along with our bootstrapping strategy of building on and combining existing open-source libraries. We also present some preliminary results from our benchmarking and integration efforts, which demonstrate that even at this early stage in its development, UCC has competitive performance to other quantum compilers, and is in a good starting position to expand and differentiate its capabilities.
+
+\section{Alternatives} \label{alternatives}
+
+There is already a diverse ecosystem of quantum compilers, yet none simultaneously satisfy the four requirements outlined above. Many popular packages such as IBM's Qiskit~\cite{qiskit2024}, Google's Cirq~\cite{Cirq_Developers_Cirq_2025}, and Quantinuum's tket~\cite{pytket_2020} are widely adopted with active communities \cite{uf_survey}, but are often tied closely to the hardware modality and roadmap of their respective hardware platforms. As a result, other vendors in e.g. the neutral atom space have developed their own compiler tools (QuEra's bloqade~\cite{quera_2025}, Infleqtion's Superstaq~\cite{superstaq}). Other compiler packages focus on specific approaches: BQSKit~\cite{bqskit_2021} focuses on gate-level synthesis via optimal-control solvers, PyZX~\cite{kissinger2020Pyzx} offers
+ZX-calculus–based rewrite rules to simplify circuits. The Munich Quantum Toolkit
+(MQT)~\cite{mqt_2024} is a comprehensive suite of compiler components and very similar in spirit to UCC, but doesn't have the same focus on user-friendliness and community-driven development. Taken together, this is an extensive set of compiler tools that span many needs across the quantum compilation stack, but creates an adoption challenge for users that want to benefit from the strengths of each. As a result, none directly provide a single, open-source, front-end-agnostic, multi-hardware modality quantum compiler that is performant, user-friendly, and community-driven.
+
+\section{Key design decisions} \label{design}
+
+
+\subsection{Uniform interface}
+Our central, user-first goal is to lower the barrier to entry for both algorithm developers and compiler engineers, which informed our technical strategy of building on familiar, existing open-source libraries. For algorithm developers, UCC offers a uniform \texttt{compile} function that works across popular frameworks, returning a compiled circuit in its original format:
+\begin{minted}
+[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,
+]
+{python}
+from ucc import compile
+
+from pytket import Circuit as TketCircuit
+from cirq import Circuit as CirqCircuit
+from qiskit import QuantumCircuit as QiskitCircuit
+from cirq import H, CNOT, LineQubit
+
+def test_tket_compile():
+    circuit = TketCircuit(2)
+    circuit.H(0)
+    circuit.CX(0, 1)
+    compile(circuit)
+
+def test_qiskit_compile():
+    circuit = QiskitCircuit(2)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    compile(circuit)
+
+def test_cirq_compile():
+    qubits = LineQubit.range(2)
+    circuit = CirqCircuit(
+        H(qubits[0]),
+        CNOT(qubits[0], qubits[1]))
+    compile(circuit)
+\end{minted}
+
+Likewise, for compiler developers, UCC exposes an intuitive interface for adding custom passes, building directly on the familiar structure of Qiskit's pass manager, which is already widely used in the quantum community. This allows developers to focus on their specific compilation logic without needing to learn a new framework or API.
+
+\begin{minted}
+[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,
+]
+{python}
+from qiskit.transpiler.basepasses
+  import TransformationPass
+from qiskit.dagcircuit import DAGCircuit
+
+class MyCustomPass(TransformationPass):
+    def __init__(self):
+        super().__init__()
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        #  Your code here
+        return dag
+custom_compiled_circuit = compile(
+   circuit_to_compile, custom_passes=[MyCustomPass()]
+)
+\end{minted}
+
+\subsection{Leveraging the broader ecosystem}
+\label{bootstrapping}
+As hinted above, in order to accelerate development and focus on our core goals of interoperability and user experience, we made the strategic decision to build upon best-in-class open-source libraries rather than reinventing core compiler functionalities. For its core compiler capabilities, UCC adopts Qiskit’s transpiler architecture \cite{qiskit2024} given it's strong benchmark peformance in both circuit reduction and runtime \cite{benchpress_2025} and a Python-level pass manager backed by a fast Rust core. UCC uses a customized performance-tuned sequence of Qiskit passes as its default compilation pipeline (see \ref{results} for results).
+
+The bootstrapping strategy was further validated in our approach to interoperability. We initially planned to build a circuit translation module from scratch. However, through our engagement with the Unitary Foundation open-source community, we discovered the qBraid library \cite{qbraid2025}. By adopting qBraid, UCC immediately gained support for circuit translations between Qiskit, Cirq, PyQuil, Braket, and more, seamlessly to the end-user. This decision not only saved significant development time but also proved the power of our community-integrated model: by actively participating in the ecosystem, we can identify and integrate the best tools available.
+
+\subsection{Infrastructure \& benchmarking-assisted development}
+\label{infra_bench}
+
+To support this community-driven approach and ensure sustainable, high-quality contributions, we have built robust infrastructure for development, testing, and performance validation. Our continuous integration (CI) pipeline—powered by GitHub Actions—enforces unit tests, linting, and code formatting on every pull request and commit.  Crucially, each CI run also executes our benchmark suite to verify that new passes and optimizations maintain or improve key metrics such as gate count, compile time, and circuit fidelity under noise.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.28]{ucc_bench_comment.png}
+  \caption{Example of UCC benchmark result, automatically run on a pending pull request to preview the impact on performance.}
+  \label{fig:ucc_bench}
+\end{figure}
+The benchmarking framework automates metric collection and comparison.  Benchmark results are published regularly to a dedicated GitHub repository \cite{ucc-bench_2025}, with plots of performance embedded in the UCC README, providing transparent performance dashboards for contributors and users.  Figure~\ref{fig:ucc_bench} shows a benchmarking preview feature, where the performance impact of any pending pull request is automatically benchmarked and reported directly within the GitHub code review before being merged. The benchmarking code's modular design makes it straightforward to add new benchmarks—e.g., support for dynamic circuits or novel instruction sets—ensuring extensibility as UCC and the broader quantum-software ecosystem evolve.
+
+\section{Building a Community of Contributors } \label{community}
+UCC's development follows a genuine open-source model, with all project management happening publicly on GitHub, distinguishing it from 'develop-in-public' approaches or one-off code releases. Additionally, UCC fosters a sustainable ecosystem of contributors through structured community-building initiatives: in particular, the Unitary Foundation microgrant program \cite{uf_grants} and UnitaryHACK hackathon \cite{unitary_hack}.
+
+UnitaryHACK incentivizes high-quality contributions through financial compensation and dedicated mentorship, effectively onboarding and retaining new developers. In 2025, UnitaryHACK brought multiple new compiler passes and features to UCC from external contributors who continue to be active in the community. For larger projects, the Unitary Foundation microgrant program provides \$4,000 in funding. This initiative has already awarded over 100 grants across more than 30 countries, leading to a significant number of research publications, new software libraries, and active contributors.
+
+By leveraging our broad view of the ecosystem, we encourage grant applicants to contribute to existing toolkits like UCC rather than starting from scratch. These efforts, combined with a collaborative Discord community of over 5,000 members, firmly embed UCC within a thriving global quantum open-source community that values equitable recognition and long-term project stewardship..
+
+\section{Results} \label{results}
+We demonstrate progress toward our primary goals by showcasing UCC's competitive performance (G1) against established compilers and its early demonstrations as an interoperable and community-extensible compilation hub (G3, G4). While our work towards early FTQC-specific capabilities (G2) and cross-hardware support is ongoing , these results establish a strong foundation for future development.
+
+\subsection{Competitive Performance}
+A core requirement (G1) for UCC is that its focus on user-friendliness and interoperability must not come at the cost of performance. To validate this, we benchmarked UCC's default compilation pipeline against other leading open-source compilers using the \texttt{ucc-bench} suite introduced previously.
+
+\begin{figure*}[bht]
+  \centering
+  \includegraphics[width=\textwidth]{latest_compiler_benchmarks_comparative_ucc.pdf}
+  \caption{Benchmark comparison of top compiler performance on six representative circuits (QAOA, QV, QFT, square-Heisenberg, Prep-Select, and QCNN).
+  (a) Log–log scatter of wall-clock compile time. Circuit names are annotated near the UCC points, where other compile results for that circuit are at the same x-coordinate.
+  (b) Scatter of compiled-ratio, which is the ratio of two-qubit gates in the compiled circuit over the original circuit. In both plots, points above the diagonal are worse performance than UCC and points below are better.}
+  \label{fig:performance}
+\end{figure*}
+
+Benchmark circuits were chosen as a small suite of common quantum algorithms: quantum approximate optimization algorithm (QAOA), quantum fourier transform (QFT), quantum volume (QV), a quantum convolutional neural network (QCNN), and a Heisenberg spin model on a square lattice. These are circuits are over 100 qubits and drawn from other benhmarking libraries \cite{Sawaya2024hamliblibraryof,benchpress_2025,qasmbench} or built within the ucc-bench codebase. For these circuits, we track the compilation time and the compiled ratio, which is the ratio of two-qubit gates in the compiled circuit over the original circuit. Lower values indicate better performance. This metric was chosen to capture the NISQ era focus on reducing the use of the most error-prone/longer running gates. All compilers target a basis gateset of $R_x$, $R_y$, $R_Z$, $H$ and $CNOT$ gates to ensure we have an apples-to-apples comparison of circuit properties post compilation. UCC follows the documentation of the respective compilers to set up the default configurations. This is consistent with UCC's design philosophy is to make compiling easy and painless for people running quantum algorithms, and not require the user to have in-depth knowledge of compilation to get solid performance. This means \texttt{pytket-peep} is tket with full peephole optimization, \texttt{qiskit-default} is Qiskit's default transpilation with optimization level 3, \texttt{cirq} uses a custom target gateset adaptor to ensure consitency with other compilers. \texttt{pyqpanda3} is a performant but closed-source compiler included for reference.
+
+Figure~\ref{fig:performance} shows the compile time (left) and the compiled ratio (right) from the benchmarks. The x-axis of each point is the respective metric for UCC and the y-axis is the metric for the other compiler. Points above (below) the diagonal are worse (better) performance than UCC. We see UCC has strong performance in both metrics amongst open-source compilers. For compile times, UCC and Qiskit are similar, but UCC has substantially better performance for the long-running compilation of a quantum volume (QV) circuit. The compiled ratio of most circuits is similar, but UCC stands out as best on the most differentiated circuit QFT. As discussed earlier, UCC's default compilation pipeline is a customized set of Qiskit passes, hence the difference in performance between the tools even though UCC is built on top of Qiskit.
+
+%Figure~\ref{fig:performance_over_time} shows the same metrics, but averages them over time for each compiler. Labels within the plots indicate when a new version of a compiler was released. In this light, UCC has best-in-class performance, but the averages are dominated by UCC's relative strength on the Quantum Volume and Square Heisenberg benchmark circuits for compile time, and the QFT and Square Heisenberg circuits for compiled ratio. The more relevant aspect is this regularly benchmarking lets us monitor the performance across the top compilers, and helps identify opportunities to bring new techniques from the broader open-source community into UCC.
+
+% \begin{figure*}[tb]
+%   \centering
+%   \includegraphics[width=\textwidth]{avg_compiler_benchmarks_over_time.pdf}
+%   \caption{(top) Average compiled ratio (2-qubit gates in compiled circuit / 2-qubit gates in original circuit) (bottom) Average wall-clock compilation time for the same benchmarks. Each point labels when that version of that compiler was benchmarked and shows how compiler changes have evolved over time.}
+%   \label{fig:performance_over_time}
+% \end{figure*}
+
+\subsection{Community-Driven Contributions}
+Given UCC's initial bootstrapping appropach, one initial capability of UCC lies in its role as a ``meta-compiler''---a hub that integrates diverse, specialized compilation techniques from across the ecosystem. This capability directly addresses our goals of being user-friendly and compatible (G3) and genuinely community-driven (G4).
+
+A clear example of this is the integration of BQSKit~\cite{bqskit_2021}, a powerful synthesis-based compiler, as a custom UCC pass. This contribution, originating from an external community member during our UnitaryHACK 2025 event, highlights the success of our model. As shown in the snippet below, a user can invoke BQSKit's advanced synthesis algorithms with a single line, without needing to learn the full BQSKit API or handle complex circuit conversions.
+
+\begin{minted}
+[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,
+]
+{python}
+from ucc.transpilers.ucc_bqskit
+    import BQSKitTransformationPass
+result = compile(circuit_to_compile,
+    custom_passes=[BQSKitTransformationPass()])
+\end{minted}
+
+An additional integration is with \texttt{mitiq}, a popular library for quantum error mitigation \cite{mitiq} developed by the Unitary Foundation. A circuit compiled with UCC can then be composed with error mitigation techniques like zero noise extrapolation \cite{zne_2019}:
+
+\begin{minted}
+[frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,]{python}
+import ucc, mitiq
+
+circuit = ...  # Your quantum circuit here
+
+# compilation
+compiled_circuit = ucc.compile(circuit,
+  target_device="ibmq_mumbai")
+
+# Method that takes a circuit and returns
+# a (noisy) expectation value, e.g. via
+# a Qiskit or Cirq simulation wrapper
+my_executor = ...
+
+# Execute the compiled circuit with ZNE
+mitigated_result = mitiq.zne.execute(
+    compiled_circuit,
+    executor=my_executor,
+    scale_noise=mitiq.zne.scaling.fold_gates_at_random
+)
+\end{minted}
+
+\begin{figure}[bht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{ucc_mitiq.pdf}
+  \caption{The impact of ZNE on pre- and post-compiled circuits which simulate the Heisenberg model on a square lattice. The circuit acts on 8 qubits, and contains 241 layers with 144 two-qubit gates. The error model used is depolarizing noise impacting two-qubit gates with a noise rate of 1\%.}
+  \label{fig:ucc_mitiq}
+\end{figure}
+Fig.~\ref{fig:ucc_mitiq} shows the result of running code like the above on a specific 9-qubit circuit simulating the square Heisenberg Hamiltonian. Noise is simulated as a depolarizing channel with $p=0.01$ after any two-qubit gate, given that is the dominant source of noise on most hardware today. The graph compares the expectation value of the all $0$ state for uncompiled vs compiled circuits, and with and without zero noise extrapolation. The noise-free expectation is the dashed line at 1. You can see the compiled circuit is more robust to noise, as UCC was able to reduce the number of two-qubit gates from 144 to 36. This combination of strong compilation and error mitigation techniques is a powerful demonstration of UCC and Mitiq's capabilities, and how they can be used to improve the performance of quantum circuits on noisy hardware.
+
+%These examples demonstrate two key achievements. First, the simple and uniform \texttt{compile} interface makes powerful, external tools accessible to all users, fulfilling (G3). Second, the ability for an expert in a specific compiler (like BQSKit) to easily package their tool as a pass for the broader UCC ecosystem validates our community-driven approach (G4). This modularity creates a virtuous cycle, where UCC provides the platform, and the community provides a rich, growing library of specialized compilation strategies.
+
+\section{Discussion \& Outlook}
+This work has introduced UCC, outlined its architecture, collaborative development framework, distinctive capabilities, and design philosophy. The result in Section~\ref{results} underscore our core thesis: an open, community-driven approach yields a high-performance, interoperable compiler.
+
+Looking forward, our research trajectory focuses on three strategic thrusts to continue to improve in these areas alongside growing capabilities in (G2). First, building upon our established community-engagement initiatives, we plan to institute a rolling bounty funding model for new compiler pass contributions to UCC, filling an existing gap between short-term issues during events such as UnitaryHACK and longer-term microgrant projects. Second, we will spur on strategic collaboration with the broader quantum ecosystem to develop and expand \textit{intermediate representations} (IRs) that capture critical physical and logical abstractions across the compilation stack. Such IRs should enable efficient handling of hardware-specific quantum classical and control, as well as resource optimization across abstraction layers. Third, we will expand our benchmarking circuit library to incorporate \textit{realistic workloads for early Fault-Tolerant Quantum Computing} (FTQC) architectures, including explicit modeling of logical qubit operations, syndrome extraction cycles, and hardware connectivity constraints. This expansion will enable more meaningful evaluation of compilation strategies under practical FTQC conditions, and allow us to test compilation schemes which combine quantum error mitigation \cite{qem} with quantum error correction, such as in \cite{Wahl_2023}, and evaluate the fault tolerance of transformed circuits, as in our experimental ucc-ft library \cite{ucc-ft_2025}.
+
+We will continue our model of co-development, expanding UCC to include hardware-targeted compiler passes, ensuring that the Unitary Compiler Collection remains responsive to emerging hardware paradigms, compilation techniques, and QEC codes, while keeping user-friendliness and ease of contribution as central tenets. These coordinated advances will position UCC as both a robust and performant compilation framework and a collaborative research testbed for next-generation quantum software ecosystems.
+
+\section{Acknowledgments}
+This work is supported by the U.S. Department of Energy, Office of
+Science, Office of Advanced Scientific Computing Research,
+Accelerated Research in Quantum Computing under Award
+Numbers DE-SC0025336 and DE-SC0020266 and National Science Foundation POSE Phase II under Award Number 2303643.
+
+We thank the Unitary Foundation team for their input, feedback, and support.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}
