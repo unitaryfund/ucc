@@ -97,7 +97,7 @@ class UCCDefault1:
                 SabreLayout(
                     coupling_map,
                     seed=1,
-                    max_iterations=4,
+                    max_iterations=10,
                     swap_trials=_get_trial_count(20),
                     layout_trials=_get_trial_count(20),
                 )

@@ -15,10 +15,13 @@ requires-python = ">=3.12,<4"
 packages = [{ include = "ucc" }]
 dependencies = [
     "cirq-core>=1.4.1,<2.0.0",
+    "matplotlib>=3.10.1",
     "ply>=3.11,<4.0.0",
     "pytket>=1.40.0,<3.0.0",
     "qbraid>=0.9.3,<1.0.0",
     "qiskit>=1.4.2,<3.0.0",
+    "qiskit-aer>=0.17.1",
+    "qiskit-ibm-runtime>=0.41.1",
     "qiskit-qasm3-import>=0.5.1,<1.0.0",
     "quimb==1.11.2",
 ]
