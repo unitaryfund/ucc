@@ -2,7 +2,6 @@ from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile as translate
 from .transpilers.ucc_defaults import UCCDefault1
-from qiskit import transpile as qiskit_transpile
 
 import sys
 import warnings
@@ -64,11 +63,11 @@ def compile(
     )
 
     # Translate into the target device gateset first; no optimization
-    basis_translated_circuit = qiskit_transpile(
-        qiskit_circuit,
-        basis_gates=ucc_default1.target_gateset,
-        optimization_level=0,
-    )
+    basis_translated_circuit = qiskit_circuit  # qiskit_transpile(
+    #     qiskit_circuit,
+    #     basis_gates=ucc_default1.target_gateset,
+    #     optimization_level=0,
+    # )
 
     if custom_passes is not None:
         ucc_default1.pass_manager.append(custom_passes)
