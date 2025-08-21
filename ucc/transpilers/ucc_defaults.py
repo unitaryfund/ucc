@@ -13,7 +13,7 @@ except ImportError:
 
 from qiskit.transpiler import PassManager
 from qiskit import user_config
-from qiskit.transpiler import Target
+from qiskit.transpiler import Target, CouplingMap
 from qiskit.transpiler.passes import (
     ApplyLayout,
     ConsolidateBlocks,
@@ -30,7 +30,6 @@ from qiskit.transpiler.passes import (
     VF2PostLayout,
 )
 from typing import Optional
-
 
 CONFIG = user_config.get_config()
 
@@ -90,6 +89,10 @@ class UCCDefault1:
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
             coupling_map = target_device.build_coupling_map()
+            if coupling_map is None:  # Assume all to all connectivity
+                coupling_map = CouplingMap.from_full(target_device.num_qubits)
+                # target_device.coupling_map = coupling_map
+
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
