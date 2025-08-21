@@ -81,9 +81,9 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
 
 
 - ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats`` for supported circuit formats. Default is the format of input circuit.
-- ``target_gateset`` is the gateset to compile the circuit to, e.g. {"cx", "rx",...}. Defaults to the gateset of the target device. If none is provided, the basis gates of the input circuit are not changed.
-- ``target_device`` can be specified as a Qiskit backend or coupling map, or a list of connections between qubits. If None, all-to-all connectivity is assumed. If a Qiskit backend or coupling map is specified, only the coupling list extracted from the backend is used.
-- ``custom_passes`` can be a list of Qiskit ``TransformationPass`` to run after the default set of passes in ``UCCDefault1``.
+- ``target_gateset`` is the gateset to compile the circuit to, e.g. {"cx", "rx",...}. Defaults to the gateset of the target device. If none is provided, defaults to `{"cx", "rz", "rx", "ry", "h"}`.
+- ``target_device`` can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_device` is specified, `target_device.operation_names` supercedes the `target_gateset`.
+- ``custom_passes`` can be a list of Qiskit ``TransformationPass`` objects to run after the default set of passes in ``UCCDefault1``.
 
 Writing a custom pass
 =====================

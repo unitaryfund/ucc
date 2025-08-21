@@ -42,11 +42,11 @@ def compile(
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats``.
             Defaults to the format of the input circuit.
         target_gateset (set[str]): (optional) The gateset to compile the circuit to.
-            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if
-            available. If no `target_gateset` or ` target_device` is provided, the
-            basis gates of the input circuit are not changed.
-        target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
-        custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default set
+            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_device` is provided, defaults to `{"cx", "rz", "rx", "ry", "h"}`.
+        target_device (qiskit.transpiler.Target): (optional)
+            The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_device` is specified, `target_device.operation_names` supercedes the `target_gateset`.
+        custom_passes (list[qiskit.transpiler.TransformationPass]): (optional)
+            A list of custom passes to apply after the default set
             of passes. Defaults to None.
 
     Returns:
@@ -58,30 +58,23 @@ def compile(
     # Translate to Qiskit Circuit object
     qiskit_circuit = translate(circuit, "qiskit")
 
-    ucc_default1 = UCCDefault1(target_device=target_device)
+    # Initialize the UCCDefault1 compiler with the target device and gateset
+    ucc_default1 = UCCDefault1(
+        target_device=target_device, target_gateset=target_gateset
+    )
+
+    # Translate into the target device gateset first; no optimization
+    basis_translated_circuit = qiskit_transpile(
+        qiskit_circuit,
+        basis_gates=ucc_default1.target_gateset,
+        optimization_level=0,
+    )
+
     if custom_passes is not None:
         ucc_default1.pass_manager.append(custom_passes)
-    compiled_circuit = ucc_default1.run(qiskit_circuit)
 
-    if target_gateset is not None:
-        # Translate into user-defined gateset; no optimization
-        compiled_circuit = qiskit_transpile(
-            compiled_circuit, basis_gates=target_gateset, optimization_level=0
-        )
-    elif hasattr(target_device, "operation_names"):
-        if target_gateset not in target_device.operation_names:
-            warnings.warn(
-                f"Warning: The target gateset {target_gateset} is not supported by the target device. "
-            )
-        # Use target_device gateset if available
-        target_gateset = target_device.operation_names
-
-        # Translate into the target device gateset; no optimization
-        compiled_circuit = qiskit_transpile(
-            compiled_circuit,
-            basis_gates=target_gateset,
-            optimization_level=0,
-        )
+    # Compile the circuit using the UCCDefault1 pass manager
+    compiled_circuit = ucc_default1.run(basis_translated_circuit)
 
     # Translate the compiled circuit to the desired format
     final_result = translate(compiled_circuit, return_format)

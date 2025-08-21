@@ -165,6 +165,21 @@ def test_custom_pass():
         assert analysis_pass.property_set["check_map"]
 
 
+def test_compile_with_no_target_gateset_or_device():
+    """Test that the final circuit is in the default gateset if no `target_gateset` or `target_device` is provided."""
+    circuit = QiskitCircuit(2)
+    circuit.cx(0, 1)
+    circuit.h(0)
+
+    result_circuit = compile(
+        circuit,
+    )
+
+    assert set(op.name for op in result_circuit).issubset(
+        {"cx", "rz", "rx", "ry", "h"}
+    )
+
+
 def test_bqskit_compile():
     from ucc.transpilers.ucc_bqskit import BQSKitTransformationPass
 
