@@ -3,8 +3,8 @@
 
 ## [0.4.9] - 2025-08-26
 [PyPI](https://pypi.org/project/ucc/0.4.9/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.9)
+In version 0.4.9, we optimized the logic for target gateset selection, made infrastructure and documentation updates and upgraded dependencies.
 
-## What's Changed
 ### ✨ Key Features
 * Fix links to research references in docs by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/455
 * Add codecov reporting by @bachase in https://github.com/unitaryfoundation/ucc/pull/465
