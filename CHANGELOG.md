@@ -12,23 +12,19 @@ In version 0.4.9, we optimized the logic for target gateset selection, made infr
 * Test for Merit systems automation by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/470
 * Simplified and optimized logic for target gateset selection.  by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/492
 ### 🔄 Dependencies
-* Bump pytket from 2.7.0 to 2.8.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/456
-* Bump qbraid from 0.9.7 to 0.9.8 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/459
-* Bump pytket from 2.8.0 to 2.9.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/458
-* Bump cirq-core from 1.5.0 to 1.6.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/457
-* Bump sphinxcontrib-bibtex from 2.6.3 to 2.6.5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/472
-* Bump pytest from 8.3.5 to 8.4.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/473
-* Bump pytest-cov from 6.1.1 to 6.2.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/474
-* Bump quimb from 1.11.1 to 1.11.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/475
-* Bump ruff from 0.11.7 to 0.12.7 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/476
-* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/481
-* Bump actions/download-artifact from 4 to 5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/482
-* Bump ruff from 0.12.7 to 0.12.8 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/483
-* Bump pre-commit from 4.2.0 to 4.3.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/484
-* Bump ruff from 0.12.8 to 0.12.9 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/486
-* Bump cirq-core from 1.6.0 to 1.6.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/487
-* Bump ruff from 0.12.9 to 0.12.10 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/494
-* Bump qiskit from 2.1.1 to 2.1.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/493
+By @dependabot  
+* pytket (2.7.0 → 2.9.1) via [#456](https://github.com/unitaryfoundation/ucc/pull/456) + [#458](https://github.com/unitaryfoundation/ucc/pull/458)  
+* qbraid (0.9.7 → 0.9.8) via [#459](https://github.com/unitaryfoundation/ucc/pull/459)  
+* cirq-core (1.5.0 → 1.6.1) via [#457](https://github.com/unitaryfoundation/ucc/pull/457) + [#487](https://github.com/unitaryfoundation/ucc/pull/487)  
+* sphinxcontrib-bibtex (2.6.3 → 2.6.5) via [#472](https://github.com/unitaryfoundation/ucc/pull/472)  
+* pytest (8.3.5 → 8.4.1) via [#473](https://github.com/unitaryfoundation/ucc/pull/473)  
+* pytest-cov (6.1.1 → 6.2.1) via [#474](https://github.com/unitaryfoundation/ucc/pull/474)  
+* quimb (1.11.1 → 1.11.2) via [#475](https://github.com/unitaryfoundation/ucc/pull/475)  
+* ruff (0.11.7 → 0.12.10) via [#476](https://github.com/unitaryfoundation/ucc/pull/476) + [#483](https://github.com/unitaryfoundation/ucc/pull/483) + [#486](https://github.com/unitaryfoundation/ucc/pull/486) + [#494](https://github.com/unitaryfoundation/ucc/pull/494)  
+* actions/checkout (4 → 5) via [#481](https://github.com/unitaryfoundation/ucc/pull/481)  
+* actions/download-artifact (4 → 5) via [#482](https://github.com/unitaryfoundation/ucc/pull/482)  
+* pre-commit (4.2.0 → 4.3.0) via [#484](https://github.com/unitaryfoundation/ucc/pull/484)  
+* qiskit (2.1.1 → 2.1.2) via [#493](https://github.com/unitaryfoundation/ucc/pull/493)  
 
 
 **Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.8...0.4.9
