@@ -1,6 +1,9 @@
 # Changelog
 <!-- Release notes generated using configuration in .github/release.yml at main -->
 
+## [0.4.9] - 2025-08-26
+[PyPI](https://pypi.org/project/ucc/0.4.9/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.9)
+
 ## What's Changed
 ### ✨ Key Features
 * Fix links to research references in docs by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/455
@@ -28,11 +31,6 @@
 
 
 **Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.8...0.4.9
-
-
-## [0.4.8] - 2025-08-26
-[PyPI](https://pypi.org/project/ucc/0.4.9/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.9)
-
 
 ## [0.4.8] - 2025-07-17
 [PyPI](https://pypi.org/project/ucc/0.4.8/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.8)
