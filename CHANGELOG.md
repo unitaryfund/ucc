@@ -1,4 +1,38 @@
 # Changelog
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### ✨ Key Features
+* Fix links to research references in docs by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/455
+* Add codecov reporting by @bachase in https://github.com/unitaryfoundation/ucc/pull/465
+* Add codecov badge to readme by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/467
+* Test for Merit systems automation by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/470
+* Simplified and optimized logic for target gateset selection.  by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/492
+
+### 🔄 Dependencies
+* Bump pytket from 2.7.0 to 2.8.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/456
+* Bump qbraid from 0.9.7 to 0.9.8 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/459
+* Bump pytket from 2.8.0 to 2.9.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/458
+* Bump cirq-core from 1.5.0 to 1.6.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/457
+* Bump sphinxcontrib-bibtex from 2.6.3 to 2.6.5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/472
+* Bump pytest from 8.3.5 to 8.4.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/473
+* Bump pytest-cov from 6.1.1 to 6.2.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/474
+* Bump quimb from 1.11.1 to 1.11.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/475
+* Bump ruff from 0.11.7 to 0.12.7 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/476
+* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/481
+* Bump actions/download-artifact from 4 to 5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/482
+* Bump ruff from 0.12.7 to 0.12.8 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/483
+* Bump pre-commit from 4.2.0 to 4.3.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/484
+* Bump ruff from 0.12.8 to 0.12.9 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/486
+* Bump cirq-core from 1.6.0 to 1.6.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/487
+
+
+**Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.8...0.4.9
+
+
+## [0.4.8] - 2025-08-26
+[PyPI](https://pypi.org/project/ucc/0.4.9/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.9)
+
 
 ## [0.4.8] - 2025-07-17
 [PyPI](https://pypi.org/project/ucc/0.4.8/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.8)
