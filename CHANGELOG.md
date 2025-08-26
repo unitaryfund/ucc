@@ -8,10 +8,9 @@ In version 0.4.9, we optimized the logic for target gateset selection, made infr
 ### ✨ Key Features
 * Fix links to research references in docs by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/455
 * Add codecov reporting by @bachase in https://github.com/unitaryfoundation/ucc/pull/465
-* Add codecov badge to readme by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/467
+* add codecov badge to readme by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/467
 * Test for Merit systems automation by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/470
 * Simplified and optimized logic for target gateset selection.  by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/492
-
 ### 🔄 Dependencies
 * Bump pytket from 2.7.0 to 2.8.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/456
 * Bump qbraid from 0.9.7 to 0.9.8 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/459
@@ -28,6 +27,8 @@ In version 0.4.9, we optimized the logic for target gateset selection, made infr
 * Bump pre-commit from 4.2.0 to 4.3.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/484
 * Bump ruff from 0.12.8 to 0.12.9 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/486
 * Bump cirq-core from 1.6.0 to 1.6.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/487
+* Bump ruff from 0.12.9 to 0.12.10 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/494
+* Bump qiskit from 2.1.1 to 2.1.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/493
 
 
 **Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.8...0.4.9
