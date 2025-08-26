@@ -1,6 +1,6 @@
 [project]
 name = "ucc"
-version = "0.4.8"
+version = "0.4.9"
 description = "Unitary Compiler Collection: A quantum circuit interface and compiler for multiple quantum frameworks"
 authors = [
     { name = "Jordan Sullivan" },
