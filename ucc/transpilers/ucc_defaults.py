@@ -50,8 +50,8 @@ class UCCDefault1:
                 target_device (qiskit.transpiler.Target): (Optional) The target device to compile the circuit for
         """
         self.pass_manager = PassManager()
-        self.target_device = target_device
-        self.target_gateset = target_gateset
+        self._target_device = target_device
+        self._target_gateset = target_gateset
         self._add_local_passes(local_iterations)
         self._add_map_passes(target_device)
 
@@ -62,12 +62,12 @@ class UCCDefault1:
     @property
     def target_basis(self):
         # Use the target device's gateset if available, otherwise use the provided gateset, otherwise
-        if hasattr(self.target_device, "operation_names"):
+        if hasattr(self._target_device, "operation_names"):
             # Use target_device gateset if available
-            target_gateset = self.target_device.operation_names
-        elif self.target_gateset is not None:
+            target_gateset = self._target_device.operation_names
+        elif self._target_gateset is not None:
             # Use provided gateset if available
-            target_gateset = self.target_gateset
+            target_gateset = self._target_gateset
         else:
             # Default if no target device or gateset is provided
             target_gateset = {"cx", "rz", "rx", "ry", "h"}

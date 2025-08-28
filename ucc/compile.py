@@ -66,7 +66,7 @@ def compile(
     # Translate into the target device gateset first; no optimization
     basis_translated_circuit = qiskit_transpile(
         qiskit_circuit,
-        basis_gates=ucc_default1.target_gateset,
+        basis_gates=ucc_default1.target_basis,
         optimization_level=0,
     )
 
