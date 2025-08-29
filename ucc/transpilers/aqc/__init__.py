@@ -64,9 +64,9 @@ def approx_compile(circuit: QuantumCircuit) -> QuantumCircuit:
     # circuit and returns the original one
     # TODO: This should be modified depending on maintainer notes
     fidelity = np.vdot(target_sv, Statevector(aqc_circuit).data)
-    if fidelity < 0.8:
+    if np.abs(fidelity) < 0.8:
         warnings.warn(
-            f"Warning: Fidelity {fidelity:.4f} is too low. Discarding compression."
+            f"Warning: Fidelity {np.abs(fidelity):.4f} is too low. Discarding compression."
         )
         return circuit
 
