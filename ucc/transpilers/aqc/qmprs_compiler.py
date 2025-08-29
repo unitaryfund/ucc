@@ -88,7 +88,7 @@ class QmprsCompiler:
 
         fidelity = np.vdot(circuit.get_statevector(), statevector)
         logger.info(
-            f"Fidelity: {fidelity:.4f}, "
+            f"Fidelity: {np.abs(fidelity):.4f}, "
             f"Number of qubits: {num_qubits}, "
             f"Number of layers: {num_layers}, "
             f"Number of sweeps: {num_sweeps}"

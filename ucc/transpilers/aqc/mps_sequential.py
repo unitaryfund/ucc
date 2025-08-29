@@ -220,18 +220,18 @@ class Sequential:
 
             fidelity = np.vdot(disentangled_mps.to_dense(), zero_state)
 
-            if fidelity >= self.max_fidelity_threshold:
+            if np.abs(fidelity) >= self.max_fidelity_threshold:
                 # If the disentangled MPS is close enough to the zero state,
                 # we can stop the disentanglement process
                 logger.info(
-                    f"Reached target fidelity {fidelity}. "
+                    f"Reached target fidelity {np.abs(fidelity):.4f}. "
                     f"{layer_index + 1} layers used."
                 )
                 break
 
         if layer_index == max_num_layers - 1:
             logger.info(
-                f"Reached fidelity {fidelity} with "
+                f"Reached fidelity {np.abs(fidelity):.4f} with "
                 f"maximum number of layers {max_num_layers}."
             )
 
@@ -308,7 +308,7 @@ class Sequential:
 
         fidelity = np.vdot(Statevector(circuit).data, statevector)
         logger.info(
-            f"Fidelity: {fidelity:.4f}, "
+            f"Fidelity: {np.abs(fidelity):.4f}, "
             f"Number of qubits: {num_qubits}, "
             f"Number of layers: {max_num_layers}, "
         )
