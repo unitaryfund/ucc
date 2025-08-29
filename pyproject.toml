@@ -13,6 +13,9 @@ readme = "README.md"
 repository = "https://github.com/unitaryfoundation/ucc"
 requires-python = ">=3.12,<4"
 packages = [{ include = "ucc" }]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+]
 dependencies = [
     "cirq-core>=1.4.1,<2.0.0",
     "ply>=3.11,<4.0.0",
