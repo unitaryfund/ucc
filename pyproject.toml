@@ -8,7 +8,7 @@ authors = [
     { name = "Nate Stemen" },
     { name = "Brad Chase" },
 ]
-license = "GPL-3.0"
+license = "AGPL-3.0-only"
 readme = "README.md"
 repository = "https://github.com/unitaryfoundation/ucc"
 requires-python = ">=3.12,<4"
