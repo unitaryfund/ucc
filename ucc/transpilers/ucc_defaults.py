@@ -118,6 +118,22 @@ class UCCDefault1:
                     trials=_get_trial_count(20),
                 )
             )
+            # Direction-correction to enforce directed edges on the Target
+            try:
+                # Qiskit 2.x
+                from qiskit.transpiler.passes import GateDirection  # type: ignore
+
+                self.pass_manager.append(GateDirection(target=target_device))
+            except Exception:
+                # Fallback: Qiskit 1.x had CXDirection with coupling_map
+                try:
+                    from qiskit.transpiler.passes import CXDirection  # type: ignore
+
+                    self.pass_manager.append(CXDirection(coupling_map))
+                except Exception:
+                    # If neither pass is available, proceed without direction correction
+                    pass
+
             # self.pass_manager.append(MapomaticLayout(coupling_map))
             self.pass_manager.append(VF2PostLayout(target=target_device))
             self.pass_manager.append(ApplyLayout())
