@@ -601,3 +601,47 @@ def test_compiled_circuits_equivalent(circuit_function, num_qubits, seed):
     sv1 = Statevector(circuit)
     sv2 = Statevector(transpiled)
     assert sv1.equiv(sv2)
+
+
+def _qiskit_major_version() -> int:
+    import qiskit
+
+    try:
+        from importlib.metadata import version as _version
+
+        ver = _version("qiskit")
+    except Exception:
+        # Fallback to qiskit.__version__
+        ver = getattr(qiskit, "__version__", "0.0.0")
+
+    try:
+        return int(str(ver).split(".")[0])
+    except Exception:
+        return 0
+
+
+@pytest.mark.skipif(
+    _qiskit_major_version() < 2,
+    reason="Test requires Qiskit 2.x where UGate ('u') replaces U3Gate",
+)
+def test_qiskit_respects_u_basis_when_requested():
+    """When requesting target_gateset={'cx','u'} and Qiskit output, the
+    compiled circuit should only contain 'cx' and 'u' ops on Qiskit 2.x.
+
+    Note: Non-Qiskit return formats may display decomposed rotations.
+    """
+    # Build a simple circuit that requires single-qubit synthesis
+    qc = QiskitCircuit(2)
+    qc.h(0)
+    qc.x(1)
+    qc.cx(0, 1)
+
+    compiled = compile(
+        qc,
+        return_format="qiskit",
+        target_gateset={"cx", "u"},
+    )
+
+    assert isinstance(compiled, QiskitCircuit)
+    op_names = {inst.operation.name for inst in compiled.data}
+    assert op_names.issubset({"cx", "u"})
