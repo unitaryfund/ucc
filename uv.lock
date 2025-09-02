@@ -58,7 +58,7 @@ wheels = [
 
 [[package]]
 name = "bqskit"
-version = "1.2.0"
+version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bqskitrs" },
@@ -68,9 +68,9 @@ dependencies = [
     { name = "scipy" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f5/77/efa6200c3f175733e57551df39a045ee2d6bf654d171410077f54fc3dc31/bqskit-1.2.0.tar.gz", hash = "sha256:5772491f997474bacd1016fed4835b93e5d0901476fdac44518c731815cd0c88", size = 265328, upload-time = "2024-09-13T18:52:51.019Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/74/cef9c5460bdba9486593308cb27e6dd7d49a6d77750c24f5a5054ca70bd6/bqskit-1.2.1.tar.gz", hash = "sha256:8456433cd58df4bc003d33299300872cc22f6cf02432553cc4888643d9c420f9", size = 279608, upload-time = "2025-08-30T22:35:59.842Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/0d/0e969c8812bb59abc28675e770257df52eb038477e4ca96662217f228cbf/bqskit-1.2.0-py3-none-any.whl", hash = "sha256:b3a5e820bc319c126c50f0750896801d340841d2b70758a769dd4d2efcd9bc74", size = 421833, upload-time = "2024-09-13T18:52:49.534Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/26/c35c93075cfeec3dc00a5b007690d01e2e4efa200bd2c0ec3346dca3b047/bqskit-1.2.1-py3-none-any.whl", hash = "sha256:cff63fac74d477311d5546edd7f16bbdc76e9e705f2affc8aeb0241544f61e36", size = 439942, upload-time = "2025-08-30T22:35:58.321Z" },
 ]
 
 [[package]]
@@ -1562,7 +1562,7 @@ wheels = [
 
 [[package]]
 name = "ucc"
-version = "0.4.8"
+version = "0.4.9"
 source = { editable = "." }
 dependencies = [
     { name = "cirq-core" },
