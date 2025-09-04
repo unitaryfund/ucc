@@ -64,13 +64,13 @@ To enable the pre-commit hooks, run
 
     Remember to run the tests and build the documentation before opening a pull request to ensure a smoother pull request review.
 
-Proposing a new transpiler/compiler pass
+Contributing a New Compiler Pass
 -------------------------------
 
 1. Proposing a New Compiler Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you've found a compiler pass you'd like to implement in UCC, first you'll submit a [New Compiler Pass Discussion](https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass), which asks you to provide...
+If you've found a compiler pass you'd like to implement in UCC, first you'll submit a `New Compiler Pass Discussion <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_, which asks you to provide...
 
 #. Detailed description of the technique
     #. Provide a written abstract without excessive jargon, citing the source of the technique.
@@ -88,9 +88,9 @@ If you've found a compiler pass you'd like to implement in UCC, first you'll sub
     * A Jupyter notebook or a small script is sufficient for the prototype.
 
 #. Validate the prototype
-    * Use the test circuits defined in section `1. Proposing a New Transpiler Pass`_ to validate the technique.
+    * Use the test circuits defined in section `1. Proposing a New Compiler Pass`_ to validate the technique.
 
-.. _1. Proposing a New Transpiler Pass: #proposing-a-new-transpiler-pass
+.. _1. Proposing a New Compiler Pass: #proposing-a-new-compiler-pass
 
 3. Implementing the New Pass in the Codebase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
