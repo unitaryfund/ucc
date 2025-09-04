@@ -65,7 +65,7 @@ To enable the pre-commit hooks, run
     Remember to run the tests and build the documentation before opening a pull request to ensure a smoother pull request review.
 
 Contributing a New Compiler Pass
--------------------------------
+--------------------------------
 
 1. Proposing a New Compiler Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
