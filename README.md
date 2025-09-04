@@ -15,6 +15,8 @@ By leveraging [qBraid](https://github.com/qBraid/qBraid), UCC interfaces automat
 
 
 **Want to know more?**
+We use the Merit Terminal to pay contributors who merge PRs to our repo! You can find our repo page on the Terminal [here](https://terminal.merit.systems/unitaryfoundation/ucc/).
+
 - Check out our [documentation](https://ucc.readthedocs.io/en/latest/), which you can build locally after installation by running `make html` in `ucc/docs/source`.
 - Watch our [introductory video](https://www.youtube.com/watch?v=11uQynyOUI8) on UCC presented at [FOSDEM 2025](https://fosdem.org/2025/) by [@natestemen](https://github.com/natestemen/).
 - Read the [launch announcement](https://unitary.foundation/posts/2025_ucc_launch_blog) to learn more on the current state of UCC, its capabilities and future direction.
@@ -124,6 +126,3 @@ Thank you to:
 - [@francespoblete](https://github.com/francespoblete) for designing the UCC logo.
 
 Contributions of any kind are welcome!
-
-<!-- ## Coming soon -->
-<!-- Did you know you can get paid for your contributions to this repo? Soon you'll be able to earn compensation through Merit systems.  -->
