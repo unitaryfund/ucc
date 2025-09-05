@@ -110,8 +110,14 @@ For the new pass to be incorporated into `the default compiler <https://github.c
 #. Reduction in runtime
     * Show a reduction in runtime, especially if the new technique replaces a slower one.
 
-#. Compatibility with other passes
-    * Ensure the new pass performs as expected when used with other existing passes.
+#. Passes should not cause new bugs or worsen performance
+    * Whether the new pass is meant to run alongside existing passes or replace some of them, we check that it doesn't cause any unexpected bugs, break any existing tests, or worsen performance.
+
+#. Integration with the library vs. default transpiler
+    * It's important to know that a new pass might be accepted into the library of passes but not necessarily integrated into the default transpiler. You can see examples of this in `this discussion <https://github.com/unitaryfoundation/ucc/discussions/392>`_ and `this pull request <https://github.com/unitaryfoundation/ucc/pull/421>`_.
+
+#. Benchmarking your new pass
+    * To run benchmarks on your new pass, please refer to the `tutorial and documentation <https://github.com/unitaryfoundation/ucc/issues/469>`_ on using ucc-bench.
 
 We appreciate your contributions and look forward to your new pass proposals!
 
