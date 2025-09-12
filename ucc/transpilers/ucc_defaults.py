@@ -121,7 +121,7 @@ class UCCDefault1:
             # self.pass_manager.append(MapomaticLayout(coupling_map))
             # self.pass_manager.append(VF2PostLayout(target=target_device))
             # self.pass_manager.append(ApplyLayout())
-            # self._add_local_passes(1)
+            self._add_local_passes(1)
             # self.pass_manager.append(VF2PostLayout(target=target_device))
             # self.pass_manager.append(ApplyLayout())
 
