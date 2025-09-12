@@ -81,22 +81,15 @@ class UCCDefault1:
             self.pass_manager.append(
                 UnitarySynthesis(basis_gates=self.target_gateset)
             )
-            # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
             self.pass_manager.append(
                 HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"]))
             )
 
-            # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
-            # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
-
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
             print("We have a target device")
             coupling_map = target_device.build_coupling_map()
-            # self.pass_manager.append(ElidePermutations())
-            # self.pass_manager.append(SpectralMapping(coupling_list))
-            # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
             self.pass_manager.append(
                 SabreLayout(
                     coupling_map,
@@ -117,12 +110,7 @@ class UCCDefault1:
                     trials=_get_trial_count(20),
                 )
             )
-            # self.pass_manager.append(MapomaticLayout(coupling_map))
-            # self.pass_manager.append(VF2PostLayout(target=target_device))
-            # self.pass_manager.append(ApplyLayout())
             self._add_local_passes(1)
-            # self.pass_manager.append(VF2PostLayout(target=target_device))
-            # self.pass_manager.append(ApplyLayout())
 
     def run(self, circuits, callback=None):
         """
