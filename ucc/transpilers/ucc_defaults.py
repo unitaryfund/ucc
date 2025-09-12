@@ -27,7 +27,6 @@ from qiskit.transpiler.passes import (
     Collect2qBlocks,
     UnitarySynthesis,
     Optimize1qGatesDecomposition,
-    VF2PostLayout,
 )
 from typing import Optional
 
@@ -94,6 +93,7 @@ class UCCDefault1:
 
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
+            print("We have a target device")
             coupling_map = target_device.build_coupling_map()
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
@@ -119,11 +119,11 @@ class UCCDefault1:
                 )
             )
             # self.pass_manager.append(MapomaticLayout(coupling_map))
-            self.pass_manager.append(VF2PostLayout(target=target_device))
-            self.pass_manager.append(ApplyLayout())
-            self._add_local_passes(1)
-            self.pass_manager.append(VF2PostLayout(target=target_device))
-            self.pass_manager.append(ApplyLayout())
+            # self.pass_manager.append(VF2PostLayout(target=target_device))
+            # self.pass_manager.append(ApplyLayout())
+            # self._add_local_passes(1)
+            # self.pass_manager.append(VF2PostLayout(target=target_device))
+            # self.pass_manager.append(ApplyLayout())
 
     def run(self, circuits, callback=None):
         """
