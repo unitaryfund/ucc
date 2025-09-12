@@ -20,7 +20,7 @@ if current_major != REQUIRED_MAJOR or not (
 ):
     warnings.warn(
         f"Warning: This package is designed for Python {REQUIRED_MAJOR}.{MINOR_VERSION_MIN}-{REQUIRED_MAJOR}.{MINOR_VERSION_MAX}. "
-        f"You are using Python) {current_major}.{current_minor}."
+        f"You are using Python {current_major}.{current_minor}."
     )
 supported_circuit_formats = ConversionGraph().nodes()
 
@@ -43,7 +43,7 @@ def compile(
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats``.
             Defaults to the format of the input circuit.
         target_gateset (set[str]): (optional) The gateset to compile the circuit to.
-            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_device` is provided, defaults to `{"cx", "rz", "rx", "ry", "h"}`.
+            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_device` is provided, defaults to {"cx", "rz", "rx", "ry", "h"}.
         target_device (qiskit.transpiler.Target): (optional)
             The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_device` is specified, `target_device.operation_names` supercedes the `target_gateset`.
         custom_passes (list[qiskit.transpiler.TransformationPass]): (optional)

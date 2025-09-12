@@ -180,6 +180,21 @@ def test_compile_target_device_coupling_map():
 
 def test_compile_with_no_target_gateset_or_device():
     """Test that the final circuit is in the default gateset if no `target_gateset` or `target_device` is provided."""
+
+    # Circuit not in the default target_gateset {"cx", "rz", "rx", "ry", "h"}
+    circuit = QiskitCircuit(2)
+    circuit.cz(0, 1)
+    circuit.h(0)
+
+    result_circuit = compile(
+        circuit,
+    )
+
+    assert set(op.name for op in result_circuit).issubset(
+        {"cx", "rz", "rx", "ry", "h"}
+    )
+
+    # Circuit already in the default target_gateset {"cx", "rz", "rx", "ry", "h"}
     circuit = QiskitCircuit(2)
     circuit.cx(0, 1)
     circuit.h(0)
@@ -572,7 +587,7 @@ def test_compile_with_target_gateset():
 def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     circuit = circuit_function(num_qubits, seed)
     transpiler = UCCDefault1()
-    target_basis = transpiler.target_basis
+    target_basis = transpiler.target_gateset
     transpiled_circuit = transpiler.run(circuit)
     dag = circuit_to_dag(transpiled_circuit)
     analysis_pass = GatesInBasis(basis_gates=target_basis)
