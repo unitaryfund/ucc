@@ -65,8 +65,10 @@ target_device = Mybackend().target
 
 # Define simple pass manager containing only an initial layout and a VF2PostLayout
 pass_manager = PassManager()
-pass_manager.append(VF2Layout(target=target_device))
-
+pass_manager.append(
+    VF2Layout(target=target_device)
+)  # Required before VF2PostLayout
+pass_manager.append(ApplyLayout())
 pass_manager.append(VF2PostLayout(target=target_device))
 pass_manager.append(ApplyLayout())
 
