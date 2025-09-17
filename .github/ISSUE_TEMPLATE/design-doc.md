@@ -15,7 +15,7 @@ Why should we build this? What problems are we trying to address?
 
 
 ## Goals
-What are in-scope goals for this project? These should be high-level, but specific enough to map onto sub-issues.
+What are in-scope goals for this project? These should be high-level, but specific enough to map onto sub-issues. How will we know we've achieved these goals?
 
 
 ## Non-Goals
