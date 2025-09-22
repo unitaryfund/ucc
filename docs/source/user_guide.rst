@@ -75,7 +75,7 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
        circuit,
        return_format="original",
        target_gateset=None,
-       target_device=None,
+       target_backend=None,
        custom_passes=None,
        callback=None
    )
@@ -83,7 +83,7 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
 
 - ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats`` for supported circuit formats. Default is the format of input circuit.
 - ``target_gateset`` is the gateset to compile the circuit to, e.g. {"cx", "rx",...}. Defaults to the gateset of the target device. If none is provided, defaults to `{"cx", "rz", "rx", "ry", "h"}`.
-- ``target_device`` can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_device` is specified, `target_device.operation_names` supercedes the `target_gateset`.
+- ``target_backend`` can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_backend` is specified, `target_backend.target.operation_names` supercedes the `target_gateset`.
 - ``custom_passes`` can be a list of Qiskit ``TransformationPass`` objects to run after the default set of passes in ``UCCDefault1``.
 - ``callback`` is a function that will be called after each pass execution, see `Qiskit documentation <https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.transpiler.PassManager#run>`_ for details
 

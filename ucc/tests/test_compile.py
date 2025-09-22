@@ -145,32 +145,32 @@ def test_custom_pass():
     assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
 
 
-def test_compile_target_device_opset():
+def test_compile_target_backend_opset():
     circuit = QiskitCircuit(3)
     circuit.cz(0, 1)
     circuit.cz(0, 2)
 
-    # Create a simple target that does not have direct CX between 0 and 2
-    t = Mybackend().target
+    # Create a simple backend that does not have direct CX between 0 and 2
+    t = Mybackend()
     # Check that the gates in the original circuit are not support by the target
     # to ensure this isn't a trival check
     assert set(op.name for op in circuit).issubset(t.operation_names) is False
 
     result_circuit = compile(
-        circuit, return_format="original", target_device=t
+        circuit, return_format="original", target_backend=t
     )
     # Check that the gates in the final circuit are all supported on the target device
     assert set(op.name for op in result_circuit).issubset(t.operation_names)
 
-    def test_compile_target_device_coupling_map():
+    def test_compile_target_backend_coupling_map():
         circuit = QiskitCircuit(3)
         circuit.cx(0, 1)
         circuit.cx(0, 2)
 
         # Create a simple target that does not have direct CX between 0 and 2
-        t = Mybackend().target
+        t = Mybackend()
         result_circuit = compile(
-            circuit, return_format="original", target_device=t
+            circuit, return_format="original", target_backend=t
         )
         # Check that the compiled circuit respects the coupling map of the target device
         analysis_pass = CheckMap(
@@ -183,7 +183,7 @@ def test_compile_target_device_opset():
 
 
 def test_compile_with_no_target_gateset_or_device():
-    """Test that the final circuit is in the default gateset if no `target_gateset` or `target_device` is provided."""
+    """Test that the final circuit is in the default gateset if no `target_gateset` or `target_backend` is provided."""
 
     # Circuit not in the default target_gateset {"cx", "rz", "rx", "ry", "h"}
     circuit = QiskitCircuit(2)

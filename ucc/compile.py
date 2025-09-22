@@ -29,7 +29,7 @@ def compile(
     circuit,
     return_format="original",
     target_gateset=None,
-    target_device=None,
+    target_backend=None,
     custom_passes=None,
     callback=None,
 ):
@@ -43,9 +43,9 @@ def compile(
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats``.
             Defaults to the format of the input circuit.
         target_gateset (set[str]): (optional) The gateset to compile the circuit to.
-            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_device` is provided, defaults to {"cx", "rz", "rx", "ry", "h"}.
-        target_device (qiskit.transpiler.Target): (optional)
-            The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_device` is specified, `target_device.operation_names` supercedes the `target_gateset`.
+            e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_backend` is provided, defaults to {"cx", "rz", "rx", "ry", "h"}.
+        target_backend (qiskit.providers.backend): (optional)
+            The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_backend` is specified, `target_backend.operation_names` supercedes the `target_gateset`.
         custom_passes (list[qiskit.transpiler.TransformationPass]): (optional)
             A list of custom passes to apply after the default set
             of passes. Defaults to None.
@@ -69,7 +69,7 @@ def compile(
 
     # Initialize the UCCDefault1 compiler with the target device and gateset
     ucc_default1 = UCCDefault1(
-        target_device=target_device, target_gateset=target_gateset
+        target_backend=target_backend, target_gateset=target_gateset
     )
 
     # Translate into the target device gateset first; no optimization

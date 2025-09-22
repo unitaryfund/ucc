@@ -36,10 +36,12 @@ CONFIG = user_config.get_config()
 
 
 class UCCDefault1:
+    DEFAULT_GATESET = {"cx", "rz", "rx", "ry", "h"}
+
     def __init__(
         self,
         local_iterations: int = 1,
-        target_device: Optional[Target] = None,
+        target_backend: Optional[Target] = None,
         target_gateset: Optional[set] = None,
     ):
         """
@@ -47,27 +49,35 @@ class UCCDefault1:
 
             Args:
                 local_iterations (int): Number of times to run the local passes
-                target_device (qiskit.transpiler.Target): (Optional) The target device to compile the circuit for
-                target_gateset (set[str]): (Optional) The gateset to compile the circuit to. e.g. {"cx", "rx",...}. `target_device` takes precedence if it provides a basis gateset.
+                target_backend (qiskit.providers.Backend): (Optional) The       target backend device to compile the circuit for
+                target_gateset (set[str]): (Optional) The gateset to compile the circuit to. e.g. {"cx", "rx",...}. `target_backend` takes precedence if it provides a basis gateset.
 
-        If neither target_device or target_gateset resolve to a gateset, defaults to {"cx", "rz", "rx", "ry", "h"}.
+        If neither target_backend or target_gateset resolve to a gateset, defaults to {"cx", "rz", "rx", "ry", "h"}.
 
         """
         self.pass_manager = PassManager()
-        self.target_device = target_device
+        self.target_backend = target_backend
 
-        if hasattr(self.target_device, "operation_names"):
-            # Use target_device gateset if available
-            self.target_gateset = self.target_device.operation_names
-        elif target_gateset is not None:
-            # Use provided gateset if available
-            self.target_gateset = target_gateset
+        if self.target_backend is None:
+            # If no backend is provided, use the provided gateset or default gateset
+            self.target_gateset = (
+                target_gateset
+                if target_gateset is not None
+                else self.DEFAULT_GATESET
+            )
+        elif hasattr(self.target_backend, "target") and hasattr(
+            self.target_backend.target, "operation_names"
+        ):
+            # If a backend is provided, use its target's operation names as the gateset
+            self.target_gateset = self.target_backend.target.operation_names
         else:
-            # Default if no target device or gateset is provided
-            self.target_gateset = {"cx", "rz", "rx", "ry", "h"}
+            self.target_gateset = self.DEFAULT_GATESET
 
         self._add_local_passes(local_iterations)
-        self._add_map_passes(target_device)
+        self._add_map_passes()
+
+        self._add_local_passes(local_iterations)
+        self._add_map_passes()
 
     @property
     def default_passes(self):
@@ -91,9 +101,10 @@ class UCCDefault1:
             # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
 
-    def _add_map_passes(self, target_device: Optional[Target] = None):
-        if target_device is not None:
-            coupling_map = target_device.build_coupling_map()
+    def _add_map_passes(self):
+        if self.target_backend is not None:
+            target = self.target_backend.target
+            coupling_map = target.build_coupling_map()
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
@@ -107,7 +118,7 @@ class UCCDefault1:
                 )
             )
 
-            self.pass_manager.append(VF2Layout(target=target_device))
+            self.pass_manager.append(VF2Layout(target=target))
             self.pass_manager.append(ApplyLayout())
             self.pass_manager.append(
                 SabreSwap(
@@ -118,10 +129,10 @@ class UCCDefault1:
                 )
             )
             # self.pass_manager.append(MapomaticLayout(coupling_map))
-            self.pass_manager.append(VF2PostLayout(target=target_device))
+            self.pass_manager.append(VF2PostLayout(target=target))
             self.pass_manager.append(ApplyLayout())
             self._add_local_passes(1)
-            self.pass_manager.append(VF2PostLayout(target=target_device))
+            self.pass_manager.append(VF2PostLayout(target=target))
             self.pass_manager.append(ApplyLayout())
 
     def run(self, circuits, callback=None):
