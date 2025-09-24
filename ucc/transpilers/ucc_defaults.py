@@ -41,7 +41,7 @@ class UCCDefault1:
     def __init__(
         self,
         local_iterations: int = 1,
-        target_backend: Optional[Target] = None,
+        target_backend: Optional[qiskit.providers.Backend] = None,
         target_gateset: Optional[set] = None,
     ):
         """
