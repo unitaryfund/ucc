@@ -10,7 +10,7 @@ except ImportError:
     def default_num_processes():
         return CPU_COUNT
 
-
+from qiskit.providers import Backend
 from qiskit.transpiler import PassManager
 from qiskit import user_config
 from qiskit.transpiler import Target
@@ -41,7 +41,7 @@ class UCCDefault1:
     def __init__(
         self,
         local_iterations: int = 1,
-        target_backend: Optional[qiskit.providers.Backend] = None,
+        target_backend: Optional[Backend] = None,
         target_gateset: Optional[set] = None,
     ):
         """
