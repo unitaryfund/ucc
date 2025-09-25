@@ -10,10 +10,10 @@ except ImportError:
     def default_num_processes():
         return CPU_COUNT
 
+
 from qiskit.providers import Backend
 from qiskit.transpiler import PassManager
 from qiskit import user_config
-from qiskit.transpiler import Target
 from qiskit.transpiler.passes import (
     ApplyLayout,
     ConsolidateBlocks,
