@@ -1238,7 +1238,7 @@ wheels = [
 
 [[package]]
 name = "pytket"
-version = "2.9.3"
+version = "2.10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "graphviz" },
@@ -1252,11 +1252,10 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/6e/8b9b062afba1a5cff7ad8f746f2e5f05c127be9eae076fdd7b7d8307e6e2/pytket-2.9.3-cp312-abi3-macosx_13_0_arm64.whl", hash = "sha256:8f34a9e86229fe9ae809fb93179ceafe095d72765a8db2ae33f5daacc0343ef3", size = 5504776, upload-time = "2025-09-03T13:47:19.896Z" },
-    { url = "https://files.pythonhosted.org/packages/57/3a/d1c8b94609dbd59793a5683d8bce192cbe1357aef19fee64560ab15b6277/pytket-2.9.3-cp312-abi3-macosx_13_0_x86_64.whl", hash = "sha256:83a69d88c33eb2af12b1a220bb37dd91568279078dde8fc2b7717b097cc707b4", size = 6363966, upload-time = "2025-09-03T13:47:21.472Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/b9/83d81d991a7d0766de97d3281f8e81121ef994b6d8efaf164d9a79220542/pytket-2.9.3-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c8306f771883a4efaad35103a4bc139b387a5eb514177abf4cb7470212f461ff", size = 7459109, upload-time = "2025-09-03T13:47:22.916Z" },
-    { url = "https://files.pythonhosted.org/packages/73/aa/18ff145338cf2f745e9481a3037652b33e73a2ef2656ee2b102a9921f674/pytket-2.9.3-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8e4f4a590057c0fd8b924bc23306c7e3c25cdbd02306f44bbe0034385241eac4", size = 8161629, upload-time = "2025-09-03T13:47:24.726Z" },
-    { url = "https://files.pythonhosted.org/packages/13/50/6f6e7157af670f2d6a80e7b4568f639dcef5942a03c426c0c15a5ab99ad2/pytket-2.9.3-cp312-abi3-win_amd64.whl", hash = "sha256:2758bbdbd5c8528c9302b85c251b60f070c0ce5bf15bbf842623be0537e86f4c", size = 9746524, upload-time = "2025-09-03T13:47:26.429Z" },
+    { url = "https://files.pythonhosted.org/packages/57/53/67f176f4b1872f5632f47cbe1ee5a25034b9162a40b289d946fa03eab756/pytket-2.10.1-cp312-abi3-macosx_13_0_arm64.whl", hash = "sha256:60967bbf797be6c708cf6b983af889546f0d9e0818868ec7484a13e0f6b36986", size = 5484417, upload-time = "2025-10-16T14:51:17.723Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/dc/c733449e8909b08b34317b2cca8c84efc616ee2cdd29a7060c6ec0323c3f/pytket-2.10.1-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:eead5714a9abde29f784f0938b9939f822426bae5b54263f9196004185fe604c", size = 7494936, upload-time = "2025-10-16T14:51:19.261Z" },
+    { url = "https://files.pythonhosted.org/packages/93/1e/7bcef18b060f2a9858016e7d874e466cf458b3ae6469d357e3bae313849c/pytket-2.10.1-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a7b98ac9119729931025952ec121652da336cb59b2f18d60f04fcdfbc9edd0fb", size = 8218527, upload-time = "2025-10-16T14:51:21.042Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/a1/89988fb36e066d78c8457a20a45ff5d7f954c22f40f80685738e8860a5f4/pytket-2.10.1-cp312-abi3-win_amd64.whl", hash = "sha256:ecf77f1d6f79e6595183c02fbb23a4fcb45a7fbb82c3c81d41d593a06e6ea4f1", size = 9713881, upload-time = "2025-10-16T14:51:22.725Z" },
 ]
 
 [[package]]
