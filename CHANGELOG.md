@@ -1,6 +1,26 @@
 # Changelog
 <!-- Release notes generated using configuration in .github/release.yml at main -->
 
+## [0.4.11] - 2025-10-30
+[PyPI](https://pypi.org/project/ucc/0.4.11/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.11)
+Just dependency updates for the core repo this release! Stay tuned for next month or check out our sibling repo ucc-bench.
+
+### 🔄 Dependencies
+* Bump ruff from 0.13.2 to 0.13.3 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/547
+* Bump astral-sh/setup-uv from 6 to 7 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/548
+* Bump ruff from 0.13.3 to 0.14.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/549
+* Bump qbraid from 0.9.10 to 0.10.0 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/550
+* Bump pytket from 2.9.3 to 2.10.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/551
+* Bump ruff from 0.14.0 to 0.14.1 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/552
+* Bump pytket from 2.10.1 to 2.10.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/553
+* Bump actions/upload-artifact from 4 to 5 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/554
+* Bump ruff from 0.14.1 to 0.14.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/555
+* Bump qiskit from 2.2.1 to 2.2.2 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/556
+* Bump actions/download-artifact from 5 to 6 by @dependabot[bot] in https://github.com/unitaryfoundation/ucc/pull/557
+
+
+**Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.10...v0.4.11
+
 ## [0.4.10] - 2025-09-29
 [PyPI](https://pypi.org/project/ucc/0.4.10/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.10)
 This release switches to use Qiskit's preset pass managers when compiling for a target devices, and improves consistency of how backends and target gatesets are specified and handled. The release also updates instructions for how to propose and contribute new compiler passes and larger design changes to UCC.
