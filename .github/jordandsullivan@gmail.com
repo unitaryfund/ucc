@@ -18,5 +18,8 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "preview-benchmark-results"
     allow:
       - dependency-type: "direct"
