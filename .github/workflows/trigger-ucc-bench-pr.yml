@@ -35,6 +35,16 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'preview-benchmark-results')
 
     steps:
+      - name: Initial event debug (pre-token)
+        run: |
+          echo "Actor: ${{ github.actor }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Event merge_commit_sha (raw): ${{ github.event.pull_request.merge_commit_sha }}"
+          echo "Head sha: ${{ github.event.pull_request.head.sha }}"
+          echo "Base sha: ${{ github.event.pull_request.base.sha }}"
+          echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
+          echo "Dump of original event payload ($GITHUB_EVENT_PATH):"
+          cat "$GITHUB_EVENT_PATH" || true
       - name: Generate token
         id: generate-token
         uses: actions/create-github-app-token@v2
@@ -45,11 +55,12 @@ jobs:
           repositories: |
             ucc-bench
             ucc
-
       - name: Trigger ucc-main-pr event in ucc-bench
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
+          echo "gh api merge_commit_sha:"
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq .merge_commit_sha || true
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
