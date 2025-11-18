@@ -282,14 +282,12 @@ def test_compile_with_mps_pass(N):
         circuit, target_gateset=["u3", "cx"], custom_passes=[MPSPass()]
     )
 
-    # Check that the fidelity is above 0.9
-    fidelity = np.vdot(
-        Statevector(circuit).data, Statevector(compiled_circuit).data
+    fidelity = np.abs(
+        np.vdot(Statevector(circuit).data, Statevector(compiled_circuit).data)
     )
 
     assert np.abs(fidelity) > 0.9
 
-    # Assert circuit depth and number of cx gates is lower
     assert circuit.depth() > compiled_circuit.depth()
     assert circuit.count_ops().get("cx", 0) > compiled_circuit.count_ops().get(
         "cx", 0
@@ -569,12 +567,12 @@ def test_compile_trivial_state_with_mps_pass():
         circuit, target_gateset=["u3", "cx"], custom_passes=[MPSPass()]
     )
 
-    fidelity = np.vdot(
-        Statevector(circuit).data, Statevector(compiled_circuit).data
+    fidelity = np.abs(
+        np.vdot(Statevector(circuit).data, Statevector(compiled_circuit).data)
     )
 
     assert compiled_circuit.count_ops().get("cx", 0) == 0
-    assert np.abs(np.round(fidelity, decimals=10)) == 1.0
+    assert np.round(fidelity, decimals=10) == 1.0
 
 
 def test_compile_with_target_gateset():

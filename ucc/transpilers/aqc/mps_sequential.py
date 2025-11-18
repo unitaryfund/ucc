@@ -218,7 +218,7 @@ class Sequential:
                 )
             )
 
-            fidelity = np.vdot(disentangled_mps.to_dense(), zero_state)
+            fidelity = np.abs(np.vdot(disentangled_mps.to_dense(), zero_state))
 
             if fidelity >= self.max_fidelity_threshold:
                 # If the disentangled MPS is close enough to the zero state,
@@ -245,7 +245,11 @@ class Sequential:
         # Apply the unitary layers to the |00...0> state
         for unitary_layer in unitary_layers:
             for qubits, unitary in unitary_layer:
-                circuit.unitary(unitary, qubits)
+                # Certain floating point errors can cause the computed
+                # `unitary` to not be unitary, which is resolved by approximating
+                # it with SVD
+                U, _, Vh = np.linalg.svd(unitary)
+                circuit.unitary(U @ Vh, qubits)
 
         return circuit
 
@@ -306,7 +310,8 @@ class Sequential:
             statevector, max_num_layers, 2**num_qubits
         )
 
-        fidelity = np.vdot(Statevector(circuit).data, statevector)
+        fidelity = np.abs(np.vdot(Statevector(circuit).data, statevector))
+
         logger.info(
             f"Fidelity: {fidelity:.4f}, "
             f"Number of qubits: {num_qubits}, "
