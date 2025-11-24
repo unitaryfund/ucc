@@ -16,7 +16,7 @@ jobs:
       - name: Configure Git to use 'main' as default branch
         run: git config --global init.defaultBranch main
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
