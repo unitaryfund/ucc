@@ -37,14 +37,7 @@ jobs:
     steps:
       - name: Initial event debug (pre-token)
         run: |
-          echo "Actor: ${{ github.actor }}"
-          echo "Event action: ${{ github.event.action }}"
           echo "Event merge_commit_sha (raw): ${{ github.event.pull_request.merge_commit_sha }}"
-          echo "Head sha: ${{ github.event.pull_request.head.sha }}"
-          echo "Base sha: ${{ github.event.pull_request.base.sha }}"
-          echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
-          echo "Dump of original event payload ($GITHUB_EVENT_PATH):"
-          cat "$GITHUB_EVENT_PATH" || true
       - name: Generate token
         id: generate-token
         uses: actions/create-github-app-token@v2
@@ -59,12 +52,22 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          echo "gh api merge_commit_sha:"
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq .merge_commit_sha || true
+          # Try to get merge_commit_sha from event
+          MERGE_COMMIT_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          echo "Event merge_commit_sha: $MERGE_COMMIT_SHA"
+          if [ -z "$MERGE_COMMIT_SHA" ] || [ "$MERGE_COMMIT_SHA" = "null" ]; then
+            echo "merge_commit_sha not set in event, fetching via gh api..."
+            MERGE_COMMIT_SHA=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq .merge_commit_sha)
+            echo "Fetched merge_commit_sha: $MERGE_COMMIT_SHA"
+          fi
+          if [ -z "$MERGE_COMMIT_SHA" ] || [ "$MERGE_COMMIT_SHA" = "null" ]; then
+            echo "Error: merge_commit_sha could not be determined."
+            exit 1
+          fi
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/unitaryfoundation/ucc-bench/dispatches \
-            -f "event_type=ucc-main-pr" -F "client_payload[commit_hash]="${{ github.event.pull_request.merge_commit_sha }}""\
+            -f "event_type=ucc-main-pr" -F "client_payload[commit_hash]=$MERGE_COMMIT_SHA" \
             -F "client_payload[pr_number]=${{ github.event.pull_request.number }}"
