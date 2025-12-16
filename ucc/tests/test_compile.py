@@ -15,6 +15,11 @@ from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
 from ucc.transpilers.aqc.mps_pass import MPSPass
+from ucc.transpilers.ucc_nwqec import (
+    CliffordTPass,
+    CliffordReduction,
+    is_clifford_or_t,
+)
 import numpy as np
 
 
@@ -644,3 +649,30 @@ def test_compiled_circuits_equivalent(circuit_function, num_qubits, seed):
     sv1 = Statevector(circuit)
     sv2 = Statevector(transpiled)
     assert sv1.equiv(sv2)
+
+
+def test_compile_clifford_t_pass():
+    circuit = qcnn_circuit(5, seed=42)
+    compiled_circuit = compile(circuit, custom_passes=[CliffordTPass()])
+
+    fidelity = np.abs(
+        np.vdot(Statevector(circuit).data, Statevector(compiled_circuit).data)
+    )
+
+    # Ensure fidelity is large, but not perfect since its approximate
+    assert np.abs(fidelity) > 0.95
+
+    for op in set(op.name for op in compiled_circuit):
+        assert is_clifford_or_t(op), f"Found non-Clifford+T gate: {op}"
+
+
+def test_compile_clifford_reduction_pass():
+    circuit = qcnn_circuit(5, seed=42)
+    compiled_circuit = compile(circuit, custom_passes=[CliffordReduction()])
+
+    fidelity = np.abs(
+        np.vdot(Statevector(circuit).data, Statevector(compiled_circuit).data)
+    )
+
+    # Ensure fidelity is large, but not perfect since its approximate
+    assert np.abs(fidelity) > 0.95
