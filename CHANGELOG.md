@@ -1,6 +1,47 @@
 # Changelog
 <!-- Release notes generated using configuration in .github/release.yml at main -->
 
+## [0.4.12] - 2025-12-18
+[PyPI](https://pypi.org/project/ucc/0.4.12/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.12)
+This release improves some of the benchmarking workflows related to the sibling ucc-bench repo. This is the last release of 2025.
+
+### ✨ Key Features
+* Auto-add `preview-benchmark-results` tag to dependabot updates by @jordandsullivan in [#577](https://github.com/unitaryfoundation/ucc/pull/577)
+* Add additional git SHA debug output to trigger-ucc-bench-PR action by @bachase in [#582](https://github.com/unitaryfoundation/ucc/pull/582)
+* MPS update by @ACE07-Sev in [#580](https://github.com/unitaryfoundation/ucc/pull/580)
+* Improve benchmark PR workflow by @bachase in [#588](https://github.com/unitaryfoundation/ucc/pull/588)
+
+### 🔄 Dependencies
+By @dependabot
+* ruff (0.14.2 → 0.14.9) via
+  [#564](https://github.com/unitaryfoundation/ucc/pull/564) +
+  [#568](https://github.com/unitaryfoundation/ucc/pull/568) +
+  [#581](https://github.com/unitaryfoundation/ucc/pull/581) +
+  [#585](https://github.com/unitaryfoundation/ucc/pull/585) +
+  [#589](https://github.com/unitaryfoundation/ucc/pull/589) +
+  [#591](https://github.com/unitaryfoundation/ucc/pull/591) +
+  [#595](https://github.com/unitaryfoundation/ucc/pull/595)
+* pytest (8.4.2 → 9.0.2) via
+  [#567](https://github.com/unitaryfoundation/ucc/pull/567) +
+  [#578](https://github.com/unitaryfoundation/ucc/pull/578) +
+  [#590](https://github.com/unitaryfoundation/ucc/pull/590)
+* qiskit (2.2.2 → 2.2.3) via
+  [#563](https://github.com/unitaryfoundation/ucc/pull/563)
+* pre-commit (4.3.0 → 4.5.0) via
+  [#566](https://github.com/unitaryfoundation/ucc/pull/566) +
+  [#586](https://github.com/unitaryfoundation/ucc/pull/586)
+* pytket (2.10.2 → 2.11.0) via
+  [#579](https://github.com/unitaryfoundation/ucc/pull/579) +
+  [#587](https://github.com/unitaryfoundation/ucc/pull/587)
+* actions/checkout (5 → 6) via
+  [#584](https://github.com/unitaryfoundation/ucc/pull/584)
+* actions/download-artifact (6 → 7) via
+  [#593](https://github.com/unitaryfoundation/ucc/pull/593)
+* actions/upload-artifact (5 → 6) via
+  [#594](https://github.com/unitaryfoundation/ucc/pull/594)
+
+**Full Changelog**: https://github.com/unitaryfoundation/ucc/compare/v0.4.11...v0.4.12
+
 ## [0.4.11] - 2025-10-30
 [PyPI](https://pypi.org/project/ucc/0.4.11/) | [GitHub](https://github.com/unitaryfoundation/ucc/releases/tag/v0.4.11)
 Just dependency updates for the core repo this release! Stay tuned for next month or check out our sibling repo ucc-bench.
