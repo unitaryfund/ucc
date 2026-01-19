@@ -1178,7 +1178,7 @@ wheels = [
 
 [[package]]
 name = "qbraid"
-version = "0.10.0"
+version = "0.10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -1190,23 +1190,24 @@ dependencies = [
     { name = "rustworkx" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/2b/1c70b99c074cad5d8ae5f3bca0ce572c3788f2d08a5bc498a083fed9e78a/qbraid-0.10.0.tar.gz", hash = "sha256:92360bd214c88954dfbc9db58656f944cbbd5651c4783684a926172e3cabe311", size = 550945, upload-time = "2025-10-14T20:37:24.647Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/2b/4ef19f3fffb7eb84fcf1ee3afd70f78687e13b80bf5f4adb967dbd8615c0/qbraid-0.10.1.tar.gz", hash = "sha256:03cf7b39545e27790f5391368f5554a1d03619d00c768f3c1b6a16da46df548d", size = 552431, upload-time = "2026-01-14T04:23:45.595Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/fe/6cc21ff5cb20067522f799f1fb3d617ff36ef0c907c295c1f4b63e25fb6f/qbraid-0.10.0-py3-none-any.whl", hash = "sha256:96fb842e20f9f7e7f933346cca09f1af2789b7f3f590f420bbb6f4fe9d7ffefd", size = 296480, upload-time = "2025-10-14T20:37:22.948Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/5f/75657344b3531ae1a4e031203d822f7c56d18c1125b61ee0e8484c712dd3/qbraid-0.10.1-py3-none-any.whl", hash = "sha256:29ef1291aa2b536d93413c6cf27bf7dd4ff8756704349d6274d50f37dcd95c1b", size = 296937, upload-time = "2026-01-14T04:23:43.957Z" },
 ]
 
 [[package]]
 name = "qbraid-core"
-version = "0.1.41"
+version = "0.1.49"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
+    { name = "pydantic" },
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/6c/c921ae95fa41785b735e3a55f051d7f8577ef8c4e6588c988f53b45a7e9b/qbraid_core-0.1.41.tar.gz", hash = "sha256:c8dac85c9424ecb09e39478622b732eeba1cb6afdd897cead97ce8b1d9d691e5", size = 286268, upload-time = "2025-05-21T19:20:36.696Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/d1/f50136a89e8b976d7529c78fad89f6a867ea175b7fde3928d2a82d8401d8/qbraid_core-0.1.49.tar.gz", hash = "sha256:9bd0a3a62bb07d0392cf79536476a4a46a3f7a3d53ad0321963c122e6cd09a50", size = 239151, upload-time = "2026-01-17T19:08:51.599Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/92/deed91c29da5a965d6317ad535fceb420933d7659af4c6befdb9d8ba16e2/qbraid_core-0.1.41-py3-none-any.whl", hash = "sha256:f13516f5901a58dd2ec55ef14cd85f0c30bc6edd9b6dabe6cbc3c841cc760328", size = 76246, upload-time = "2025-05-21T19:20:34.925Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/78/74cf6661bf3ee179b2b7a527e69748018133ad7faae7d71b98239cac2b1a/qbraid_core-0.1.49-py3-none-any.whl", hash = "sha256:a59bc3e284f31bb67a7748d9d01fb170932cba0eadf371f73e1aa8c5134d842e", size = 95581, upload-time = "2026-01-17T19:08:50.003Z" },
 ]
 
 [[package]]
