@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.typing import NDArray
 from qmprs.synthesis.mps_encoding import Sequential as QmprsSequential  # type: ignore
-from quick.circuit import QiskitCircuit
+from quick.circuit import QiskitCircuit  # type: ignore
 from qiskit import QuantumCircuit
-from .mps_utils import calculate_entanglement_entropy_slope
+from .utils import calculate_entanglement_entropy_slope
 import warnings
 import logging
 

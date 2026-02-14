@@ -1,7 +1,6 @@
 from qiskit.converters import dag_to_circuit, circuit_to_dag
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.dagcircuit import DAGCircuit
-from . import approx_compile
 
 
 class MPSPass(TransformationPass):
@@ -20,6 +19,8 @@ class MPSPass(TransformationPass):
         super().__init__()
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
+        from . import approx_compile
+
         qiskit_circuit = dag_to_circuit(dag)
 
         return circuit_to_dag(approx_compile(qiskit_circuit))
