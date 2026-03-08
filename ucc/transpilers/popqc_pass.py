@@ -114,7 +114,7 @@ class PopQCPass(TransformationPass):
         circuit = dag.to_circuit()
 
         # Export to QASM
-        qasm = circuit.qasm()
+        qasm = qasm2.dumps(circuit)
 
         # Create temp files
         with tempfile.NamedTemporaryFile(
@@ -150,8 +150,8 @@ class PopQCPass(TransformationPass):
                 with open(output_path, 'r') as f:
                     optimized_qasm = f.read()
 
-                optimized_circuit = QuantumCircuit.from_qasm_str(optimized_qasm)
-                return optimized_circuit._create_circuit_dag()
+                optimized_circuit = QuantumCircuit.qasm2.loads(optimized_qasm)
+                return optimized_circuit.to_dag()
 
             return dag
 
@@ -200,7 +200,7 @@ def benchmark_popqc(circuit: QuantumCircuit, threads_list: List[int] = [1, 2, 4,
 
     for threads in threads_list:
         popqc = PopQCPass(threads=threads)
-        dag = circuit._create_circuit_dag()
+        dag = circuit.to_dag()
 
         start = time.time()
         optimized = popqc.run(dag)
