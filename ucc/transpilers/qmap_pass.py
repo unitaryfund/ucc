@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from qiskit.dagcircuit import DAGCircuit
 
 try:
-    from mqt.qmap.plugins.qiskit.sc import compile as qmap_compile
+    from mqt.qmap.plugins.qiskit.sc import compile_ as qmap_compile
     from mqt.qmap.plugins.qiskit.clifford_synthesis import optimize_clifford
     QMAP_AVAILABLE = True
 except ImportError:
@@ -92,10 +92,12 @@ class QMAPRoutingPass(TransformationPass):
         )
         
         # Map and route using QMAP
+        from mqt.qmap.sc import Method
+        method_enum = Method.heuristic if self.method == "heuristic" else Method.exact
         mapped_circuit, results = qmap_compile(
             circuit,
             arch=backend,
-            method=self.method,
+            method=method_enum,
         )
         
         if self.verbose:
