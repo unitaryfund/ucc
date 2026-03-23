@@ -40,7 +40,7 @@ jobs:
           echo "Event merge_commit_sha (raw): ${{ github.event.pull_request.merge_commit_sha }}"
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.UCC_BENCH_APP_ID }}
           private-key: ${{ secrets.UCC_BENCH_APP_PRIVATE_KEY }}
