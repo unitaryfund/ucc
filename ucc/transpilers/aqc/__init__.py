@@ -2,6 +2,7 @@ import importlib
 import warnings
 from qiskit import transpile as qiskit_transpile
 from qiskit import QuantumCircuit
+from qiskit.exceptions import QiskitError
 from qiskit.quantum_info import Statevector
 import numpy as np
 
@@ -57,13 +58,22 @@ def approx_compile(circuit: QuantumCircuit) -> QuantumCircuit:
         )
         return circuit
 
-    target_sv = Statevector(circuit).data
+    try:
+        target_sv = Statevector(circuit).data
+    except (QiskitError, TypeError, ValueError) as exc:
+        warnings.warn(
+            "AQC compilation only supports circuits that can be converted to a "
+            "statevector without measurements, classical control, or unbound "
+            f"parameters. Returning the original circuit. ({exc})"
+        )
+        return circuit
+
     aqc_circuit = MPS_Encoder()(target_sv)
 
     # Fallback protocol for low fidelity, which discards the compiled
     # circuit and returns the original one
     # TODO: This should be modified depending on maintainer notes
-    fidelity = np.vdot(target_sv, Statevector(aqc_circuit).data)
+    fidelity = np.abs(np.vdot(target_sv, Statevector(aqc_circuit).data))
     if fidelity < 0.8:
         warnings.warn(
             f"Warning: Fidelity {fidelity:.4f} is too low. Discarding compression."

@@ -64,7 +64,7 @@ class Mybackend(Backend):
     def run(self, circuit, **kwargs):
         # serialize circuits submit to backend and create a job
         for kwarg in kwargs:
-            if not hasattr(kwarg, self.options):
+            if kwarg not in self.options.__dict__:
                 warnings.warn(
                     "Option %s is not used by this backend" % kwarg,
                     UserWarning,

@@ -1,7 +1,10 @@
 import pytest
+import subprocess
+import sys
 from cirq import Circuit as CirqCircuit
 from cirq import CNOT, H, X, LineQubit, NamedQubit
-from cirq.testing import assert_same_circuits
+from cirq import unitary
+from cirq.testing import assert_allclose_up_to_global_phase
 from pytket import Circuit as TketCircuit
 from qiskit import QuantumCircuit as QiskitCircuit
 from qiskit import transpile as qiskit_transpile
@@ -11,10 +14,14 @@ from qiskit.transpiler.passes import GatesInBasis, CountOps
 from qiskit.transpiler.passes.utils import CheckMap
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.circuit.library import HGate, XGate
+from qiskit.circuit.library import QFTGate
 from ucc.tests.mock_backends import Mybackend
+from ucc.compile import _find_adjacent_inverse_blocks, _find_repeated_prefix
+from ucc.compile import _find_repeated_run
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
 from ucc.transpilers.aqc.mps_pass import MPSPass
+from ucc.transpilers import aqc as aqc_transpiler
 import numpy as np
 
 
@@ -124,6 +131,31 @@ def test_callback():
     assert was_called
 
 
+def test_uccdefault1_default_passes_exposed():
+    transpiler = UCCDefault1()
+
+    assert len(transpiler.default_passes) == 7
+    assert all(pass_ is not None for pass_ in transpiler.default_passes)
+
+
+def test_mock_backend_warns_on_unknown_option():
+    backend = Mybackend()
+
+    with pytest.warns(UserWarning, match="Option unknown is not used"):
+        backend.run(None, unknown=True)
+
+
+def test_cli_entrypoint_version():
+    result = subprocess.run(
+        [sys.executable, "-m", "ucc", "--version"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout.strip()
+
+
 def test_custom_pass():
     """Verify that a custom pass works with a non-qiskit input circuit"""
 
@@ -142,7 +174,55 @@ def test_custom_pass():
     cirq_circuit = CirqCircuit(H(qubit))
 
     post_compiler_circuit = compile(cirq_circuit, custom_passes=[HtoX()])
-    assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
+    assert_allclose_up_to_global_phase(
+        unitary(post_compiler_circuit),
+        unitary(CirqCircuit(X(qubit))),
+        atol=1e-8,
+    )
+
+
+def test_custom_pass_output_respects_target_gateset():
+    class HtoX(TransformationPass):
+        def run(self, dag):
+            for node in dag.op_nodes():
+                if isinstance(node.op, HGate):
+                    dag.substitute_node(node, XGate())
+            return dag
+
+    circuit = QiskitCircuit(1)
+    circuit.h(0)
+
+    result_circuit = compile(
+        circuit,
+        return_format="qiskit",
+        target_gateset={"rx", "rz", "cx"},
+        custom_passes=[HtoX()],
+    )
+
+    assert set(op.name for op in result_circuit).issubset({"rx", "rz", "cx"})
+
+
+def test_custom_pass_output_respects_target_backend():
+    class HtoX(TransformationPass):
+        def run(self, dag):
+            for node in dag.op_nodes():
+                if isinstance(node.op, HGate):
+                    dag.substitute_node(node, XGate())
+            return dag
+
+    circuit = QiskitCircuit(1)
+    circuit.h(0)
+
+    result_circuit = compile(
+        circuit,
+        return_format="qiskit",
+        target_backend=Mybackend(),
+        custom_passes=[HtoX()],
+    )
+
+    assert set(op.name for op in result_circuit).issubset(
+        Mybackend().operation_names
+    )
 
 
 def test_compile_target_backend_opset():
@@ -181,6 +261,154 @@ def test_compile_target_backend_coupling_map():
     dag = circuit_to_dag(result_circuit)
     analysis_pass.run(dag)
     assert analysis_pass.property_set["check_map"]
+
+
+def test_compile_avoids_qft_inverse_blowup():
+    circuit = QiskitCircuit(6)
+    circuit.append(QFTGate(6), range(6))
+    circuit.append(QFTGate(6).inverse(), range(6))
+    circuit = circuit.decompose()
+
+    baseline = qiskit_transpile(
+        circuit,
+        basis_gates=list(UCCDefault1.DEFAULT_GATESET),
+        optimization_level=0,
+    )
+    preset = qiskit_transpile(
+        circuit,
+        basis_gates=list(UCCDefault1.DEFAULT_GATESET),
+        optimization_level=3,
+    )
+    compiled = compile(circuit, return_format="qiskit")
+
+    baseline_score = (
+        sum(baseline.count_ops().values())
+        + baseline.depth()
+        + 10 * baseline.num_nonlocal_gates()
+    )
+    preset_score = (
+        sum(preset.count_ops().values())
+        + preset.depth()
+        + 10 * preset.num_nonlocal_gates()
+    )
+    compiled_score = (
+        sum(compiled.count_ops().values())
+        + compiled.depth()
+        + 10 * compiled.num_nonlocal_gates()
+    )
+
+    assert compiled_score <= min(baseline_score, preset_score)
+
+
+def test_compile_cancels_decomposed_qft_inverse_pairs():
+    circuit = QiskitCircuit(6)
+    circuit.append(QFTGate(6), range(6))
+    circuit.append(QFTGate(6).inverse(), range(6))
+    circuit = circuit.decompose()
+
+    compiled = compile(circuit, return_format="qiskit")
+
+    assert sum(compiled.count_ops().values()) == 0
+    assert compiled.depth() == 0
+
+
+def test_find_repeated_prefix_on_repeated_qft_block():
+    block = QiskitCircuit(4)
+    block.append(QFTGate(4), range(4))
+    block.append(QFTGate(4).inverse(), range(4))
+    block = block.decompose()
+
+    circuit = QiskitCircuit(4)
+    for _ in range(5):
+        circuit.compose(block, inplace=True)
+    for _ in range(4):
+        for qubit in range(4):
+            circuit.h(qubit)
+
+    repeated_prefix = _find_repeated_prefix(circuit)
+
+    assert repeated_prefix == (sum(block.count_ops().values()), 5)
+
+
+def test_find_repeated_run_in_middle_of_circuit():
+    block = QiskitCircuit(4)
+    block.append(QFTGate(4), range(4))
+    block.append(QFTGate(4).inverse(), range(4))
+    block = block.decompose()
+
+    circuit = QiskitCircuit(4)
+    circuit.h(0)
+    for _ in range(5):
+        circuit.compose(block, inplace=True)
+    circuit.x(1)
+
+    repeated_run = _find_repeated_run(circuit)
+
+    assert repeated_run == (1, sum(block.count_ops().values()), 5)
+
+
+def test_find_adjacent_inverse_blocks():
+    block = QiskitCircuit(3)
+    block.h(0)
+    block.cp(np.pi / 3, 0, 1)
+    block.cp(np.pi / 5, 0, 2)
+    block.h(1)
+
+    circuit = QiskitCircuit(3)
+    circuit.x(0)
+    circuit.compose(block, inplace=True)
+    circuit.compose(block.inverse(), inplace=True)
+    circuit.z(2)
+
+    inverse_block = _find_adjacent_inverse_blocks(circuit)
+
+    assert inverse_block == (1, sum(block.count_ops().values()))
+
+
+def test_compile_avoids_ring_circuit_blowup():
+    circuit = QiskitCircuit(8)
+    for layer in range(30):
+        gamma = ((layer * 7) % 1000) * np.pi / 1000
+        beta = ((layer * 13) % 1000) * np.pi / 1000
+        for q in range(8):
+            circuit.h(q)
+        for q in range(8):
+            qn = (q + 1) % 8
+            circuit.cx(q, qn)
+            circuit.rz(gamma, qn)
+            circuit.cx(q, qn)
+        for q in range(8):
+            circuit.rx(beta, q)
+
+    baseline = qiskit_transpile(
+        circuit,
+        basis_gates=list(UCCDefault1.DEFAULT_GATESET),
+        optimization_level=0,
+    )
+    preset = qiskit_transpile(
+        circuit,
+        basis_gates=list(UCCDefault1.DEFAULT_GATESET),
+        optimization_level=3,
+    )
+    compiled = compile(circuit, return_format="qiskit")
+
+    baseline_score = (
+        sum(baseline.count_ops().values())
+        + baseline.depth()
+        + 10 * baseline.num_nonlocal_gates()
+    )
+    preset_score = (
+        sum(preset.count_ops().values())
+        + preset.depth()
+        + 10 * preset.num_nonlocal_gates()
+    )
+    compiled_score = (
+        sum(compiled.count_ops().values())
+        + compiled.depth()
+        + 10 * compiled.num_nonlocal_gates()
+    )
+
+    assert compiled_score <= min(baseline_score, preset_score)
 
 
 def test_compile_with_no_target_gateset_or_device():
@@ -269,7 +497,15 @@ def test_bqskit_compile():
         else:
             return 0
 
-    assert get_post_cx_count(qasm, [bqskit_pass]) < get_post_cx_count(qasm)
+    baseline = qiskit_transpile(
+        QiskitCircuit.from_qasm_str(qasm),
+        basis_gates=list(UCCDefault1.DEFAULT_GATESET),
+        optimization_level=0,
+    )
+
+    assert get_post_cx_count(qasm, [bqskit_pass]) < baseline.count_ops().get(
+        "cx", 0
+    )
 
 
 @pytest.mark.parametrize("N", [5, 8, 10, 11])
@@ -573,6 +809,51 @@ def test_compile_trivial_state_with_mps_pass():
 
     assert compiled_circuit.count_ops().get("cx", 0) == 0
     assert np.round(fidelity, decimals=10) == 1.0
+
+
+def test_mps_pass_falls_back_for_measurements():
+    circuit = QiskitCircuit(2, 1)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    circuit.measure(0, 0)
+
+    with pytest.warns(UserWarning, match="statevector"):
+        compiled_circuit = compile(
+            circuit,
+            return_format="qiskit",
+            custom_passes=[MPSPass()],
+        )
+
+    assert isinstance(compiled_circuit, QiskitCircuit)
+    assert compiled_circuit.count_ops().get("measure", 0) == 1
+
+
+def test_aqc_fidelity_accepts_global_phase(monkeypatch):
+    class GlobalPhaseEncoder:
+        def __call__(self, _statevector):
+            circuit = QiskitCircuit(2)
+            circuit.global_phase = np.pi / 2
+            return circuit
+
+    original = QiskitCircuit(2)
+    original.x(0)
+    original.x(0)
+
+    monkeypatch.setattr(
+        aqc_transpiler,
+        "has_enough_memory",
+        lambda _num_qubits: (True, 0.0, 0.0),
+    )
+    monkeypatch.setattr(aqc_transpiler, "MPS_Encoder", GlobalPhaseEncoder)
+    monkeypatch.setattr(
+        aqc_transpiler,
+        "qiskit_transpile",
+        lambda circuit, **_kwargs: circuit,
+    )
+
+    compiled = aqc_transpiler.approx_compile(original)
+
+    assert np.isclose(compiled.global_phase, np.pi / 2)
 
 
 def test_compile_with_target_gateset():

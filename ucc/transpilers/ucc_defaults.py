@@ -52,6 +52,7 @@ class UCCDefault1:
 
         """
         self.pass_manager = PassManager()
+        self._default_passes = ()
         self.target_backend = target_backend
 
         if self.target_backend is None:
@@ -77,28 +78,40 @@ class UCCDefault1:
             self.pass_manager = generate_preset_pass_manager(
                 optimization_level=3, backend=self.target_backend
             )
+            self._default_passes = tuple(
+                getattr(self.pass_manager, stage)
+                for stage in self.pass_manager.stages
+                if getattr(self.pass_manager, stage) is not None
+            )
 
     @property
     def default_passes(self):
-        return
+        """Return the default compilation workflow as an immutable sequence."""
+
+        return self._default_passes
 
     def _add_local_passes(self, local_iterations):
+        default_passes = []
         for _ in range(local_iterations):
-            self.pass_manager.append(Optimize1qGatesDecomposition())
-            self.pass_manager.append(CommutativeCancellation())
-            self.pass_manager.append(Collect2qBlocks())
-            self.pass_manager.append(ConsolidateBlocks(force_consolidate=True))
-            self.pass_manager.append(
-                UnitarySynthesis(basis_gates=self.target_gateset)
+            default_passes.extend(
+                [
+                    Optimize1qGatesDecomposition(),
+                    CommutativeCancellation(),
+                    Collect2qBlocks(),
+                    ConsolidateBlocks(force_consolidate=True),
+                    UnitarySynthesis(basis_gates=self.target_gateset),
+                    CollectCliffords(),
+                    HighLevelSynthesis(
+                        hls_config=HLSConfig(clifford=["greedy"])
+                    ),
+                ]
             )
             # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
-            self.pass_manager.append(CollectCliffords())
-            self.pass_manager.append(
-                HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"]))
-            )
-
             # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
+
+        self._default_passes = tuple(default_passes)
+        self.pass_manager.append(list(self._default_passes))
 
     def run(self, circuits, callback=None):
         """
