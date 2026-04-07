@@ -42,9 +42,6 @@ docs = [
     "sphinxcontrib-bibtex>=2.6.3",
 ]
 
-[project.scripts]
-ucc = "ucc.__main__:main"
-
 [tool.ruff]
 line-length = 79
 
