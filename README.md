@@ -13,9 +13,6 @@ The **Unitary Compiler Collection (UCC)** is a Python library for frontend-agnos
 
 By leveraging [qBraid](https://github.com/qBraid/qBraid), UCC interfaces automatically with multiple quantum computing frameworks, including [Qiskit](https://github.com/Qiskit/qiskit), [Cirq](https://github.com/quantumlib/Cirq), and [PyTKET](https://github.com/CQCL/tket) and supports programs in OpenQASM 2 and [OpenQASM 3](https://openqasm.com/). For the full list, just call `ucc.supported_circuit_formats`.
 
-> _We use the [Merit Terminal](https://terminal.merit.systems/unitaryfoundation/ucc/) to pay contributors who implement new compiler passes in our repo!
-Check out our [open issues tagged with #merit-bounty](https://github.com/unitaryfoundation/ucc/issues?q=is%3Aissue%20state%3Aopen%20label%3Amerit-bounty) to see which are eligible for compensation._
-
 ### Want to know more?
 
 | Resource | Description |
