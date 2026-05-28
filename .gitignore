@@ -16,3 +16,4 @@ dist/
 build/
 jupyter_execute/
 benchmarks/results/test_data
+.mypy_cache/

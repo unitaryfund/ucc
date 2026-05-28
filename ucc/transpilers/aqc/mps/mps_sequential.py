@@ -3,7 +3,7 @@ from numpy.typing import NDArray
 import quimb.tensor as qtn  # type: ignore
 from qiskit import QuantumCircuit  # type: ignore
 from qiskit.quantum_info import Statevector  # type: ignore
-from .mps_utils import calculate_entanglement_entropy_slope
+from .utils import calculate_entanglement_entropy_slope
 import warnings
 import logging
 
@@ -218,7 +218,9 @@ class Sequential:
                 )
             )
 
-            fidelity = np.abs(np.vdot(disentangled_mps.to_dense(), zero_state))
+            fidelity = (
+                np.abs(np.vdot(disentangled_mps.to_dense(), zero_state)) ** 2
+            )
 
             if fidelity >= self.max_fidelity_threshold:
                 # If the disentangled MPS is close enough to the zero state,
@@ -310,7 +312,7 @@ class Sequential:
             statevector, max_num_layers, 2**num_qubits
         )
 
-        fidelity = np.abs(np.vdot(Statevector(circuit).data, statevector))
+        fidelity = np.abs(np.vdot(Statevector(circuit).data, statevector)) ** 2
 
         logger.info(
             f"Fidelity: {fidelity:.4f}, "

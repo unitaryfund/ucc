@@ -6,7 +6,7 @@ from pytket import Circuit as TketCircuit
 from qiskit import QuantumCircuit as QiskitCircuit
 from qiskit import transpile as qiskit_transpile
 from qiskit.converters import circuit_to_dag
-from qiskit.quantum_info import Statevector
+from qiskit.quantum_info import Statevector, Operator
 from qiskit.transpiler.passes import GatesInBasis, CountOps
 from qiskit.transpiler.passes.utils import CheckMap
 from qiskit.transpiler.basepasses import TransformationPass
@@ -14,7 +14,9 @@ from qiskit.circuit.library import HGate, XGate
 from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
-from ucc.transpilers.aqc.mps_pass import MPSPass
+from ucc.transpilers.aqc.mps import MPSPass
+from ucc.transpilers.aqc.sweep import StateSweepPass, UnitarySweepPass
+from ucc.transpilers.aqc.sweep.approx_unitary import hst_fidelity
 import numpy as np
 
 
@@ -30,6 +32,28 @@ def random_area_law_circuit(N, seed=12345):
     np.random.seed(seed)
 
     state = np.random.rand(2**N) + 1j * np.random.rand(2**N)
+    state /= np.linalg.norm(state)
+
+    circuit = QiskitCircuit(N)
+    circuit.initialize(state, range(N))
+
+    return circuit
+
+
+def random_state_circuit(N, seed=12345):
+    """A circuit to generate a random statevector.
+
+    Parameters:
+        N (int): Number of qubits
+
+    Returns:
+        QiskitCircuit: Output circuit
+    """
+    np.random.seed(seed)
+
+    state = np.random.uniform(-1, 1, 2**N) + 1j * np.random.uniform(
+        -1, 1, 2**N
+    )
     state /= np.linalg.norm(state)
 
     circuit = QiskitCircuit(N)
@@ -644,3 +668,39 @@ def test_compiled_circuits_equivalent(circuit_function, num_qubits, seed):
     sv1 = Statevector(circuit)
     sv2 = Statevector(transpiled)
     assert sv1.equiv(sv2)
+
+
+def test_compile_with_state_sweep_pass():
+    """Test that the final circuit from `StateSweepPass` approximates the target state."""
+    circuit = random_state_circuit(7)
+
+    compiled_circuit = compile(
+        circuit,
+        target_gateset=["u3", "cx"],
+        custom_passes=[StateSweepPass()],
+    )
+
+    fidelity = np.abs(
+        np.vdot(Statevector(circuit).data, Statevector(compiled_circuit).data)
+    )
+
+    assert np.abs(fidelity) > 0.9
+
+
+def test_compile_with_unitary_sweep_pass():
+    """Test that the final circuit from `UnitarySweepPass` approximates the target unitary."""
+    circuit = random_clifford_circuit(5)
+
+    compiled_circuit = compile(
+        circuit,
+        target_gateset=["u3", "cx"],
+        custom_passes=[UnitarySweepPass()],
+    )
+
+    fidelity = hst_fidelity(
+        Operator(circuit).data,
+        Operator(compiled_circuit).data,
+        circuit.num_qubits,
+    )
+
+    assert np.abs(fidelity) > 0.9

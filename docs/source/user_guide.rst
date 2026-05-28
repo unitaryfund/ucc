@@ -259,7 +259,7 @@ Here is an example of how to use the ``MPSEncoder``:
 
 .. testcode:: mps
 
-   from ucc.transpilers.aqc.mps_pass import MPSPass
+   from ucc.transpilers.aqc import MPSPass
    result = compile(circuit_to_compile, custom_passes=[MPSPass()])
 
 The ``MPSEncoder`` is just one example of the extensibility of UCC. If you would like to port a compile pass from another framework, please create a `proposal <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_ and be ready to benchmark its performance relative to ``UCCDefault1``.
