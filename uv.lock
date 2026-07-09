@@ -790,6 +790,18 @@ wheels = [
 ]
 
 [[package]]
+name = "nwqec"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/75/c984f6bfbd5572cc4ef7bc0317e27d3f1d4dd51ee818efdc34bd27a3f48f/nwqec-0.1.1.tar.gz", hash = "sha256:24946909496389bdc3c2fd9cfae94f1470911ccdc330abc2ab5a93eec813a06c", size = 3717519, upload-time = "2025-11-21T02:31:56.923Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/f3/e57c927bdb9fe1ec4c2795d5012e39566127fa1496209515e68e67d16ffc/nwqec-0.1.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:bf6565cfcac6ada4d427f0abb96365c0514e47363a566390beac48926c936a17", size = 1538824, upload-time = "2025-11-21T02:31:38.99Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/26/f32297540a94704133ed47f3dfdf4a7006bf7e7c5b7d83a5efbe863bafa2/nwqec-0.1.1-cp312-cp312-macosx_11_0_x86_64.whl", hash = "sha256:df94c5a53c68cc704d9c5e9ddc5cee9b2890a6bce2c8a80681f4fa0388a80a2d", size = 1744946, upload-time = "2025-11-21T02:31:40.462Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/84/fcef2e5d0ea888d3c78d21df8c03a5aa6832cf03014e97a78c4b359f33e1/nwqec-0.1.1-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6ae6dbf2d8c4f0aa5b612b5183031a66b7a496152ee7a4475fac8c1654e1f6e2", size = 1539453, upload-time = "2025-11-21T02:31:41.798Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/80/5dba147a595ca74123d86b8cf0f96e00921b85c06445bdc31254efc79e45/nwqec-0.1.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b5fee392941db5113b16d4dbee6f2bbc3678ef639e5dbc2863507780daee19ff", size = 1686963, upload-time = "2025-11-21T02:31:43.108Z" },
+]
+
+[[package]]
 name = "openqasm3"
 version = "1.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1609,6 +1621,7 @@ version = "0.4.12"
 source = { editable = "." }
 dependencies = [
     { name = "cirq-core" },
+    { name = "nwqec" },
     { name = "ply" },
     { name = "pytket" },
     { name = "qbraid" },
@@ -1635,6 +1648,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "cirq-core", specifier = ">=1.4.1,<2.0.0" },
+    { name = "nwqec", specifier = ">=0.1.1" },
     { name = "ply", specifier = ">=3.11,<4.0.0" },
     { name = "pytket", specifier = ">=1.40.0,<3.0.0" },
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
