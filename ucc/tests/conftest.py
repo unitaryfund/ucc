@@ -1,8 +1,8 @@
-import pytest
+from pytest import fixture
 from qiskit.transpiler import CouplingMap
 
 
-@pytest.fixture
+@fixture
 def line4():
     return CouplingMap(
         [
@@ -16,7 +16,7 @@ def line4():
     )
 
 
-@pytest.fixture
+@fixture
 def square4():
     return CouplingMap(
         [
@@ -32,7 +32,7 @@ def square4():
     )
 
 
-@pytest.fixture
+@fixture
 def star4():
     return CouplingMap(
         [

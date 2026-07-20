@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import pytest
-
+from pytest import fixture, mark, raises, approx
 from ucc.custom_passes.spectral.graph import coupling_to_undirected_adjacency
 
 
@@ -23,7 +22,7 @@ class FakeCouplingMap:
         return list(self.edges)
 
 
-@pytest.fixture
+@fixture
 def line4() -> FakeCouplingMap:
     return FakeCouplingMap(
         4,
@@ -93,15 +92,15 @@ def test_custom_uniform_edge_weight_is_applied():
         edge_weight=2.5,
     )
 
-    assert adjacency[0][1] == pytest.approx(2.5)
-    assert adjacency[1][0] == pytest.approx(2.5)
+    assert adjacency[0][1] == approx(2.5)
+    assert adjacency[1][0] == approx(2.5)
 
 
-@pytest.mark.parametrize("edge_weight", [0.0, -1.0])
+@mark.parametrize("edge_weight", [0.0, -1.0])
 def test_non_positive_edge_weight_raises(edge_weight):
     coupling = FakeCouplingMap(2, ((0, 1),))
 
-    with pytest.raises(ValueError, match="positive"):
+    with raises(ValueError, match="positive"):
         coupling_to_undirected_adjacency(
             coupling,
             edge_weight=edge_weight,
@@ -111,35 +110,35 @@ def test_non_positive_edge_weight_raises(edge_weight):
 def test_out_of_range_endpoint_raises():
     coupling = FakeCouplingMap(2, ((0, 2),))
 
-    with pytest.raises(ValueError, match="outside the valid range"):
+    with raises(ValueError, match="outside the valid range"):
         coupling_to_undirected_adjacency(coupling)
 
 
 def test_negative_endpoint_raises():
     coupling = FakeCouplingMap(2, ((-1, 1),))
 
-    with pytest.raises(ValueError, match="outside the valid range"):
+    with raises(ValueError, match="outside the valid range"):
         coupling_to_undirected_adjacency(coupling)
 
 
 def test_self_loop_raises():
     coupling = FakeCouplingMap(2, ((1, 1),))
 
-    with pytest.raises(ValueError, match="Self-loop"):
+    with raises(ValueError, match="Self-loop"):
         coupling_to_undirected_adjacency(coupling)
 
 
 def test_non_integer_endpoint_raises():
     coupling = FakeCouplingMap(2, ((0, 1.5),))
 
-    with pytest.raises(TypeError, match="must be an integer"):
+    with raises(TypeError, match="must be an integer"):
         coupling_to_undirected_adjacency(coupling)
 
 
 def test_malformed_edge_raises():
     coupling = FakeCouplingMap(2, ((0, 1, 2),))  # type: ignore[arg-type]
 
-    with pytest.raises(ValueError, match="exactly two endpoints"):
+    with raises(ValueError, match="exactly two endpoints"):
         coupling_to_undirected_adjacency(coupling)
 
 
