@@ -51,6 +51,7 @@ def benchmark_result(
     compiled,
     *,
     name: str = "benchmark",
+    check_equivalence: bool = True,
 ) -> BenchmarkResult:
     """Compute a compact summary for a benchmark run.
 
@@ -66,6 +67,12 @@ def benchmark_result(
     original = _bind_parameters(original)
     compiled = _bind_parameters(compiled)
 
+    equivalent = False
+    if check_equivalence and original.num_qubits == compiled.num_qubits:
+        equivalent = Statevector.from_instruction(original).equiv(
+            Statevector.from_instruction(compiled)
+        )
+
     return BenchmarkResult(
         name=name,
         num_qubits=original.num_qubits,
@@ -74,7 +81,5 @@ def benchmark_result(
         two_qubit_before=_two_qubit_gate_count(original),
         two_qubit_after=_two_qubit_gate_count(compiled),
         swap_after=compiled.count_ops().get("swap", 0),
-        equivalent=Statevector.from_instruction(original).equiv(
-            Statevector.from_instruction(compiled)
-        ),
+        equivalent=equivalent,
     )

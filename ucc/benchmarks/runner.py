@@ -159,10 +159,16 @@ def _run_prepared_case(
         name=case_name,
         backend_name=_backend_name(backend),
         baseline=benchmark_result(
-            circuit, baseline_circuit, name=f"{case_name}-baseline"
+            circuit,
+            baseline_circuit,
+            name=f"{case_name}-baseline",
+            check_equivalence=backend is None,
         ),
         spectral=benchmark_result(
-            circuit, spectral_circuit, name=f"{case_name}-spectral"
+            circuit,
+            spectral_circuit,
+            name=f"{case_name}-spectral",
+            check_equivalence=backend is None,
         ),
         baseline_seconds=baseline_seconds,
         spectral_seconds=spectral_seconds,

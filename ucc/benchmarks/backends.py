@@ -22,14 +22,14 @@ class IBMBackendSnapshot:
 
 def load_runtime_service(
     *,
-    channel: str = "ibm_quantum",
+    channel: str = "ibm_quantum_platform",
     instance: str | None = None,
     token: str | None = None,
 ) -> QiskitRuntimeService:
     """Load an IBM Runtime service using saved credentials or a token.
 
     Args:
-        channel: IBM channel name, usually ``"ibm_quantum"``.
+        channel: IBM channel name, usually ``"ibm_quantum_platform"``.
         instance: Optional hub/group/project instance.
         token: Optional API token if credentials are not already saved.
 

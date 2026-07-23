@@ -40,8 +40,21 @@ class RoutingState:
             physical_a: First physical qubit index.
             physical_b: Second physical qubit index.
         """
-        logical_a = self.physical_to_logical[physical_a]
-        logical_b = self.physical_to_logical[physical_b]
+        logical_a = self.physical_to_logical.get(physical_a)
+        logical_b = self.physical_to_logical.get(physical_b)
+
+        if logical_a is None and logical_b is None:
+            return
+        if logical_a is None:
+            self.logical_to_physical[logical_b] = physical_a
+            self.physical_to_logical[physical_a] = logical_b
+            self.physical_to_logical.pop(physical_b, None)
+            return
+        if logical_b is None:
+            self.logical_to_physical[logical_a] = physical_b
+            self.physical_to_logical[physical_b] = logical_a
+            self.physical_to_logical.pop(physical_a, None)
+            return
 
         self.logical_to_physical[logical_a] = physical_b
         self.logical_to_physical[logical_b] = physical_a

@@ -90,7 +90,11 @@ def route(
     """
     initial_mapping = _layout_to_initial_mapping(circuit, initial_layout)
     state = RoutingState.from_initial_layout(initial_mapping)
-    routed = QuantumCircuit(circuit.num_qubits)
+    num_physical_qubits = max(
+        max(hardware_metric.adjacency) + 1 if hardware_metric.adjacency else 0,
+        max(initial_mapping.values()) + 1 if initial_mapping else 0,
+    )
+    routed = QuantumCircuit(num_physical_qubits or circuit.num_qubits)
 
     for instruction in circuit.data:
         op = _instruction_operation(instruction)
