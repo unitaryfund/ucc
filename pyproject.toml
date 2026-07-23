@@ -47,7 +47,10 @@ line-length = 79
 
 [tool.pytest.ini_options]
 testpaths = ["ucc/tests"]
-python_files = ["test_*.py"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
 
 [build-system]
 requires = ["hatchling"]
