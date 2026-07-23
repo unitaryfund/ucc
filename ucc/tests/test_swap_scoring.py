@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
 from ucc.custom_passes.spectral.routing.routing_state import RoutingState
-from ucc.custom_passes.spectral.routing.swap_scoring import score_swap
+from ucc.custom_passes.spectral.routing.swap_scoring import (
+    score_swap,
+    spectral_tiebreak_score,
+)
 
 
 def _metric():
@@ -61,3 +64,15 @@ def test_lookahead_can_distinguish_candidate_swaps():
     bad = score_swap(state, metric, 0, 1, lookahead_depth=2)
 
     assert good < bad
+
+
+def test_spectral_tiebreak_prefers_layouts_closer_to_reference():
+    state = RoutingState.from_initial_layout(
+        {0: 0, 1: 1, 2: 2}, front_layer=[]
+    )
+    metric = _metric()
+
+    better = spectral_tiebreak_score(state, metric, 0, 1)
+    worse = spectral_tiebreak_score(state, metric, 0, 2)
+
+    assert better < worse

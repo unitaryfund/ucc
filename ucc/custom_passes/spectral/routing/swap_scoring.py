@@ -24,6 +24,34 @@ def _score_interaction(
     return hop + 0.1 * weighted + 0.01 * curve_penalty
 
 
+def _spectral_alignment_penalty(
+    state: RoutingState,
+    metric: HardwareMetric,
+) -> float:
+    """Score how far the current layout drifted from the reference layout."""
+    total = 0.0
+    for logical, physical in state.logical_to_physical.items():
+        reference_physical = state.reference_layout.get(logical, physical)
+        total += abs(
+            metric.curve_order.get(physical, physical)
+            - metric.curve_order.get(reference_physical, reference_physical)
+        )
+    return total
+
+
+def _base_swap_score(
+    state: RoutingState,
+    metric: HardwareMetric,
+    *,
+    lookahead_depth: int,
+) -> float:
+    """Score the front layer using SABRE-style interaction distance."""
+    score = 0.0
+    for gate in state.front_layer[:lookahead_depth]:
+        score += _score_interaction(state, metric, gate)
+    return score
+
+
 def score_swap(
     state: RoutingState,
     metric: HardwareMetric,
@@ -45,11 +73,30 @@ def score_swap(
         A scalar heuristic score; lower is better.
     """
     trial = RoutingState.from_initial_layout(
-        dict(state.logical_to_physical), front_layer=list(state.front_layer)
+        dict(state.logical_to_physical),
+        reference_layout=dict(state.reference_layout),
+        front_layer=list(state.front_layer),
     )
     trial.swap(physical_a, physical_b)
+    return _base_swap_score(trial, metric, lookahead_depth=lookahead_depth)
 
-    score = 0.0
-    for gate in trial.front_layer[:lookahead_depth]:
-        score += _score_interaction(trial, metric, gate)
-    return score
+
+def spectral_tiebreak_score(
+    state: RoutingState,
+    metric: HardwareMetric,
+    physical_a: int,
+    physical_b: int,
+    *,
+    lookahead_depth: int = 1,
+) -> tuple[float, float]:
+    """Return the SABRE score and the spectral tie-breaker for a swap."""
+    trial = RoutingState.from_initial_layout(
+        dict(state.logical_to_physical),
+        reference_layout=dict(state.reference_layout),
+        front_layer=list(state.front_layer),
+    )
+    trial.swap(physical_a, physical_b)
+    return (
+        _base_swap_score(trial, metric, lookahead_depth=lookahead_depth),
+        _spectral_alignment_penalty(trial, metric),
+    )

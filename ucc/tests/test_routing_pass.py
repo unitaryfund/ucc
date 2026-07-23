@@ -30,6 +30,13 @@ def _metric():
     )
 
 
+def _layout_mapping(circuit: QuantumCircuit, layout) -> dict[int, int]:
+    return {
+        physical: circuit.find_bit(virtual).index
+        for physical, virtual in layout.get_physical_bits().items()
+    }
+
+
 def test_routing_pass_uses_layout_from_property_set():
     circuit = QuantumCircuit(3)
     circuit.cx(0, 2)
@@ -54,7 +61,11 @@ def test_routing_pass_stores_final_layout():
     pass_.property_set["layout"] = {0: 0, 1: 1, 2: 2}
     pass_.run(dag)
 
-    assert pass_.property_set["final_layout"] == {0: 0, 1: 1, 2: 2}
+    assert _layout_mapping(circuit, pass_.property_set["final_layout"]) == {
+        0: 0,
+        1: 1,
+        2: 2,
+    }
 
 
 def test_routing_pass_preserves_semantics():

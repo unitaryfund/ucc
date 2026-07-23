@@ -1,4 +1,4 @@
-"""Pure interaction-sequence router producing a SWAP-inserted circuit."""
+"""SABRE-style router with a spectral swap-scoring prior."""
 
 from __future__ import annotations
 
@@ -9,6 +9,9 @@ from qiskit.transpiler.layout import Layout
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
 from ucc.custom_passes.spectral.routing.routing_state import RoutingState
+from ucc.custom_passes.spectral.routing.swap_scoring import (
+    spectral_tiebreak_score,
+)
 
 
 def _instruction_qubits(instruction):
@@ -73,6 +76,54 @@ def _shortest_path(
     raise ValueError("hardware graph is disconnected")
 
 
+def _two_qubit_operations(
+    circuit: QuantumCircuit,
+) -> list[tuple[int, tuple[int, int]]]:
+    """Return logical two-qubit gates with their circuit positions."""
+    gates: list[tuple[int, tuple[int, int]]] = []
+    for index, instruction in enumerate(circuit.data):
+        qargs = _instruction_qubits(instruction)
+        if len(qargs) != 2:
+            continue
+        logical = tuple(
+            sorted(circuit.find_bit(qubit).index for qubit in qargs)
+        )
+        gates.append((index, logical))
+    return gates
+
+
+def _candidate_swaps(
+    metric: HardwareMetric, physical_a: int, physical_b: int
+) -> list[tuple[int, int]]:
+    """Return local SWAP candidates around the active front gate."""
+    candidates: set[tuple[int, int]] = set()
+    for origin in (physical_a, physical_b):
+        for neighbor in metric.adjacency.get(origin, {}):
+            if neighbor == origin:
+                continue
+            candidates.add(tuple(sorted((origin, neighbor))))
+    return sorted(candidates)
+
+
+def _append_instruction(
+    routed: QuantumCircuit,
+    state: RoutingState,
+    instruction,
+    circuit: QuantumCircuit,
+) -> None:
+    """Append a single instruction to the routed circuit under the current map."""
+    op = _instruction_operation(instruction)
+    qargs = _instruction_qubits(instruction)
+    logical = [circuit.find_bit(qubit).index for qubit in qargs]
+    routed.append(
+        op,
+        [
+            routed.qubits[state.physical_of(logical_qubit)]
+            for logical_qubit in logical
+        ],
+    )
+
+
 def route(
     circuit: QuantumCircuit,
     hardware_metric: HardwareMetric,
@@ -96,42 +147,60 @@ def route(
     )
     routed = QuantumCircuit(num_physical_qubits or circuit.num_qubits)
 
+    two_qubit_gates = _two_qubit_operations(circuit)
+    gate_index = 0
+
     for instruction in circuit.data:
-        op = _instruction_operation(instruction)
         qargs = _instruction_qubits(instruction)
         logical = [circuit.find_bit(qubit).index for qubit in qargs]
 
         if len(logical) == 1:
-            routed.append(op, [routed.qubits[state.physical_of(logical[0])]])
+            _append_instruction(routed, state, instruction, circuit)
             continue
 
         if len(logical) != 2:
-            routed.append(
-                op, [routed.qubits[state.physical_of(q)] for q in logical]
-            )
+            _append_instruction(routed, state, instruction, circuit)
             continue
 
         logical_a, logical_b = logical
         physical_a = state.physical_of(logical_a)
         physical_b = state.physical_of(logical_b)
 
+        current_gate = tuple(sorted((logical_a, logical_b)))
+        front_layer = [current_gate]
+        for _, gate in two_qubit_gates[gate_index + 1 : gate_index + 3]:
+            front_layer.append(gate)
+        state.front_layer = front_layer
+
         while hardware_metric.hop_distances[physical_a][physical_b] > 1:
-            path = _shortest_path(
-                hardware_metric.adjacency, physical_a, physical_b
+            candidates = _candidate_swaps(
+                metric=hardware_metric,
+                physical_a=physical_a,
+                physical_b=physical_b,
             )
-            swap_left, swap_right = path[-2], path[-1]
+            if not candidates:
+                path = _shortest_path(
+                    hardware_metric.adjacency, physical_a, physical_b
+                )
+                candidates = [tuple(sorted((path[-2], path[-1])))]
+
+            swap_left, swap_right = min(
+                candidates,
+                key=lambda swap: spectral_tiebreak_score(
+                    state,
+                    hardware_metric,
+                    swap[0],
+                    swap[1],
+                    lookahead_depth=len(front_layer),
+                ),
+            )
             routed.swap(swap_left, swap_right)
             state.swap(swap_left, swap_right)
             physical_a = state.physical_of(logical_a)
             physical_b = state.physical_of(logical_b)
 
-        routed.append(
-            op,
-            [
-                routed.qubits[state.physical_of(logical_a)],
-                routed.qubits[state.physical_of(logical_b)],
-            ],
-        )
+        _append_instruction(routed, state, instruction, circuit)
+        gate_index += 1
 
     for logical in sorted(initial_mapping):
         desired = initial_mapping[logical]

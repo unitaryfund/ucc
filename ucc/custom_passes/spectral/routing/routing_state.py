@@ -10,11 +10,14 @@ class RoutingState:
     """Track the current logical-to-physical assignment during routing."""
 
     logical_to_physical: dict[int, int]
+    reference_layout: dict[int, int] = field(default_factory=dict)
     physical_to_logical: dict[int, int] = field(init=False)
     front_layer: list[tuple[int, int]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Build the inverse physical-to-logical map."""
+        if not self.reference_layout:
+            self.reference_layout = dict(self.logical_to_physical)
         self.physical_to_logical = {
             physical: logical
             for logical, physical in self.logical_to_physical.items()
@@ -25,11 +28,13 @@ class RoutingState:
         cls,
         initial_layout: dict[int, int],
         *,
+        reference_layout: dict[int, int] | None = None,
         front_layer: list[tuple[int, int]] | None = None,
     ) -> "RoutingState":
         """Create a routing state from an initial layout and optional front layer."""
         return cls(
             logical_to_physical=dict(initial_layout),
+            reference_layout=dict(reference_layout or initial_layout),
             front_layer=list(front_layer or []),
         )
 
