@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import AnalysisPass
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
@@ -49,7 +50,11 @@ class SpectralLayoutPass(AnalysisPass):
             curve_order=logical_curve_order,
         )
 
-        self.property_set["layout"] = spectral_placement(
-            logical_metric, self.hardware_metric
+        placement = spectral_placement(logical_metric, self.hardware_metric)
+        self.property_set["layout"] = Layout(
+            {
+                dag.qubits[logical_qubit]: physical_qubit
+                for logical_qubit, physical_qubit in placement.items()
+            }
         )
         return dag

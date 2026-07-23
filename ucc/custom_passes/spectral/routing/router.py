@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import deque
 
 from qiskit import QuantumCircuit
+from qiskit.transpiler.layout import Layout
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
 from ucc.custom_passes.spectral.routing.routing_state import RoutingState
@@ -22,6 +23,29 @@ def _instruction_operation(instruction):
     if hasattr(instruction, "operation"):
         return instruction.operation
     return instruction[0]
+
+
+def _layout_to_initial_mapping(
+    circuit: QuantumCircuit,
+    layout,
+) -> dict[int, int]:
+    """Normalize a Qiskit layout or mapping to logical-to-physical integers."""
+    if isinstance(layout, dict):
+        return dict(layout)
+
+    if isinstance(layout, Layout):
+        return {
+            circuit.find_bit(virtual_bit).index: physical
+            for virtual_bit, physical in layout.get_virtual_bits().items()
+        }
+
+    if hasattr(layout, "get_virtual_bits"):
+        return {
+            circuit.find_bit(virtual_bit).index: physical
+            for virtual_bit, physical in layout.get_virtual_bits().items()
+        }
+
+    raise TypeError("initial_layout must be a mapping or Qiskit Layout")
 
 
 def _shortest_path(
@@ -52,7 +76,7 @@ def _shortest_path(
 def route(
     circuit: QuantumCircuit,
     hardware_metric: HardwareMetric,
-    initial_layout: dict[int, int],
+    initial_layout,
 ):
     """Route a circuit onto the hardware graph with SWAP insertion.
 
@@ -64,7 +88,8 @@ def route(
     Returns:
         A tuple of ``(routed_circuit, final_state)``.
     """
-    state = RoutingState.from_initial_layout(initial_layout)
+    initial_mapping = _layout_to_initial_mapping(circuit, initial_layout)
+    state = RoutingState.from_initial_layout(initial_mapping)
     routed = QuantumCircuit(circuit.num_qubits)
 
     for instruction in circuit.data:
@@ -104,8 +129,8 @@ def route(
             ],
         )
 
-    for logical in sorted(initial_layout):
-        desired = initial_layout[logical]
+    for logical in sorted(initial_mapping):
+        desired = initial_mapping[logical]
         current = state.physical_of(logical)
         if current != desired:
             routed.swap(current, desired)

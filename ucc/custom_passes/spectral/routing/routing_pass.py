@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import TransformationPass
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
@@ -40,5 +41,10 @@ class SpectralRoutingPass(TransformationPass):
         routed, state = route(
             circuit, self.hardware_metric, self.property_set["layout"]
         )
-        self.property_set["final_layout"] = dict(state.logical_to_physical)
+        self.property_set["final_layout"] = Layout(
+            {
+                routed.qubits[logical_qubit]: physical_qubit
+                for logical_qubit, physical_qubit in state.logical_to_physical.items()
+            }
+        )
         return circuit_to_dag(routed)

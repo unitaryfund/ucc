@@ -24,6 +24,13 @@ def _metric(curve_order):
     )
 
 
+def _layout_mapping(circuit: QuantumCircuit, layout) -> dict[int, int]:
+    return {
+        physical: circuit.find_bit(virtual).index
+        for physical, virtual in layout.get_physical_bits().items()
+    }
+
+
 def test_layout_pass_stores_layout_in_property_set():
     circuit = QuantumCircuit(3)
     circuit.cx(0, 1)
@@ -35,7 +42,11 @@ def test_layout_pass_stores_layout_in_property_set():
     layout_pass.hardware_metric = hardware_metric
     layout_pass.run(dag)
 
-    assert layout_pass.property_set["layout"] == {0: 1, 1: 2, 2: 0}
+    assert _layout_mapping(circuit, layout_pass.property_set["layout"]) == {
+        0: 2,
+        1: 0,
+        2: 1,
+    }
 
 
 def test_layout_pass_uses_logical_interaction_graph():
@@ -49,7 +60,12 @@ def test_layout_pass_uses_logical_interaction_graph():
     layout_pass.hardware_metric = hardware_metric
     layout_pass.run(dag)
 
-    assert set(layout_pass.property_set["layout"]) == {0, 1, 2, 3}
+    assert set(layout_pass.property_set["layout"].get_physical_bits()) == {
+        0,
+        1,
+        2,
+        3,
+    }
 
 
 def test_layout_pass_is_deterministic_for_same_input():
@@ -67,4 +83,6 @@ def test_layout_pass_is_deterministic_for_same_input():
     first.run(dag)
     second.run(dag)
 
-    assert first.property_set["layout"] == second.property_set["layout"]
+    assert _layout_mapping(
+        circuit, first.property_set["layout"]
+    ) == _layout_mapping(circuit, second.property_set["layout"])

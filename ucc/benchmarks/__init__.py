@@ -16,13 +16,23 @@ from ucc.benchmarks.circuits import (
     random_benchmark_circuit,
     real_amplitudes_benchmark,
 )
+from ucc.benchmarks.runner import (
+    BenchmarkCase,
+    BenchmarkComparison,
+    default_benchmark_cases,
+    run_benchmark_case,
+    run_benchmarks,
+)
 from ucc.benchmarks.metrics import BenchmarkResult, benchmark_result
 
 __all__ = [
     "IBMBackendSnapshot",
     "BenchmarkResult",
+    "BenchmarkCase",
+    "BenchmarkComparison",
     "backend_snapshot",
     "benchmark_result",
+    "default_benchmark_cases",
     "draper_adder_benchmark",
     "efficient_su2_benchmark",
     "hardware_metric_from_backend",
@@ -33,4 +43,6 @@ __all__ = [
     "qft_benchmark",
     "random_benchmark_circuit",
     "real_amplitudes_benchmark",
+    "run_benchmark_case",
+    "run_benchmarks",
 ]

@@ -79,7 +79,7 @@ def backend_snapshot(backend) -> IBMBackendSnapshot:
         properties.
     """
     hardware_metric = HardwareMetric.from_coupling_map(
-        backend.coupling_map, target=backend.target
+        backend.coupling_map, target=backend.target, clamp_error=True
     )
     coupling_edges = tuple(
         tuple(edge) for edge in backend.coupling_map.get_edges()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from qiskit import QuantumCircuit
+from qiskit.circuit import Parameter
 from qiskit.providers.fake_provider import GenericBackendV2
 
 from ucc.benchmarks.backends import (
@@ -17,6 +19,7 @@ from ucc.benchmarks.circuits import (
     real_amplitudes_benchmark,
 )
 from ucc.benchmarks.metrics import benchmark_result
+from ucc.benchmarks.runner import run_benchmarks
 
 
 def test_random_benchmark_circuit_returns_circuit():
@@ -64,8 +67,6 @@ def test_hardware_metric_from_backend_matches_snapshot_metric():
 
 
 def test_benchmark_result_marks_equivalent_simple_circuits():
-    from qiskit import QuantumCircuit
-
     original = QuantumCircuit(2)
     original.h(0)
     original.cx(0, 1)
@@ -75,3 +76,30 @@ def test_benchmark_result_marks_equivalent_simple_circuits():
 
     assert result.name == "simple"
     assert result.equivalent
+
+
+def test_benchmark_result_binds_parameters_deterministically():
+    theta = Parameter("theta")
+
+    original = QuantumCircuit(1)
+    original.rx(theta, 0)
+    compiled = original.copy()
+
+    result = benchmark_result(original, compiled, name="parameterized")
+
+    assert result.equivalent
+
+
+def test_run_benchmarks_compares_baseline_and_spectral_pipelines():
+    backend = GenericBackendV2(num_qubits=3)
+    snapshot = backend_snapshot(backend)
+
+    results = run_benchmarks(
+        hardware_metric=snapshot.hardware_metric,
+        backend=backend,
+    )
+
+    assert results
+    assert all(result.backend_name == backend.name for result in results)
+    assert all(result.baseline.depth_after >= 0 for result in results)
+    assert all(result.spectral.depth_after >= 0 for result in results)
