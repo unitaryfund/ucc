@@ -17,7 +17,15 @@ def build_baseline_pass_manager() -> PassManager:
 def build_spectral_pass_manager(
     hardware_metric: HardwareMetric,
 ) -> PassManager:
-    """Return a level-3 pass manager with spectral layout and routing stages."""
+    """Return a level-3 pass manager with spectral layout and routing stages.
+
+    Args:
+        hardware_metric: Hardware description used by the custom passes.
+
+    Returns:
+        A staged pass manager that keeps Qiskit's level-3 pipeline but swaps
+        in the spectral layout and routing stages.
+    """
     layout_pass = SpectralLayoutPass()
     layout_pass.hardware_metric = hardware_metric
 

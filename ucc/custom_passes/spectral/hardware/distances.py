@@ -2,10 +2,8 @@
 
 Both functions accept the undirected adjacency mapping produced by
 ``graph.coupling_to_undirected_adjacency`` and return a full
-``dict[int, dict[int, float]]`` matrix.  Unreachable pairs receive
+``dict[int, dict[int, float]]`` matrix. Unreachable pairs receive
 ``float("inf")``.
-
-Uses ``rustworkx`` (bundled with Qiskit) for fast graph traversal.
 """
 
 from __future__ import annotations
@@ -22,10 +20,14 @@ DistanceMatrix: TypeAlias = dict[QubitIndex, dict[QubitIndex, float]]
 def _adjacency_to_pygraph(
     adjacency: Adjacency,
 ) -> tuple[rx.PyGraph, dict[int, int]]:
-    """Convert an adjacency dict to a rustworkx PyGraph.
+    """Convert an adjacency dict to a ``rustworkx.PyGraph``.
 
-    Returns the graph and a mapping from qubit index to rustworkx node index
-    (they may differ if qubit indices are non-contiguous).
+    Args:
+        adjacency: Undirected adjacency mapping.
+
+    Returns:
+        A tuple of ``(graph, qubit_to_node)``. The node mapping may differ from
+        the original indices if the qubit labels are non-contiguous.
     """
     graph = rx.PyGraph()
     qubit_to_node: dict[int, int] = {}
@@ -45,7 +47,17 @@ def _full_matrix(
     raw: dict[int, dict[int, float]],
     node_to_qubit: dict[int, int],
 ) -> DistanceMatrix:
-    """Build a complete qubit-indexed matrix, filling unreachable pairs with inf."""
+    """Build a complete qubit-indexed matrix.
+
+    Args:
+        adjacency: Original adjacency mapping.
+        raw: All-pairs shortest-path data indexed by graph node.
+        node_to_qubit: Mapping from graph node index back to qubit index.
+
+    Returns:
+        A dense qubit-indexed matrix, filling unreachable pairs with
+        ``float("inf")``.
+    """
     qubits = list(adjacency.keys())
     matrix: DistanceMatrix = {q: {} for q in qubits}
     for src_qubit in qubits:
@@ -64,17 +76,13 @@ def _full_matrix(
 def hop_distance_matrix(adjacency: Adjacency) -> DistanceMatrix:
     """Return all-pairs unweighted (hop-count) shortest-path distances.
 
-    Parameters
-    ----------
-    adjacency:
-        Undirected adjacency mapping as returned by
-        ``coupling_to_undirected_adjacency``.
+    Args:
+        adjacency: Undirected adjacency mapping as returned by
+            ``coupling_to_undirected_adjacency``.
 
-    Returns
-    -------
-    dict[int, dict[int, float]]
+    Returns:
         ``matrix[i][j]`` is the minimum number of hops between qubits ``i``
-        and ``j``.  Self-distances are ``0``.  Unreachable pairs are
+        and ``j``. Self-distances are ``0``. Unreachable pairs are
         ``float("inf")``.
     """
     if not adjacency:
@@ -92,17 +100,13 @@ def hop_distance_matrix(adjacency: Adjacency) -> DistanceMatrix:
 def weighted_distance_matrix(adjacency: Adjacency) -> DistanceMatrix:
     """Return all-pairs calibration-weighted shortest-path distances.
 
-    Parameters
-    ----------
-    adjacency:
-        Undirected adjacency mapping whose edge weights represent routing
-        costs (e.g. ``EdgeCalibration.total_cost``).
+    Args:
+        adjacency: Undirected adjacency mapping whose edge weights represent
+            routing costs (e.g. ``EdgeCalibration.total_cost``).
 
-    Returns
-    -------
-    dict[int, dict[int, float]]
+    Returns:
         ``matrix[i][j]`` is the minimum total edge cost between qubits ``i``
-        and ``j``.  Self-distances are ``0``.  Unreachable pairs are
+        and ``j``. Self-distances are ``0``. Unreachable pairs are
         ``float("inf")``.
     """
     if not adjacency:

@@ -11,20 +11,30 @@ Adjacency: TypeAlias = dict[QubitIndex, dict[QubitIndex, float]]
 
 
 def _iter_op_nodes(circuit_or_dag):
+    """Yield operation nodes from a circuit or DAG input."""
     if hasattr(circuit_or_dag, "op_nodes"):
         return circuit_or_dag.op_nodes()
     return circuit_to_dag(circuit_or_dag).op_nodes()
 
 
 def _qubit_index(qubits, qubit) -> int:
+    """Return the index of a qubit in a qubit list."""
     return qubits.index(qubit)
 
 
 def circuit_to_interaction_graph(circuit_or_dag) -> Adjacency:
     """Return a weighted undirected logical-interaction graph.
 
-    Every logical qubit in the input is represented as a vertex, even if it has
-    no two-qubit interactions.
+    Args:
+        circuit_or_dag: A ``QuantumCircuit`` or ``DAGCircuit``.
+
+    Returns:
+        A weighted undirected interaction graph where repeated two-qubit gates
+        accumulate edge weight.
+
+    Notes:
+        Every logical qubit in the input is represented as a vertex, even if it
+        has no two-qubit interactions.
     """
 
     qubits = list(getattr(circuit_or_dag, "qubits"))

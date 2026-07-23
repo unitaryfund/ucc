@@ -11,6 +11,7 @@ def _score_interaction(
     metric: HardwareMetric,
     gate: tuple[int, int],
 ) -> float:
+    """Score a single logical interaction under the current routing state."""
     logical_a, logical_b = gate
     physical_a = state.physical_of(logical_a)
     physical_b = state.physical_of(logical_b)
@@ -31,7 +32,18 @@ def score_swap(
     *,
     lookahead_depth: int = 1,
 ) -> float:
-    """Score a candidate SWAP; lower scores are better."""
+    """Score a candidate SWAP; lower scores are better.
+
+    Args:
+        state: Current routing state.
+        metric: Hardware metric used for distance and locality scoring.
+        physical_a: First physical qubit in the candidate SWAP.
+        physical_b: Second physical qubit in the candidate SWAP.
+        lookahead_depth: Number of front-layer gates to include.
+
+    Returns:
+        A scalar heuristic score; lower is better.
+    """
     trial = RoutingState.from_initial_layout(
         dict(state.logical_to_physical), front_layer=list(state.front_layer)
     )

@@ -11,6 +11,7 @@ Placement: TypeAlias = dict[QubitIndex, QubitIndex]
 
 
 def _sorted_by_curve_rank(metric: HardwareMetric) -> list[int]:
+    """Return qubits sorted by curve rank and then by index."""
     return [
         qubit
         for qubit, _ in sorted(
@@ -22,7 +23,15 @@ def _sorted_by_curve_rank(metric: HardwareMetric) -> list[int]:
 def spectral_placement(
     logical_metric: HardwareMetric, hardware_metric: HardwareMetric
 ) -> Placement:
-    """Pair logical and physical qubits in curve-rank order."""
+    """Pair logical and physical qubits in curve-rank order.
+
+    Args:
+        logical_metric: Metric describing the logical interaction graph.
+        hardware_metric: Metric describing the hardware graph.
+
+    Returns:
+        Logical-to-physical qubit placement.
+    """
     logical_order = _sorted_by_curve_rank(logical_metric)
     hardware_order = _sorted_by_curve_rank(hardware_metric)
 
@@ -37,7 +46,16 @@ def layout_cost(
     hardware_metric: HardwareMetric,
     placement: Placement,
 ) -> float:
-    """Score a placement by weighted logical interactions on hardware distance."""
+    """Score a placement by weighted logical interactions on hardware distance.
+
+    Args:
+        logical_metric: Metric describing the logical interaction graph.
+        hardware_metric: Metric describing the hardware graph.
+        placement: Logical-to-physical mapping to score.
+
+    Returns:
+        Weighted interaction cost; lower is better.
+    """
     total = 0.0
     seen: set[tuple[int, int]] = set()
 

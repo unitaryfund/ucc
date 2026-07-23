@@ -39,8 +39,19 @@ class HardwareMetric:
     ) -> "HardwareMetric":
         """Build the complete hardware metric from a coupling map.
 
-        ``target`` is accepted for future calibration-aware extensions and is
-        currently unused; the current tests exercise the no-calibration path.
+        Args:
+            coupling_map: Qiskit-like coupling map object.
+            target: Reserved for future calibration-aware extensions.
+            n_components: Number of spectral coordinates to compute.
+            sigma: Affinity kernel width.
+            grid_size: Side length for the integer grid.
+
+        Returns:
+            A fully populated ``HardwareMetric``.
+
+        Notes:
+            ``target`` is currently unused; the current tests exercise the
+            no-calibration path.
         """
 
         adjacency = coupling_to_undirected_adjacency(coupling_map)
@@ -72,5 +83,12 @@ class HardwareMetric:
         )
 
     def curve_rank(self, qubit: int) -> int:
-        """Return the curve rank of a qubit."""
+        """Return the curve rank of a qubit.
+
+        Args:
+            qubit: Logical or physical qubit index.
+
+        Returns:
+            The curve rank assigned to ``qubit``.
+        """
         return self.curve_order[qubit]

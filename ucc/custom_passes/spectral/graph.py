@@ -1,7 +1,7 @@
 """Hardware-coupling graph construction.
 
-Module to convert Qiskit's directed ``CouplingMap`` representation into a deterministic undirected adjacency
-mapping.
+This module converts Qiskit's directed ``CouplingMap`` representation into a
+deterministic, undirected adjacency mapping.
 """
 
 from collections.abc import Iterable
@@ -21,10 +21,18 @@ class CouplingMapLike(Protocol):
     """
 
     def size(self) -> int:
-        """Return the number of physical qubits in the coupling map."""
+        """Return the number of physical qubits.
+
+        Returns:
+            Number of physical qubits in the coupling map.
+        """
 
     def get_edges(self) -> Iterable[tuple[int, int]]:
-        """Return directed physical coupling edges."""
+        """Return directed physical coupling edges.
+
+        Returns:
+            Directed edges as ``(source, destination)`` pairs.
+        """
 
 
 def coupling_to_undirected_adjacency(
@@ -34,38 +42,27 @@ def coupling_to_undirected_adjacency(
 ) -> Adjacency:
     """Convert a directed coupling map into an undirected adjacency mapping.
 
-    Parameters
-    ----------
-    coupling_map:
-        A Qiskit ``CouplingMap`` or any object exposing compatible ``size()``
-        and ``get_edges()`` methods.
+    Args:
+        coupling_map: A Qiskit ``CouplingMap`` or any object exposing
+            compatible ``size()`` and ``get_edges()`` methods.
+        edge_weight: Uniform positive weight assigned to every undirected edge.
 
-    edge_weight:
-        Uniform positive weight assigned to every undirected edge. Phase 1
-        uses ``1.0``; the parameter is exposed to make the function reusable
-        in tests and later phases.
-
-    Returns
-    -------
-    dict[int, dict[int, float]]
+    Returns:
         Every physical qubit index from ``0`` through ``size() - 1`` is a key.
         For every hardware connection ``a -- b``, both ``adj[a][b]`` and
         ``adj[b][a]`` are present. Directed duplicates are collapsed.
 
-    Raises
-    ------
-    TypeError
-        If ``size()`` or an edge endpoint is not an integer.
+    Raises:
+        TypeError: If ``size()`` or an edge endpoint is not an integer.
+        ValueError: If the qubit count is negative, the edge weight is
+            non-positive, an endpoint lies outside the physical-qubit range, or
+            a self-loop occurs.
 
-    ValueError
-        If the qubit count is negative, the edge weight is non-positive, an
-        endpoint lies outside the physical-qubit range, or a self-loop occurs.
-
-    Notes
-    -----
-    Directionality is intentionally discarded here. This graph represents
-    physical reachability for placement and SWAP routing. Native gate direction
-    can be handled by later translation/direction-correction passes.
+    Notes:
+        Directionality is intentionally discarded here. This graph represents
+        physical reachability for placement and SWAP routing. Native gate
+        direction can be handled by later translation/direction-correction
+        passes.
     """
 
     number_of_qubits = coupling_map.size()

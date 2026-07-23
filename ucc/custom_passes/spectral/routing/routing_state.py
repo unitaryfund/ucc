@@ -14,6 +14,7 @@ class RoutingState:
     front_layer: list[tuple[int, int]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        """Build the inverse physical-to-logical map."""
         self.physical_to_logical = {
             physical: logical
             for logical, physical in self.logical_to_physical.items()
@@ -26,13 +27,19 @@ class RoutingState:
         *,
         front_layer: list[tuple[int, int]] | None = None,
     ) -> "RoutingState":
+        """Create a routing state from an initial layout and optional front layer."""
         return cls(
             logical_to_physical=dict(initial_layout),
             front_layer=list(front_layer or []),
         )
 
     def swap(self, physical_a: int, physical_b: int) -> None:
-        """Swap the logical qubits currently occupying two physical qubits."""
+        """Swap the logical qubits currently occupying two physical qubits.
+
+        Args:
+            physical_a: First physical qubit index.
+            physical_b: Second physical qubit index.
+        """
         logical_a = self.physical_to_logical[physical_a]
         logical_b = self.physical_to_logical[physical_b]
 
@@ -42,12 +49,15 @@ class RoutingState:
         self.physical_to_logical[physical_b] = logical_a
 
     def physical_of(self, logical: int) -> int:
+        """Return the current physical qubit for a logical qubit."""
         return self.logical_to_physical[logical]
 
     def logical_of(self, physical: int) -> int:
+        """Return the logical qubit currently occupying a physical qubit."""
         return self.physical_to_logical[physical]
 
     def remove_front_gate(self, gate: tuple[int, int]) -> None:
+        """Remove a gate from the front layer if it is present."""
         try:
             self.front_layer.remove(gate)
         except ValueError:

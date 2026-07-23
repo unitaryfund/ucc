@@ -15,11 +15,20 @@ Adjacency: TypeAlias = dict[QubitIndex, dict[QubitIndex, float]]
 
 
 def _sorted_nodes(adjacency: Adjacency) -> list[int]:
+    """Return adjacency keys in deterministic order."""
     return sorted(adjacency)
 
 
 def adjacency_to_affinity(adjacency: Adjacency, sigma: float) -> Adjacency:
-    """Convert edge costs to similarities with an exponential kernel."""
+    """Convert edge costs to similarities with an exponential kernel.
+
+    Args:
+        adjacency: Weighted adjacency map.
+        sigma: Positive kernel width.
+
+    Returns:
+        Symmetric similarity graph with weights in ``(0, 1]``.
+    """
     if sigma <= 0:
         raise ValueError("sigma must be positive")
 
@@ -34,8 +43,15 @@ def adjacency_to_affinity(adjacency: Adjacency, sigma: float) -> Adjacency:
 def normalized_laplacian(affinity: Adjacency) -> np.ndarray:
     """Return the symmetric normalized graph Laplacian.
 
-    Isolated vertices are assigned zero rows and columns so that they preserve
-    the expected disconnected-graph behavior in the tests.
+    Args:
+        affinity: Weighted affinity graph.
+
+    Returns:
+        Dense symmetric normalized Laplacian matrix.
+
+    Notes:
+        Isolated vertices are assigned zero rows and columns so that they
+        preserve disconnected-graph behavior.
     """
     nodes = _sorted_nodes(affinity)
     n = len(nodes)
@@ -65,7 +81,16 @@ def normalized_laplacian(affinity: Adjacency) -> np.ndarray:
 def spectral_coordinates(
     adjacency: Adjacency, *, n_components: int = 2, sigma: float = 1.0
 ) -> np.ndarray:
-    """Return low-dimensional spectral coordinates for the graph."""
+    """Return low-dimensional spectral coordinates for the graph.
+
+    Args:
+        adjacency: Weighted adjacency graph.
+        n_components: Number of non-trivial eigenvectors to return.
+        sigma: Affinity-kernel width.
+
+    Returns:
+        A dense array of shape ``(n_vertices, n_components)``.
+    """
     if n_components < 1:
         raise ValueError("n_components must be at least 1")
 

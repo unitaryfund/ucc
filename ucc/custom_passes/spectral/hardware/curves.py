@@ -8,7 +8,15 @@ from hilbertcurve.hilbertcurve import HilbertCurve
 
 
 def to_integer_grid(coords: np.ndarray, grid_size: int) -> np.ndarray:
-    """Scale floating coordinates into an integer grid of side ``grid_size``."""
+    """Scale floating coordinates into an integer grid of side ``grid_size``.
+
+    Args:
+        coords: Floating-point coordinate array of shape ``(n, d)``.
+        grid_size: Side length of the target integer grid.
+
+    Returns:
+        Integer grid coordinates of the same shape.
+    """
     if grid_size < 2:
         raise ValueError("grid_size must be at least 2")
 
@@ -32,7 +40,14 @@ def to_integer_grid(coords: np.ndarray, grid_size: int) -> np.ndarray:
 
 
 def hilbert_order(grid_coords: np.ndarray) -> list[int]:
-    """Return Hilbert-curve ranks for 2D grid coordinates."""
+    """Return Hilbert-curve ranks for 2D grid coordinates.
+
+    Args:
+        grid_coords: Integer coordinates with shape ``(n, 2)``.
+
+    Returns:
+        Hilbert ranks, one per input point.
+    """
     points = np.asarray(grid_coords, dtype=int)
     if points.ndim != 2 or points.shape[1] != 2:
         raise ValueError("hilbert_order expects a 2D array with two columns")
@@ -60,7 +75,14 @@ def hilbert_order(grid_coords: np.ndarray) -> list[int]:
 
 
 def _morton_index(point: np.ndarray) -> int:
-    """Interleave bits across coordinates to form a Morton index."""
+    """Interleave bits across coordinates to form a Morton index.
+
+    Args:
+        point: One integer coordinate vector.
+
+    Returns:
+        Morton/Z-order rank for the point.
+    """
     dims = len(point)
     coords = [int(value) for value in point]
     if dims == 2:
@@ -71,7 +93,14 @@ def _morton_index(point: np.ndarray) -> int:
 
 
 def morton_order(grid_coords: np.ndarray) -> list[int]:
-    """Return Morton/Z-order ranks for n-dimensional grid coordinates."""
+    """Return Morton/Z-order ranks for n-dimensional grid coordinates.
+
+    Args:
+        grid_coords: Integer coordinates with shape ``(n, d)``.
+
+    Returns:
+        Morton ranks, one per input point.
+    """
     points = np.asarray(grid_coords, dtype=int)
     if points.ndim != 2:
         raise ValueError("morton_order expects a 2D array")

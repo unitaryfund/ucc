@@ -1,17 +1,8 @@
 """Calibration-aware edge-cost utilities.
 
-Module to convert hardware instruction properties into non-negative additive
-routing costs. The functions in this module are deliberately independent of
-Qiskit: any object exposing ``error`` and ``duration`` attributes can be used.
-
-The main model is::
-
-    total_cost = hop_weight * hop_cost
-               + error_weight * [-log(1 - error_rate)]
-               + duration_weight * [duration / duration_scale]
-
-The logarithmic error term is convenient because independent path
-reliabilities multiply, while their negative logarithms add.
+This module converts hardware instruction properties into non-negative
+additive routing costs. The functions are deliberately independent of Qiskit:
+any object exposing ``error`` and ``duration`` attributes can be used.
 """
 
 from __future__ import annotations
@@ -33,26 +24,15 @@ class InstructionPropertiesLike(Protocol):
 class EdgeCalibration:
     """Normalized calibration values and their additive cost components.
 
-    Attributes
-    ----------
-    error_rate:
-        Validated two-qubit instruction error probability in ``[0, 1)``.
-
-    duration:
-        Validated non-negative duration in the caller's chosen time unit.
-        Qiskit commonly reports seconds.
-
-    hop_cost:
-        Base cost of traversing one hardware edge.
-
-    error_cost:
-        Additive reliability penalty ``-log(1 - error_rate)``.
-
-    normalized_duration:
-        ``duration / duration_scale``.
-
-    total_cost:
-        Weighted sum of the three cost components.
+    Attributes:
+        error_rate: Validated two-qubit instruction error probability in
+            ``[0, 1)``.
+        duration: Validated non-negative duration in the caller's chosen time
+            unit. Qiskit commonly reports seconds.
+        hop_cost: Base cost of traversing one hardware edge.
+        error_cost: Additive reliability penalty ``-log(1 - error_rate)``.
+        normalized_duration: ``duration / duration_scale``.
+        total_cost: Weighted sum of the three cost components.
     """
 
     error_rate: float
@@ -64,7 +44,19 @@ class EdgeCalibration:
 
 
 def _require_real(name: str, value: object) -> float:
-    """Validate and convert a finite real number, rejecting booleans."""
+    """Validate and convert a finite real number, rejecting booleans.
+
+    Args:
+        name: Name used in error messages.
+        value: Candidate numeric value.
+
+    Returns:
+        The validated floating-point value.
+
+    Raises:
+        TypeError: If ``value`` is not a real number.
+        ValueError: If ``value`` is not finite.
+    """
 
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise TypeError(f"{name} must be a real number")
@@ -79,15 +71,16 @@ def _require_real(name: str, value: object) -> float:
 def validate_error_rate(error_rate: float, *, clamp: bool = False) -> float:
     """Validate a gate error probability.
 
-    Parameters
-    ----------
-    error_rate:
-        Probability-like value expected in ``[0, 1)``.
+    Args:
+        error_rate: Probability-like value expected in ``[0, 1)``.
+        clamp: When ``True``, values below zero are clamped to zero and values
+            at or above one are clamped to ``1 - 1e-12``.
 
-    clamp:
-        When ``True``, values below zero are clamped to zero and values at or
-        above one are clamped to ``1 - 1e-12``. The default is strict and
-        raises ``ValueError`` for out-of-range values.
+    Returns:
+        The validated or clamped error rate.
+
+    Raises:
+        ValueError: If ``error_rate`` is out of range and ``clamp`` is false.
     """
 
     value = _require_real("error_rate", error_rate)
@@ -104,9 +97,13 @@ def validate_error_rate(error_rate: float, *, clamp: bool = False) -> float:
 def error_to_additive_cost(error_rate: float, *, clamp: bool = False) -> float:
     """Convert an error probability into an additive path penalty.
 
-    ``-log(1-error)`` is zero for a perfect gate and increases monotonically
-    with error. For a path of independent edges, summing this value is
-    equivalent to taking the negative logarithm of the path reliability.
+    Args:
+        error_rate: Probability-like value expected in ``[0, 1)``.
+        clamp: When ``True``, out-of-range values are clamped before
+            conversion.
+
+    Returns:
+        The additive reliability penalty ``-log(1 - error_rate)``.
     """
 
     error = validate_error_rate(error_rate, clamp=clamp)
@@ -114,7 +111,15 @@ def error_to_additive_cost(error_rate: float, *, clamp: bool = False) -> float:
 
 
 def normalize_duration(duration: float, *, duration_scale: float) -> float:
-    """Normalize a non-negative duration by a positive finite scale."""
+    """Normalize a non-negative duration by a positive finite scale.
+
+    Args:
+        duration: Non-negative duration in the caller's unit.
+        duration_scale: Positive scale used to normalize ``duration``.
+
+    Returns:
+        The normalized duration.
+    """
 
     value = _require_real("duration", duration)
     scale = _require_real("duration_scale", duration_scale)
@@ -140,9 +145,21 @@ def combined_edge_cost(
 ) -> EdgeCalibration:
     """Calculate all edge-cost components and their weighted total.
 
-    All costs and weights must be non-negative. A zero total is permitted for
-    analysis, although later shortest-path code may choose to require strictly
-    positive edge costs.
+    Args:
+        error_rate: Gate error probability.
+        duration: Gate duration.
+        hop_cost: Base cost for one hop.
+        hop_weight: Weight applied to ``hop_cost``.
+        error_weight: Weight applied to the additive error penalty.
+        duration_weight: Weight applied to the normalized duration.
+        duration_scale: Scale used to normalize duration.
+        clamp_error: Whether to clamp error values outside ``[0, 1)``.
+
+    Returns:
+        A validated ``EdgeCalibration`` record.
+
+    Raises:
+        ValueError: If any cost or weight is negative.
     """
 
     hop = _require_real("hop_cost", hop_cost)
@@ -188,10 +205,17 @@ def calibration_from_properties(
 ) -> EdgeCalibration:
     """Build an edge calibration from a Qiskit-like properties object.
 
-    Missing properties, or attributes whose value is ``None``, are interpreted
-    as zero error and zero duration. This makes the function convenient for
-    fake backends and partially populated targets while keeping the numerical
-    behavior explicit and deterministic.
+    Args:
+        properties: Qiskit-like instruction properties object.
+        **cost_options: Keyword arguments forwarded to
+            ``combined_edge_cost``.
+
+    Returns:
+        A validated ``EdgeCalibration`` record.
+
+    Notes:
+        Missing properties, or attributes whose value is ``None``, are
+        interpreted as zero error and zero duration.
     """
 
     if properties is None:

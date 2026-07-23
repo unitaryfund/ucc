@@ -11,12 +11,14 @@ from ucc.custom_passes.spectral.routing.routing_state import RoutingState
 
 
 def _instruction_qubits(instruction):
+    """Return qubits from a Qiskit instruction record."""
     if hasattr(instruction, "qubits"):
         return list(instruction.qubits)
     return list(instruction[1])
 
 
 def _instruction_operation(instruction):
+    """Return the operation from a Qiskit instruction record."""
     if hasattr(instruction, "operation"):
         return instruction.operation
     return instruction[0]
@@ -25,6 +27,7 @@ def _instruction_operation(instruction):
 def _shortest_path(
     adjacency: dict[int, dict[int, float]], start: int, goal: int
 ):
+    """Return a shortest path in the hardware adjacency graph."""
     if start == goal:
         return [start]
 
@@ -51,7 +54,16 @@ def route(
     hardware_metric: HardwareMetric,
     initial_layout: dict[int, int],
 ):
-    """Route a circuit onto the hardware graph with SWAP insertion."""
+    """Route a circuit onto the hardware graph with SWAP insertion.
+
+    Args:
+        circuit: Input quantum circuit.
+        hardware_metric: Hardware distances and adjacency.
+        initial_layout: Logical-to-physical initial assignment.
+
+    Returns:
+        A tuple of ``(routed_circuit, final_state)``.
+    """
     state = RoutingState.from_initial_layout(initial_layout)
     routed = QuantumCircuit(circuit.num_qubits)
 

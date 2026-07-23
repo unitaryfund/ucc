@@ -15,10 +15,22 @@ class SpectralLayoutPass(AnalysisPass):
     """Compute and store a spectral initial layout for a DAG."""
 
     def __init__(self):
+        """Initialize the analysis pass with no hardware metric attached yet."""
         super().__init__()
         self.hardware_metric: HardwareMetric | None = None
 
     def run(self, dag):
+        """Compute the layout and store it in the property set.
+
+        Args:
+            dag: Input DAG circuit.
+
+        Returns:
+            The input DAG unchanged.
+
+        Raises:
+            ValueError: If ``hardware_metric`` has not been assigned.
+        """
         if self.hardware_metric is None:
             raise ValueError(
                 "hardware_metric must be set before running the pass"
