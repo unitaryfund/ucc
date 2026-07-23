@@ -18,7 +18,9 @@ classifiers = [
 ]
 dependencies = [
     "cirq-core>=1.4.1,<2.0.0",
+    "hilbertcurve>=2.0.5",
     "ply>=3.11,<4.0.0",
+    "pymorton>=1.0.5",
     "pytket>=1.40.0,<3.0.0",
     "qbraid>=0.9.3,<1.0.0",
     "qiskit>=1.4.2,<3.0.0",

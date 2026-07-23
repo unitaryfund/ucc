@@ -430,6 +430,18 @@ wheels = [
 ]
 
 [[package]]
+name = "hilbertcurve"
+version = "2.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f8/0f/e5ca68d4f1533b9b4bda6d354b017aa632830f17a951e715cd2a93104be5/hilbertcurve-2.0.5.tar.gz", hash = "sha256:6a7703d9a2f1fe748c86d86908bf183e7d139b973645e4b2526e10b34e75796d", size = 58670, upload-time = "2021-03-29T20:43:27.794Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9a/ce/b5b18c87a6f02057fe5b2d0638cac0d097de983f560a53213d94e6352907/hilbertcurve-2.0.5-py3-none-any.whl", hash = "sha256:dbaad510237d3cd4355c189f00e8dbe66a9e66e03af37f9d3f257799292da363", size = 8595, upload-time = "2021-03-29T20:43:25.825Z" },
+]
+
+[[package]]
 name = "identify"
 version = "2.6.14"
 source = { registry = "https://pypi.org/simple" }
@@ -1046,6 +1058,14 @@ wheels = [
 ]
 
 [[package]]
+name = "pymorton"
+version = "1.0.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c6/8d/906ba6d4266d7696547b8b70e08423975243c7339fe1ccf4bdbc42478394/pymorton-1.0.5-py2.py3-none-any.whl", hash = "sha256:b2df3ed2ab002f0b6780344485980130a3f959f959aea65301381b11cfe31dce", size = 4427, upload-time = "2018-02-15T02:06:39.032Z" },
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.2.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1609,7 +1629,9 @@ version = "0.4.12"
 source = { editable = "." }
 dependencies = [
     { name = "cirq-core" },
+    { name = "hilbertcurve" },
     { name = "ply" },
+    { name = "pymorton" },
     { name = "pytket" },
     { name = "qbraid" },
     { name = "qiskit" },
@@ -1635,7 +1657,9 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "cirq-core", specifier = ">=1.4.1,<2.0.0" },
+    { name = "hilbertcurve", specifier = ">=2.0.5" },
     { name = "ply", specifier = ">=3.11,<4.0.0" },
+    { name = "pymorton", specifier = ">=1.0.5" },
     { name = "pytket", specifier = ">=1.40.0,<3.0.0" },
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
     { name = "qiskit", specifier = ">=1.4.2,<3.0.0" },
