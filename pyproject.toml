@@ -24,6 +24,7 @@ dependencies = [
     "pytket>=1.40.0,<3.0.0",
     "qbraid>=0.9.3,<1.0.0",
     "qiskit>=1.4.2,<3.0.0",
+    "qiskit-ibm-runtime>=0.48.0",
     "qiskit-qasm3-import>=0.5.1,<1.0.0",
     "quimb==1.14.0",
 ]
