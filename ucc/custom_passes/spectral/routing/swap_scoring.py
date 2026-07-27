@@ -28,7 +28,14 @@ def _spectral_alignment_penalty(
     state: RoutingState,
     metric: HardwareMetric,
 ) -> float:
-    """Score how far the current layout drifted from the reference layout."""
+    """Score how far the current layout drifted from the reference layout.
+
+    The result is averaged over the number of mapped qubits so the penalty
+    stays on a comparable scale regardless of device size, letting it be
+    combined with the (per-gate) SABRE score via a fixed weight.
+    """
+    if not state.logical_to_physical:
+        return 0.0
     total = 0.0
     for logical, physical in state.logical_to_physical.items():
         reference_physical = state.reference_layout.get(logical, physical)
@@ -36,7 +43,7 @@ def _spectral_alignment_penalty(
             metric.curve_order.get(physical, physical)
             - metric.curve_order.get(reference_physical, reference_physical)
         )
-    return total
+    return total / len(state.logical_to_physical)
 
 
 def _base_swap_score(
@@ -81,6 +88,14 @@ def score_swap(
     return _base_swap_score(trial, metric, lookahead_depth=lookahead_depth)
 
 
+DEFAULT_SPECTRAL_WEIGHT = 0.25
+"""Default weight for the spectral-alignment term in ``spectral_tiebreak_score``.
+
+Set to 0.0 to fully disable spectral scoring and recover plain SABRE
+behavior; increase to let spectral locality dominate over hop distance.
+"""
+
+
 def spectral_tiebreak_score(
     state: RoutingState,
     metric: HardwareMetric,
@@ -88,15 +103,35 @@ def spectral_tiebreak_score(
     physical_b: int,
     *,
     lookahead_depth: int = 1,
-) -> tuple[float, float]:
-    """Return the SABRE score and the spectral tie-breaker for a swap."""
+    spectral_weight: float = DEFAULT_SPECTRAL_WEIGHT,
+) -> float:
+    """Return a blended SABRE + spectral-locality score for a candidate SWAP.
+
+    Unlike a lexicographic tie-break, the spectral-alignment penalty is
+    weighted and added directly to the SABRE distance score, so it
+    participates in every routing decision instead of only breaking exact
+    ties (which almost never occur with continuous calibration-aware costs).
+
+    Args:
+        state: Current routing state.
+        metric: Hardware metric used for distance and locality scoring.
+        physical_a: First physical qubit in the candidate SWAP.
+        physical_b: Second physical qubit in the candidate SWAP.
+        lookahead_depth: Number of front-layer gates to include.
+        spectral_weight: Weight applied to the spectral-alignment penalty
+            relative to the SABRE distance score. Lower is better.
+
+    Returns:
+        A scalar heuristic score; lower is better.
+    """
     trial = RoutingState.from_initial_layout(
         dict(state.logical_to_physical),
         reference_layout=dict(state.reference_layout),
         front_layer=list(state.front_layer),
     )
     trial.swap(physical_a, physical_b)
-    return (
-        _base_swap_score(trial, metric, lookahead_depth=lookahead_depth),
-        _spectral_alignment_penalty(trial, metric),
+    base_score = _base_swap_score(
+        trial, metric, lookahead_depth=lookahead_depth
     )
+    spectral_penalty = _spectral_alignment_penalty(trial, metric)
+    return base_score + spectral_weight * spectral_penalty

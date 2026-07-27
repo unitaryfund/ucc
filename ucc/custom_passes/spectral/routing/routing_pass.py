@@ -8,15 +8,25 @@ from qiskit.transpiler.basepasses import TransformationPass
 
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
 from ucc.custom_passes.spectral.routing.router import route
+from ucc.custom_passes.spectral.routing.swap_scoring import (
+    DEFAULT_SPECTRAL_WEIGHT,
+)
 
 
 class SpectralRoutingPass(TransformationPass):
     """Insert SWAPs according to the pure spectral router."""
 
-    def __init__(self):
-        """Initialize the transformation pass with no hardware metric attached."""
+    def __init__(self, spectral_weight: float = DEFAULT_SPECTRAL_WEIGHT):
+        """Initialize the transformation pass with no hardware metric attached.
+
+        Args:
+            spectral_weight: Weight applied to the spectral-alignment term
+                when scoring candidate SWAPs. Set to ``0.0`` to recover
+                plain SABRE-style routing.
+        """
         super().__init__()
         self.hardware_metric: HardwareMetric | None = None
+        self.spectral_weight = spectral_weight
 
     def run(self, dag):
         """Route a DAG using the stored layout and hardware metric.
@@ -39,7 +49,10 @@ class SpectralRoutingPass(TransformationPass):
 
         circuit = dag_to_circuit(dag)
         routed, state = route(
-            circuit, self.hardware_metric, self.property_set["layout"]
+            circuit,
+            self.hardware_metric,
+            self.property_set["layout"],
+            spectral_weight=self.spectral_weight,
         )
         self.property_set["final_layout"] = Layout(
             {

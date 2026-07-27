@@ -10,6 +10,7 @@ from qiskit.transpiler.layout import Layout
 from ucc.custom_passes.spectral.hardware.hardware_metric import HardwareMetric
 from ucc.custom_passes.spectral.routing.routing_state import RoutingState
 from ucc.custom_passes.spectral.routing.swap_scoring import (
+    DEFAULT_SPECTRAL_WEIGHT,
     spectral_tiebreak_score,
 )
 
@@ -128,6 +129,8 @@ def route(
     circuit: QuantumCircuit,
     hardware_metric: HardwareMetric,
     initial_layout,
+    *,
+    spectral_weight: float = DEFAULT_SPECTRAL_WEIGHT,
 ):
     """Route a circuit onto the hardware graph with SWAP insertion.
 
@@ -135,6 +138,9 @@ def route(
         circuit: Input quantum circuit.
         hardware_metric: Hardware distances and adjacency.
         initial_layout: Logical-to-physical initial assignment.
+        spectral_weight: Weight applied to the spectral-alignment term when
+            scoring candidate SWAPs (see ``swap_scoring.spectral_tiebreak_score``).
+            Set to ``0.0`` to recover plain SABRE-style routing.
 
     Returns:
         A tuple of ``(routed_circuit, final_state)``.
@@ -192,6 +198,7 @@ def route(
                     swap[0],
                     swap[1],
                     lookahead_depth=len(front_layer),
+                    spectral_weight=spectral_weight,
                 ),
             )
             routed.swap(swap_left, swap_right)
